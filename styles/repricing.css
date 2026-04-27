@@ -1,0 +1,39 @@
+.pricing-top-grid{
+  display:grid;
+  grid-template-columns:minmax(0,1.1fr) minmax(360px,.8fr);
+  gap:12px;
+  margin-bottom:12px;
+}
+
+.rule-card h3{margin:4px 0 8px;color:#102033;font-size:18px;font-weight:900}
+.pricing-text{font-size:13px;line-height:1.45;color:#344054;margin:0}
+
+.rules-panel{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:12px;
+  align-items:end;
+}
+.rule-field label{display:block;font-size:10px;text-transform:uppercase;letter-spacing:.12em;font-weight:900;color:#a56d67;margin-bottom:6px}
+.rule-field input{width:100%;height:40px;border:1px solid rgba(242,108,99,.35);border-radius:12px;padding:0 12px;background:#fff;color:#102033;outline:none}
+
+.pricing-kpis{grid-template-columns:repeat(5,minmax(150px,1fr))!important;gap:10px!important;margin-bottom:12px!important}
+.pricing-kpis .mini-card{min-height:82px;border-radius:18px!important;padding:14px!important}
+.pricing-kpis .mini-card p{font-size:10px;letter-spacing:.10em;text-transform:uppercase;color:#a56d67;font-weight:900;margin:0 0 6px}
+.pricing-kpis .mini-card h3{font-size:26px;line-height:1;margin:0;color:#102033}
+.pricing-kpis .mini-card span{display:block;margin-top:6px;font-size:11px;color:#667085}
+.bi-ruim{background:#fff1f3!important;border-color:#fecdca!important}.bi-alerta{background:#fff8e6!important;border-color:#fedf89!important}.bi-ok{background:#ecfdf3!important;border-color:#b7e4c7!important}
+
+.executive-decision h3{font-size:18px;margin:4px 0 8px;color:#102033;font-weight:950}
+.pricing-filters{display:flex;gap:10px;align-items:center}.pricing-filters input,.pricing-filters select{height:40px;border:1px solid rgba(242,108,99,.35);border-radius:12px;padding:0 12px;background:#fff;color:#102033}.pricing-filters input{min-width:260px}.pricing-filters select{min-width:160px}
+
+.pricing-table th{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:#8a5049;background:#fff1ed;white-space:nowrap}.pricing-table td{vertical-align:top;font-size:12px}.produto-cell{min-width:260px;max-width:380px}.produto-cell strong{font-size:13px;color:#102033}.produto-cell small{color:#667085}
+.empty-row{text-align:center!important;padding:22px!important;color:#667085!important}
+
+.badge{display:inline-flex;align-items:center;gap:5px;border-radius:999px;padding:6px 9px;font-size:11px;font-weight:900;white-space:nowrap}.badge.ok{background:#d1fadf;color:#027a48}.badge.warn{background:#fff3cd;color:#b54708}.badge.danger{background:#fee4e2;color:#b42318}.badge.neutral{background:#eef2f6;color:#344054}
+
+.acao-box{display:flex;flex-direction:column;gap:6px;min-width:210px}.acao-metricas{display:grid;grid-template-columns:1fr 1fr;gap:4px 8px;font-size:11px;color:#344054}.acao-metricas span{white-space:nowrap}.gap-ok{color:#027a48}.gap-warn{color:#b54708}.gap-danger{color:#b42318}.acao-box small{font-size:11px;line-height:1.35;color:#344054}.frete-alerta{color:#b54708!important;font-weight:800}.acao-COMPETIR{border-left:3px solid #12b76a;padding-left:8px}.acao-NAO_COLOCAR{border-left:3px solid #f04438;padding-left:8px}.acao-REVISAR,.acao-INFORMAR_CUSTO{border-left:3px solid #f79009;padding-left:8px}.acao-MANTER{border-left:3px solid #667085;padding-left:8px}
+
+.auditoria-box{white-space:pre-wrap;line-height:1.5;font-size:12px;max-height:360px;overflow:auto;background:#fffaf9;border-radius:14px;padding:12px;border:1px solid rgba(242,108,99,.16)}
+
+@media(max-width:1300px){.pricing-top-grid{grid-template-columns:1fr}.pricing-kpis{grid-template-columns:repeat(2,minmax(150px,1fr))!important}.rules-panel{grid-template-columns:1fr}.pricing-filters{flex-direction:column;align-items:stretch}.pricing-filters input,.pricing-filters select{min-width:0;width:100%}}

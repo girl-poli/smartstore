@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Smart Cosméticos • Análise de Custo</title>
+
+  <link rel="stylesheet" href="styles/global.css?v=11" />
+  <link rel="stylesheet" href="styles/vendas.css?v=11" />
+  <link rel="stylesheet" href="styles/custo.css?v=4" />
+
+
+  <style>
+    .custo-cards-grid {
+      grid-template-columns: repeat(4, minmax(180px, 1fr)) !important;
+      gap: 12px !important;
+      margin-bottom: 12px !important;
+    }
+
+    .custo-cards-valores {
+      margin-top: -4px !important;
+    }
+
+    .custo-cards-grid .mini-card {
+      min-height: 88px;
+      border-radius: 18px;
+    }
+
+    .mini-card.card-pro-ok {
+      background: #ecfdf3 !important;
+      border-color: #b7e4c7 !important;
+    }
+
+    .mini-card.card-pro-alerta {
+      background: #fff8e6 !important;
+      border-color: #fedf89 !important;
+    }
+
+    .mini-card.card-pro-ruim {
+      background: #fff1f3 !important;
+      border-color: #fecdca !important;
+    }
+
+    .mini-card.card-pro-neutro {
+      background: #fffdfd !important;
+    }
+
+    @media(max-width: 1300px) {
+      .custo-cards-grid {
+        grid-template-columns: repeat(2, minmax(180px, 1fr)) !important;
+      }
+    }
+
+
+    /* Correção visual da sidebar da página Compras */
+    .app-shell {
+      align-items: stretch;
+    }
+
+    .sidebar {
+      min-height: 100vh;
+      height: 100vh;
+      position: sticky;
+      top: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+
+    .sidebar .brand {
+      margin-bottom: 4px;
+    }
+
+    .sidebar .menu {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin: 0 0 4px;
+      flex: 0 0 auto;
+    }
+
+    .sidebar .menu-link {
+      min-height: 38px;
+      display: flex;
+      align-items: center;
+      padding: 0 16px;
+      border-radius: 999px;
+      white-space: nowrap;
+    }
+
+    .sidebar .sidebar-box {
+      flex: 0 0 auto;
+      margin: 0;
+    }
+
+    .sidebar .market-list {
+      gap: 2px;
+    }
+
+    .sidebar .market-item {
+      line-height: 1.12;
+    }
+
+    /* Calendário no mesmo padrão visual das outras telas */
+    .date-field-pro {
+      display: grid;
+      grid-template-columns: minmax(150px, 1fr) 42px;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .date-field-pro .input-date {
+      width: 100%;
+      min-width: 0;
+    }
+
+    .date-field-pro input[type="date"]::-webkit-calendar-picker-indicator {
+      opacity: 0;
+      display: none;
+      -webkit-appearance: none;
+    }
+
+    .date-field-pro input[type="date"] {
+      appearance: none;
+      -webkit-appearance: none;
+    }
+
+    .btn-calendar-pro {
+      width: 42px;
+      height: 42px;
+      border: 1px solid #f3cfc8;
+      border-radius: 14px;
+      background: #fff8f7;
+      color: #f26c63;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 16px;
+      transition: all .15s ease;
+    }
+
+    .btn-calendar-pro:hover {
+      background: #fff1ed;
+      border-color: #f26c63;
+      transform: translateY(-1px);
+    }
+
+    .btn-calendar-pro:active {
+      transform: translateY(0);
+    }
+
+    @media(max-width: 900px) {
+      .sidebar {
+        height: auto;
+        min-height: auto;
+        position: relative;
+      }
+
+      .date-field-pro {
+        grid-template-columns: 1fr 42px;
+      }
+    }
+
+  </style>
+
+</head>
+<body>
+  <div class="app-shell">
+
+    <aside class="sidebar">
+      <div class="brand">
+        <img src="assets/logo-smart.png" alt="Smart Cosméticos" class="brand-logo" />
+        <div>
+          <p class="brand-kicker">Smart Cosméticos</p>
+          <h1 class="brand-title">Análise de Vendas</h1>
+        </div>
+      </div>
+
+<nav class="menu">
+  <a class="menu-link" href="index.html">Resumo</a>
+  <a class="menu-link" href="vendas.html">Vendas</a>
+  <a class="menu-link active" href="custo.html">Compras</a>
+  <a class="menu-link" href="produtos.html">Produtos</a>
+
+</nav>
+
+      <div class="sidebar-box">
+        <p class="box-label">Leitura operacional</p>
+        <p class="box-text">
+          Aqui você acompanha compras do robô, conciliação com vendas, SKU,
+          produto, datas e status operacional.
+        </p>
+      </div>
+
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div>
+          <p class="page-kicker">Analítico</p>
+          <h2 class="page-title">Análise de custo</h2>
+        </div>
+
+        <div class="topbar-actions">
+          <button class="btn btn-secondary" id="btnExportarCusto" type="button">Exportar</button>
+        </div>
+      </header>
+
+      <section class="filtros-box">
+        <div class="filtros-box-header">
+          <p class="panel-kicker">Filtros</p>
+          <h3>Refine a análise</h3>
+        </div>
+
+        <div class="filtros-grid">
+          <div class="filter-group">
+            <label for="filtroMarketplaceCusto">Marketplace</label>
+            <select id="filtroMarketplaceCusto" class="select-mkt">
+              <option value="todos">Todos</option>
+              <option value="mercado_livre">mercado_livre</option>
+              <option value="shopee">shopee</option>
+              <option value="tiktok">tiktok</option>
+              <option value="ML">ML</option>
+              <option value="Shopee">Shopee</option>
+              <option value="TikTok">TikTok</option>
+            </select>
+          </div>
+
+          <div class="filter-group">
+            <label for="filtroPedidoCusto">Pedido / ID venda / ID MKT</label>
+            <input
+              type="text"
+              id="filtroPedidoCusto"
+              class="input-date"
+              placeholder="Digite pedido, ID venda ou ID MKT"
+            />
+          </div>
+
+          <div class="filter-group">
+            <label for="filtroSkuProdutoCusto">SKU / Produto</label>
+            <input
+              type="text"
+              id="filtroSkuProdutoCusto"
+              class="input-date"
+              placeholder="Digite SKU ou produto"
+            />
+          </div>
+
+          <div class="filter-group">
+            <label for="filtroTipoDataCusto">Tipo de data</label>
+            <select id="filtroTipoDataCusto" class="select-mkt">
+              <option value="data_venda">Data da Venda</option>
+              <option value="data_importacao">Data da Importação</option>
+              <option value="data_pagamento">Data do Pagamento</option>
+              <option value="data_embalado">Data do Pedido Embalado</option>
+            </select>
+          </div>
+
+          <div class="filter-group">
+            <label for="filtroDataInicioCusto">Data início</label>
+            <div class="date-field-pro">
+              <input
+                type="date"
+                id="filtroDataInicioCusto"
+                class="input-date"
+              />
+              <button class="btn-calendar-pro" type="button" data-open-date="filtroDataInicioCusto" aria-label="Abrir calendário da data início">📅</button>
+            </div>
+          </div>
+
+          <div class="filter-group">
+            <label for="filtroDataFimCusto">Data fim</label>
+            <div class="date-field-pro">
+              <input
+                type="date"
+                id="filtroDataFimCusto"
+                class="input-date"
+              />
+              <button class="btn-calendar-pro" type="button" data-open-date="filtroDataFimCusto" aria-label="Abrir calendário da data fim">📅</button>
+            </div>
+          </div>
+
+          <div class="filter-group filter-group-actions">
+            <label>&nbsp;</label>
+            <button class="btn btn-secondary" id="btnLimparFiltrosCusto" type="button">
+              Limpar filtros
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <section class="cards-grid produtos-grid produtos-grid-principal custo-cards-grid">
+        <article class="mini-card">
+          <p>Total de Compras</p>
+          <h3 id="cardTotalCompras">0</h3>
+          <small id="cardTotalComprasSub">Base do robô</small>
+        </article>
+
+        <article class="mini-card ok">
+          <p>Compras conciliadas com vendas</p>
+          <h3 id="cardComprasConciliadas">0</h3>
+          <small id="cardComprasConciliadasSub">0,0% sobre o total</small>
+        </article>
+
+        <article class="mini-card ok">
+          <p>Compras válidas</p>
+          <h3 id="cardComprasValidas">0</h3>
+          <small id="cardComprasValidasSub">Exclui Cancelado e Reembolsar</small>
+        </article>
+
+        <article class="mini-card medio">
+          <p>Compras pendentes</p>
+          <h3 id="cardComprasPendentes">0</h3>
+          <small id="cardComprasPendentesSub">0,0% sobre compras válidas</small>
+        </article>
+      </section>
+
+
+      <section class="cards-grid produtos-grid produtos-grid-principal custo-cards-grid custo-cards-valores">
+        <article class="mini-card card-pro-neutro">
+          <p>Valor base do robô</p>
+          <h3 id="cardValorTotalCompras">R$ 0</h3>
+          <small id="cardValorTotalComprasSub">Soma filtrada</small>
+        </article>
+
+        <article class="mini-card card-pro-ok">
+          <p>Valor conciliado</p>
+          <h3 id="cardValorConciliadas">R$ 0</h3>
+          <small id="cardValorConciliadasSub">Compras com venda</small>
+        </article>
+
+        <article class="mini-card card-pro-ok">
+          <p>Valor compras válidas</p>
+          <h3 id="cardValorValidas">R$ 0</h3>
+          <small id="cardValorValidasSub">Sem Cancelado/Reembolsar</small>
+        </article>
+
+        <article class="mini-card card-pro-alerta">
+          <p>Valor pendente</p>
+          <h3 id="cardValorPendentes">R$ 0</h3>
+          <small id="cardValorPendentesSub">Ações em aberto</small>
+        </article>
+      </section>
+
+      <section class="filters-bar"></section>
+
+      <section class="custo-tabs">
+        <button class="custo-tab-btn active" data-aba="dados" type="button">
+          Dados de custo
+        </button>
+        <button class="custo-tab-btn" data-aba="status" type="button">
+          Mapa de status
+        </button>
+      </section>
+
+      <section id="aba-dados" class="custo-tab-content active">
+        <section class="table-panel">
+          <div class="panel-header">
+            <div>
+              <p class="panel-kicker">Tabela</p>
+              <h3>Detalhamento do custo</h3>
+            </div>
+          </div>
+
+          <div class="table-info-bar">
+            <div class="table-info-text" id="resumoTabelaCusto">
+              Carregando dados...
+            </div>
+          </div>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Pedido</th>
+                  <th>Marketplace</th>
+                  <th>ID pedido MKT</th>
+                  <th>SKU</th>
+                  <th>Produto</th>
+                  <th>Data da Venda</th>
+                  <th>Data da Importação</th>
+                  <th>Data do Pagamento</th>
+                  <th>Data do Pedido Embalado</th>
+                  <th>Cruzou vendas?</th>
+                  <th>Status do custo</th>
+                  <th>Custo</th>
+                  <th>Venda</th>
+                  <th>Status original</th>
+                  <th>Ação sugerida</th>
+                </tr>
+              </thead>
+              <tbody id="tbodyCusto"></tbody>
+            </table>
+          </div>
+        </section>
+      </section>
+
+      <section id="aba-status" class="custo-tab-content">
+        <section class="table-panel">
+          <div class="panel-header">
+            <div>
+              <p class="panel-kicker">Auditoria</p>
+              <h3>Mapa de status do custo</h3>
+            </div>
+          </div>
+
+          <div class="table-info-bar">
+            <div class="table-info-text" id="resumoMapaStatus">
+              Carregando mapa...
+            </div>
+          </div>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Status original</th>
+                  <th>Status do custo</th>
+                  <th>Regra aplicada</th>
+                  <th>Origem</th>
+                  <th>Custo</th>
+                  <th>Vendas</th>
+                  <th>Quantidade</th>
+                </tr>
+              </thead>
+              <tbody id="tbodyStatus"></tbody>
+            </table>
+          </div>
+        </section>
+      </section>
+    </main>
+  </div>
+
+  <script src="custo.js?v=12"></script>
+  <script src="scripts/auth-guard.js?v=1"></script>
+
+  <script>
+    document.addEventListener('click', (event) => {
+      const btn = event.target.closest('[data-open-date]');
+      if (!btn) return;
+
+      const input = document.getElementById(btn.dataset.openDate);
+      if (!input) return;
+
+      input.focus();
+      if (typeof input.showPicker === 'function') {
+        input.showPicker();
+      }
+    });
+  </script>
+
+</body>
+</html>

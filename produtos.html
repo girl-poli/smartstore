@@ -1,0 +1,1010 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Smart Cosméticos • Produtos</title>
+<link rel="stylesheet" href="styles/global.css?v=18" />
+<link rel="stylesheet" href="styles/produtos.css?v=18" />
+
+<style>
+  .produtos-grid-principal {
+    grid-template-columns: repeat(4, minmax(170px, 1fr)) !important;
+    gap: 12px !important;
+  }
+
+  .produtos-grid-principal .mini-card {
+    min-height: 86px;
+    border-radius: 18px;
+  }
+
+  .mini-card.bi-ok {
+    background: #ecfdf3 !important;
+    border-color: #b7e4c7 !important;
+  }
+
+  .mini-card.bi-alerta {
+    background: #fff8e6 !important;
+    border-color: #fedf89 !important;
+  }
+
+  .mini-card.bi-ruim {
+    background: #fff1f3 !important;
+    border-color: #fecdca !important;
+  }
+
+  .status-produto {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 999px;
+    padding: 5px 9px;
+    font-size: 11px;
+    font-weight: 800;
+    white-space: nowrap;
+  }
+
+  .status-completo { background: #d1fadf; color: #027a48; }
+  .status-parcial { background: #fff3cd; color: #b54708; }
+  .status-sem-mkt { background: #fee4e2; color: #b42318; }
+
+  .preco-maior { font-weight: 900; color: #027a48; }
+  .preco-menor { font-weight: 900; color: #b54708; }
+
+  .auditoria-box {
+    white-space: pre-wrap;
+    line-height: 1.55;
+    font-size: 12px;
+  }
+
+  @media(max-width: 1300px) {
+    .produtos-grid-principal {
+      grid-template-columns: repeat(2, minmax(170px, 1fr)) !important;
+    }
+  }
+</style>
+
+
+<style>
+  .farol-preco {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 999px;
+    padding: 5px 9px;
+    font-size: 11px;
+    font-weight: 900;
+    white-space: nowrap;
+  }
+
+  .farol-verde {
+    background: #d1fadf;
+    color: #027a48;
+  }
+
+  .farol-amarelo {
+    background: #fff3cd;
+    color: #b54708;
+  }
+
+  .farol-vermelho {
+    background: #fee4e2;
+    color: #b42318;
+  }
+
+  .preco-abaixo-2 {
+    color: #b42318 !important;
+    font-weight: 900;
+    background: #fff1f3;
+    border-radius: 8px;
+    padding: 3px 5px;
+  }
+
+  .preco-abaixo-3 {
+    color: #b54708 !important;
+    font-weight: 900;
+    background: #fff8e6;
+    border-radius: 8px;
+    padding: 3px 5px;
+  }
+
+  .preco-ok-3 {
+    color: #027a48 !important;
+    font-weight: 900;
+  }
+</style>
+
+
+<style>
+  .diretoria-panel {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr 1fr;
+    gap: 12px;
+    margin: 12px 0;
+  }
+
+  .diretoria-card {
+    border: 1px solid rgba(242,108,99,.22);
+    border-radius: 18px;
+    padding: 14px;
+    background: #fff;
+    box-shadow: var(--shadow);
+  }
+
+  .diretoria-card h3 {
+    margin: 0 0 8px;
+    font-size: 14px;
+    color: #1f2937;
+  }
+
+  .diretoria-big {
+    font-size: 30px;
+    font-weight: 900;
+    color: #102033;
+    margin: 4px 0;
+  }
+
+  .diretoria-sub {
+    font-size: 12px;
+    color: #8a6f6b;
+    line-height: 1.4;
+  }
+
+  .risco-baixo { background: #ecfdf3 !important; border-color: #b7e4c7 !important; }
+  .risco-medio { background: #fff8e6 !important; border-color: #fedf89 !important; }
+  .risco-alto { background: #fff1f3 !important; border-color: #fecdca !important; }
+
+  .barra-markup {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    overflow: hidden;
+    border-radius: 999px;
+    height: 14px;
+    background: #f3f4f6;
+    margin-top: 10px;
+  }
+
+  .barra-markup span:nth-child(1) { background: #f04438; }
+  .barra-markup span:nth-child(2) { background: #f79009; }
+  .barra-markup span:nth-child(3) { background: #fdb022; }
+  .barra-markup span:nth-child(4) { background: #12b76a; }
+
+  .diretoria-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 10px;
+  }
+
+  .diretoria-tag {
+    border-radius: 999px;
+    padding: 6px 10px;
+    font-size: 11px;
+    font-weight: 800;
+    background: rgba(255,255,255,.75);
+    border: 1px solid rgba(242,108,99,.18);
+  }
+
+  .filtros-grid-pro {
+    display: grid !important;
+    grid-template-columns: 180px minmax(240px, 1fr) 180px 200px auto !important;
+    gap: 10px !important;
+    align-items: end !important;
+  }
+
+  .filtros-grid-pro .filtro-tabs-wrap {
+    grid-column: 1 / -1;
+    margin-top: 4px;
+  }
+
+  @media(max-width: 1300px) {
+    .diretoria-panel { grid-template-columns: 1fr; }
+    .filtros-grid-pro { grid-template-columns: 1fr 1fr !important; }
+  }
+</style>
+
+
+
+<style>
+  .pricing-market-panel { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(320px, .75fr); gap: 12px; margin: 12px 0; }
+  .pricing-market-card { border: 1px solid rgba(242,108,99,.22); border-radius: 18px; padding: 14px; background: #fff; box-shadow: var(--shadow); }
+  .pricing-market-card h3 { margin: 0 0 6px; font-size: 14px; color: #1f2937; }
+  .pricing-sub { margin: 0 0 12px; font-size: 12px; color: #8a6f6b; line-height: 1.45; }
+  .pricing-legend { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0 14px; }
+  .pricing-legend span { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 800; color: #475467; }
+  .pricing-dot { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }
+  .dot-ate2 { background: #f04438; } .dot-ate25 { background: #f79009; } .dot-ate3 { background: #fdb022; } .dot-maior3 { background: #12b76a; }
+  .regua-market-list { display: grid; gap: 14px; }
+  .regua-market-item { border: 1px solid rgba(242,108,99,.16); border-radius: 16px; padding: 12px; background: linear-gradient(180deg, #fff, #fff8f7); }
+  .regua-market-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 10px; }
+  .regua-market-name { font-size: 15px; font-weight: 950; color: #102033; }
+  .regua-market-risk { text-align: right; font-size: 18px; font-weight: 950; color: #102033; line-height: 1.05; }
+  .regua-market-risk small { display: block; font-size: 11px; font-weight: 800; color: #8a6f6b; margin-top: 3px; }
+  .regua-bar { display: flex; width: 100%; height: 22px; border-radius: 999px; overflow: hidden; background: #f2f4f7; box-shadow: inset 0 0 0 1px rgba(16,32,51,.06); }
+  .regua-seg { height: 100%; min-width: 0; transition: width .25s ease; }
+  .regua-seg-ate2 { background: #f04438; } .regua-seg-ate25 { background: #f79009; } .regua-seg-ate3 { background: #fdb022; } .regua-seg-maior3 { background: #12b76a; }
+  .regua-numeros { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin-top: 9px; }
+  .regua-num { border-radius: 12px; padding: 8px; background: rgba(255,255,255,.78); border: 1px solid rgba(16,32,51,.06); }
+  .regua-num strong { display: block; font-size: 13px; color: #102033; line-height: 1.1; }
+  .regua-num span { display: block; font-size: 10px; color: #8a6f6b; font-weight: 800; margin-top: 3px; }
+  .market-critical-list { display: grid; gap: 10px; margin-top: 8px; }
+  .market-critical-item { border-radius: 14px; border: 1px solid rgba(242,108,99,.18); padding: 11px; background: #fff7f6; }
+  .market-critical-top { display: flex; justify-content: space-between; gap: 10px; font-weight: 950; color: #102033; font-size: 14px; }
+  .market-critical-bar { height: 8px; background: #f3f4f6; border-radius: 999px; overflow: hidden; margin-top: 8px; }
+  .market-critical-bar span { display: block; height: 100%; width: 0%; background: #f26c63; }
+  @media(max-width: 1300px) { .pricing-market-panel { grid-template-columns: 1fr; } .regua-numeros { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+</style>
+
+
+<style>
+  /* ===== ORGANIZAÇÃO EXECUTIVA ===== */
+  .executive-top-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 360px;
+    gap: 12px;
+    align-items: stretch;
+    margin-bottom: 12px;
+  }
+
+  .executive-top-layout .produtos-grid-principal {
+    margin: 0 !important;
+    grid-template-columns: repeat(4, minmax(135px, 1fr)) !important;
+    gap: 9px !important;
+  }
+
+  .executive-top-layout .mini-card {
+    min-height: 72px !important;
+    padding: 11px 12px !important;
+    border-radius: 15px !important;
+  }
+
+  .executive-top-layout .mini-card p {
+    font-size: 10px !important;
+    letter-spacing: .08em !important;
+    margin-bottom: 4px !important;
+  }
+
+  .executive-top-layout .mini-card h3 {
+    font-size: 24px !important;
+    line-height: 1.05 !important;
+  }
+
+  .executive-top-layout .mini-card span {
+    font-size: 10px !important;
+    line-height: 1.2 !important;
+  }
+
+  .diretoria-stack {
+    display: grid;
+    grid-template-rows: 1fr 1fr 1fr;
+    gap: 10px;
+    min-width: 0;
+  }
+
+  .diretoria-stack .diretoria-card {
+    margin: 0 !important;
+    padding: 12px !important;
+    border-radius: 16px !important;
+    min-height: 0;
+  }
+
+  .diretoria-stack .diretoria-card h3 {
+    font-size: 13px !important;
+    margin-bottom: 5px !important;
+  }
+
+  .diretoria-stack .diretoria-big {
+    font-size: 26px !important;
+    line-height: 1.05 !important;
+    margin: 2px 0 !important;
+  }
+
+  .diretoria-stack .diretoria-sub {
+    font-size: 11px !important;
+    line-height: 1.3 !important;
+  }
+
+  .diretoria-stack .diretoria-tags {
+    gap: 6px !important;
+    margin-top: 7px !important;
+  }
+
+  .diretoria-stack .diretoria-tag {
+    padding: 5px 8px !important;
+    font-size: 10px !important;
+  }
+
+  .pricing-market-panel {
+    grid-template-columns: minmax(0, 1.08fr) minmax(430px, .92fr) !important;
+    align-items: stretch;
+  }
+
+  .calculadora-card {
+    border: 1px solid rgba(242,108,99,.22);
+    border-radius: 18px;
+    padding: 14px;
+    background: #fff;
+    box-shadow: var(--shadow);
+  }
+
+  .calc-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+
+  .calc-kicker {
+    margin: 0;
+    color: #b47b73;
+    font-size: 10px;
+    letter-spacing: .22em;
+    text-transform: uppercase;
+    font-weight: 900;
+  }
+
+  .calc-title {
+    margin: 2px 0 0;
+    color: #102033;
+    font-size: 16px;
+    font-weight: 950;
+  }
+
+  .calc-meta {
+    background: #fff1f0;
+    color: #d92d20;
+    border-radius: 999px;
+    padding: 7px 10px;
+    font-size: 12px;
+    font-weight: 950;
+    white-space: nowrap;
+  }
+
+  .calc-grid {
+    display: grid;
+    grid-template-columns: 1.3fr .75fr .65fr .75fr;
+    gap: 9px;
+    align-items: end;
+  }
+
+  .calc-grid .span-2 { grid-column: span 2; }
+
+  .calc-field label {
+    display: block;
+    margin-bottom: 5px;
+    color: #9b6f69;
+    font-size: 10px;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    font-weight: 900;
+  }
+
+  .calc-field input,
+  .calc-field select {
+    width: 100%;
+    height: 38px;
+    border: 1px solid rgba(242,108,99,.32);
+    border-radius: 10px;
+    padding: 0 10px;
+    color: #102033;
+    background: #fff;
+    outline: none;
+  }
+
+  .calc-actions {
+    display: flex;
+    gap: 8px;
+    align-items: end;
+  }
+
+  .calc-actions .btn {
+    height: 38px;
+    padding: 0 14px;
+  }
+
+  .calc-rule {
+    margin: 9px 0 10px;
+    font-size: 11px;
+    color: #475467;
+    line-height: 1.35;
+  }
+
+  .calc-result {
+    border: 1px solid rgba(16,32,51,.08);
+    border-radius: 14px;
+    background: #f8fafc;
+    padding: 12px;
+    min-height: 90px;
+  }
+
+  .calc-result .label {
+    color: #b47b73;
+    font-size: 10px;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    font-weight: 900;
+    margin: 0 0 4px;
+  }
+
+  .calc-result .valor {
+    color: #102033;
+    font-size: 26px;
+    font-weight: 950;
+    line-height: 1.1;
+    margin: 0;
+  }
+
+  .calc-result .detalhe {
+    color: #667085;
+    font-size: 11px;
+    line-height: 1.35;
+    margin-top: 6px;
+  }
+
+  .calc-ok { background: #ecfdf3 !important; border-color: #b7e4c7 !important; }
+  .calc-alerta { background: #fff8e6 !important; border-color: #fedf89 !important; }
+  .calc-ruim { background: #fff1f3 !important; border-color: #fecdca !important; }
+
+  @media(max-width: 1450px) {
+    .executive-top-layout { grid-template-columns: 1fr; }
+    .diretoria-stack { grid-template-columns: repeat(3, 1fr); grid-template-rows: auto; }
+    .pricing-market-panel { grid-template-columns: 1fr !important; }
+  }
+
+  @media(max-width: 900px) {
+    .executive-top-layout .produtos-grid-principal { grid-template-columns: repeat(2, minmax(135px, 1fr)) !important; }
+    .diretoria-stack { grid-template-columns: 1fr; }
+    .calc-grid { grid-template-columns: 1fr; }
+    .calc-grid .span-2 { grid-column: auto; }
+  }
+</style>
+
+<style>
+/* ===== AJUSTE FINAL DE DENSIDADE VISUAL ===== */
+.main{padding-top:18px!important}
+.executive-top-layout{grid-template-columns:minmax(0,1fr) 300px!important;gap:10px!important;align-items:stretch!important;margin-bottom:10px!important}
+.executive-top-layout .produtos-grid-principal{grid-template-columns:repeat(4,minmax(120px,1fr))!important;gap:8px!important}
+.executive-top-layout .mini-card{min-height:58px!important;padding:8px 10px!important;border-radius:13px!important;display:flex!important;flex-direction:column!important;justify-content:center!important}
+.executive-top-layout .mini-card p{font-size:8.5px!important;line-height:1.1!important;margin:0 0 4px!important;letter-spacing:.09em!important}
+.executive-top-layout .mini-card h3{font-size:20px!important;line-height:1!important;margin:0!important}
+.executive-top-layout .mini-card span{font-size:8.5px!important;line-height:1.15!important;margin-top:3px!important}
+.diretoria-stack{display:grid!important;grid-template-columns:1fr!important;grid-template-rows:auto auto auto!important;gap:8px!important}
+.diretoria-stack .diretoria-card{padding:10px 11px!important;border-radius:14px!important;min-height:74px!important}
+.diretoria-stack .diretoria-card h3{font-size:12px!important;line-height:1.1!important;margin:0 0 4px!important}
+.diretoria-stack .diretoria-big{font-size:23px!important;line-height:1!important;margin:0 0 3px!important}
+.diretoria-stack .diretoria-sub{font-size:10px!important;line-height:1.22!important}
+.diretoria-stack .diretoria-tags{display:grid!important;grid-template-columns:1fr!important;gap:5px!important;margin-top:5px!important}
+.diretoria-stack .diretoria-tag{width:100%!important;padding:5px 7px!important;font-size:10px!important}.barra-markup{height:10px!important;margin-top:7px!important}
+.pricing-market-panel{grid-template-columns:minmax(0,1.05fr) minmax(390px,.95fr)!important;gap:10px!important;align-items:stretch!important;margin-bottom:10px!important}
+.pricing-market-card,.calculadora-card{padding:11px 12px!important;border-radius:16px!important}.pricing-market-card h3,.calc-title{font-size:14px!important;line-height:1.1!important;margin:0 0 4px!important}
+.pricing-sub,.calc-rule{font-size:10px!important;line-height:1.28!important;margin:4px 0 8px!important}.pricing-legend{gap:9px!important;margin:6px 0 8px!important;font-size:10px!important}.regua-market-list{gap:8px!important}
+.regua-market-card{padding:9px 10px!important;border-radius:14px!important}.regua-market-top h4{font-size:13px!important;margin:0!important}.regua-market-risk strong{font-size:15px!important;line-height:1!important}.regua-market-risk small,.regua-market-sub{font-size:9.5px!important;line-height:1.2!important}.regua-bar{height:15px!important;margin:7px 0!important}.regua-numeros{grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:6px!important}.regua-num-card{min-height:42px!important;padding:6px 8px!important;border-radius:10px!important}.regua-num-card strong{font-size:12px!important;line-height:1!important}.regua-num-card span{font-size:9px!important;line-height:1.1!important}
+.calc-head{margin-bottom:8px!important}.calc-kicker{font-size:9px!important}.calc-meta{padding:5px 8px!important;font-size:10px!important}.calc-grid{grid-template-columns:1.2fr .75fr .65fr!important;gap:7px!important}.calc-grid .span-2{grid-column:span 2!important}.calc-field label{font-size:8.8px!important;margin-bottom:4px!important}.calc-field input,.calc-field select{height:32px!important;border-radius:9px!important;padding:0 8px!important;font-size:11px!important}.calc-actions{margin-top:6px!important}.calc-actions .btn{height:32px!important;padding:0 12px!important;font-size:11px!important}.calc-result{min-height:68px!important;padding:10px!important;border-radius:12px!important}.calc-result .label{font-size:9px!important;margin-bottom:3px!important}.calc-result .valor{font-size:20px!important}.calc-result .detalhe{font-size:10px!important;line-height:1.25!important;margin-top:4px!important}
+@media(max-width:1180px){.executive-top-layout,.pricing-market-panel{grid-template-columns:1fr!important}}
+@media(max-width:900px){.executive-top-layout .produtos-grid-principal{grid-template-columns:repeat(2,minmax(120px,1fr))!important}.regua-numeros,.calc-grid{grid-template-columns:1fr 1fr!important}.calc-grid .span-2{grid-column:span 2!important}}
+</style>
+
+
+<style>
+/* ===== RANKING ULTRA PRO: VENDAS + PREÇOS POR MKT ===== */
+.ranking-ultra-panel { margin-top: 12px; }
+.ranking-ultra-toolbar { display:flex; gap:10px; align-items:end; flex-wrap:wrap; margin-top:10px; }
+.ranking-ultra-toolbar .filtro-item { min-width:160px; }
+.ranking-ultra-toolbar select, .ranking-ultra-toolbar input { width:100%; height:36px; border:1px solid rgba(242,108,99,.25); border-radius:10px; padding:0 10px; background:#fff; }
+.ranking-kpis { display:grid; grid-template-columns:repeat(4,minmax(150px,1fr)); gap:10px; margin:12px 0; }
+.ranking-kpi { border:1px solid rgba(242,108,99,.18); border-radius:16px; padding:11px; background:#fff8f6; }
+.ranking-kpi small { display:block; font-size:10px; font-weight:900; letter-spacing:.08em; text-transform:uppercase; color:#a56d67; margin-bottom:4px; }
+.ranking-kpi strong { display:block; font-size:22px; color:#102033; line-height:1.1; }
+.ranking-table th { white-space:nowrap; }
+.ranking-produto-cell strong { display:block; max-width:330px; }
+.ranking-produto-cell small { display:block; color:#8a6f6b; margin-top:3px; font-weight:800; }
+.ranking-canal-box { display:grid; gap:4px; min-width:110px; }
+.ranking-canal-box b { color:#102033; }
+.ranking-canal-box span { color:#667085; font-size:11px; }
+.share-bar { height:10px; border-radius:999px; overflow:hidden; display:flex; background:#f1f5f9; min-width:120px; }
+.share-bar span { display:block; min-width:2px; }
+.share-ml { background:#64748b; }
+.share-shopee { background:#f26c63; }
+.share-tiktok { background:#102033; }
+.insight-pill { display:inline-flex; align-items:center; padding:5px 8px; border-radius:999px; font-size:10px; font-weight:900; white-space:nowrap; }
+.insight-ok { background:#ecfdf3; color:#027a48; }
+.insight-alerta { background:#fff8e6; color:#b54708; }
+.insight-ruim { background:#fff1f3; color:#b42318; }
+.insight-neutro { background:#f1f5f9; color:#475467; }
+.ranking-vazio { padding:16px; color:#667085; background:#f8fafc; border-radius:14px; border:1px dashed #cbd5e1; }
+@media(max-width:1200px){ .ranking-kpis{grid-template-columns:repeat(2,1fr);} .ranking-table{font-size:12px;} }
+</style>
+
+
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <img src="assets/logo-smart.png" alt="Smart Cosméticos" class="brand-logo" />
+        <div>
+          <p class="brand-kicker">Smart Cosméticos</p>
+          <h1 class="brand-title">Análise de Vendas</h1>
+        </div>
+      </div>
+
+      <nav class="menu">
+        <a class="menu-link" href="index.html">Resumo</a>
+        <a class="menu-link" href="vendas.html">Vendas</a>
+        <a class="menu-link" href="custo.html">Compras</a>
+        <a class="menu-link active" href="produtos.html">Produtos</a>
+            <a class="menu-link" href="conferencia.html">Analise Publicação</a>
+         <a class="menu-link" href="radar.html">Radar de Produtos</a>
+
+            <a class="menu-link" href="repricing.html">Preço de Catalogo ML</a>
+            <a class="menu-link" href="estoque-tiktok.html">Estoque Tiktok</a>
+            <a class="menu-link" href="processamento.html">Processamento</a>
+
+      </nav>
+<div class="sidebar-box">
+        <p class="box-label">Base de preço</p>
+        <p class="box-text">
+          Comparativo por SKU com custo, presença por marketplace e auditoria de pendências.
+        </p>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div>
+          <p class="page-kicker">Cadastro e preço</p>
+          <h2 class="page-title">Produtos</h2>
+        </div>
+        <div class="topbar-actions">
+          <button class="btn btn-primary" id="btnProcessar">Atualizar catálogo</button>
+          <button class="btn btn-secondary" id="btnExportar">Exportar CSV</button>
+        </div>
+      </header>
+
+      <div class="executive-top-layout">
+        <section class="cards-grid produtos-grid produtos-grid-principal">
+        <article class="mini-card">
+          <p>Produtos base</p>
+          <h3 id="cardTotalBase">0</h3>
+        </article>
+
+        <article class="mini-card">
+          <p>Produtos com ML</p>
+          <h3 id="cardTotalML">0</h3>
+        </article>
+
+        <article class="mini-card">
+          <p>Produtos com Shopee</p>
+          <h3 id="cardTotalShopee">0</h3>
+        </article>
+
+        <article class="mini-card">
+          <p>Produtos com TikTok</p>
+          <h3 id="cardTotalTikTok">0</h3>
+        </article>
+
+        <article class="mini-card">
+          <p>Em todos os canais</p>
+          <h3 id="cardTodosCanais">0</h3>
+        </article>
+
+      
+
+        <article class="mini-card mini-card-small">
+          <p>Média ML</p>
+          <h3 id="cardMediaML">0,00x</h3>
+        </article>
+
+        <article class="mini-card mini-card-small">
+          <p>Média Shopee</p>
+          <h3 id="cardMediaShopee">0,00x</h3>
+        </article>
+
+        <article class="mini-card mini-card-small">
+          <p>Média TikTok</p>
+          <h3 id="cardMediaTikTok">0,00x</h3>
+        </article>
+
+          <article class="mini-card destaque-alerta">
+          <p>Sem nenhum MKT</p>
+          <h3 id="cardSemNenhumMkt">0</h3>
+          <span>Produtos da base sem ML, Shopee e TikTok</span>
+        </article>
+
+        <article class="mini-card bi-ruim">
+          <p>Até 2x</p>
+          <h3 id="cardAte2">0</h3>
+          <span>Crítico</span>
+        </article>
+
+        <article class="mini-card bi-alerta">
+          <p>Até 2,5x</p>
+          <h3 id="cardAte25">0</h3>
+          <span>Atenção</span>
+        </article>
+
+        <article class="mini-card bi-alerta">
+          <p>Até 3x</p>
+          <h3 id="cardAte3">0</h3>
+          <span>Limite mínimo</span>
+        </article>
+
+        <article class="mini-card bi-ok">
+          <p>Maior que 3x</p>
+          <h3 id="cardMaior3">0</h3>
+          <span>Saudável</span>
+        </article>
+
+<article class="mini-card">
+          <p>Média de custo</p>
+          <h3 id="cardMediaCusto">R$ 0,00</h3>
+        </article>
+
+        <article class="mini-card">
+          <p>Média de preço</p>
+          <h3 id="cardMediaPreco">R$ 0,00</h3>
+        </article>
+
+        <article class="mini-card mini-card-small">
+          <p>Médio x custo</p>
+          <h3 id="cardMediaPercentual">0,00x</h3>
+        </article>
+      </section>
+
+        <section class="diretoria-panel diretoria-stack">
+        <article class="diretoria-card" id="cardRiscoDiretoria">
+          <h3>Risco de pricing</h3>
+          <div class="diretoria-big" id="kpiRiscoPricing">-</div>
+          <div class="diretoria-sub" id="kpiRiscoDescricao">Aguardando cálculo...</div>
+          <div class="barra-markup" id="barraMarkup">
+            <span style="width:0%"></span>
+            <span style="width:0%"></span>
+            <span style="width:0%"></span>
+            <span style="width:0%"></span>
+          </div>
+        </article>
+
+        <article class="diretoria-card">
+          <h3>Distribuição de markup</h3>
+          <div class="diretoria-tags">
+            <span class="diretoria-tag" id="pctAte2">Até 2x: 0%</span>
+            <span class="diretoria-tag" id="pctAte25">Até 2,5x: 0%</span>
+            <span class="diretoria-tag" id="pctAte3">Até 3x: 0%</span>
+            <span class="diretoria-tag" id="pctMaior3">> 3x: 0%</span>
+          </div>
+        </article>
+
+        <article class="diretoria-card">
+          <h3>Ação recomendada</h3>
+          <div class="diretoria-big" id="kpiAcaoRecomendada">-</div>
+          <div class="diretoria-sub" id="kpiAcaoDescricao">Produtos abaixo da política mínima precisam de revisão.</div>
+        </article>
+      </section>
+
+      </div>
+
+      <section class="pricing-market-panel">
+        <article class="pricing-market-card">
+          <h3>Régua executiva de pricing por marketplace</h3>
+          <p class="pricing-sub">Distribuição por faixa de markup. Vermelho, laranja e amarelo indicam risco abaixo de 3x; verde indica preço saudável acima de 3x.</p>
+          <div class="pricing-legend">
+            <span><i class="pricing-dot dot-ate2"></i>Até 2x</span>
+            <span><i class="pricing-dot dot-ate25"></i>2x até 2,5x</span>
+            <span><i class="pricing-dot dot-ate3"></i>2,5x até 3x</span>
+            <span><i class="pricing-dot dot-maior3"></i>Maior que 3x</span>
+          </div>
+          <div class="regua-market-list" id="reguaPricingMarketplaces"></div>
+        </article>
+        <article class="calculadora-card">
+          <div class="calc-head">
+            <div>
+              <p class="calc-kicker">Simulador</p>
+              <h3 class="calc-title">Calculadora de margem</h3>
+            </div>
+            <div class="calc-meta">Meta mínima: 20%</div>
+          </div>
+
+          <div class="calc-grid">
+            <div class="calc-field span-2">
+              <label for="calcBusca">SKU / Produto</label>
+              <input type="text" id="calcBusca" placeholder="Digite o SKU ou nome" />
+            </div>
+
+            <div class="calc-field">
+              <label for="calcMarketplace">Marketplace</label>
+              <select id="calcMarketplace">
+                <option value="manual">Manual</option>
+                <option value="ml">Mercado Livre</option>
+                <option value="shopee">Shopee</option>
+                <option value="tiktok">TikTok</option>
+              </select>
+            </div>
+
+            <div class="calc-field">
+              <label for="calcCusto">Custo</label>
+              <input type="number" id="calcCusto" step="0.01" placeholder="0,00" />
+            </div>
+
+            <div class="calc-field">
+              <label for="calcPreco">Preço de venda</label>
+              <input type="number" id="calcPreco" step="0.01" placeholder="0,00" />
+            </div>
+
+            <div class="calc-field">
+              <label for="calcDesconto">Desconto / cupom</label>
+              <input type="number" id="calcDesconto" step="0.01" value="0" />
+            </div>
+
+            <div class="calc-field">
+              <label for="calcFrete">Frete vendedor</label>
+              <input type="number" id="calcFrete" step="0.01" value="0" />
+            </div>
+
+            <div class="calc-field">
+              <label for="calcTaxa">Taxa MKT %</label>
+              <input type="number" id="calcTaxa" step="0.01" value="25" />
+            </div>
+
+            <div class="calc-field">
+              <label for="calcRepasse">Repasse manual</label>
+              <input type="number" id="calcRepasse" step="0.01" placeholder="opcional" />
+            </div>
+          </div>
+
+          <p class="calc-rule">Regra: se o repasse manual estiver vazio, calcula <strong>preço - desconto - frete - taxa</strong>. Margem = <strong>(repasse - custo) / preço</strong>.</p>
+
+          <div class="calc-actions">
+            <button class="btn btn-primary" id="btnCalcMargem">Calcular</button>
+            <button class="btn btn-secondary" id="btnCalcLimpar">Limpar</button>
+          </div>
+
+          <div class="calc-result" id="calcResultado">
+            <p class="label">Margem simulada</p>
+            <p class="valor">Preencha os campos</p>
+            <div class="detalhe">Digite um SKU para buscar o custo automaticamente.</div>
+          </div>
+        </article>
+      </section>
+
+
+      
+      <section class="table-panel filtros-panel filtros-produtos-fixo">
+        <div class="panel-header filtros-header-compacto">
+          <div>
+            <p class="panel-kicker">Filtros e organização</p>
+            <h3>Conferência da base</h3>
+          </div>
+          <div class="painel-inteligente-resumo" id="decisaoResumo">Carregando...</div>
+        </div>
+
+        <div class="filtros-grid filtros-grid-smart">
+          <div class="filtro-item filtro-sku">
+            <label for="filtroSku">SKU</label>
+            <input type="text" id="filtroSku" placeholder="Buscar SKU" />
+          </div>
+
+          <div class="filtro-item filtro-nome">
+            <label for="filtroNome">Nome</label>
+            <input type="text" id="filtroNome" placeholder="Buscar por palavra-chave" />
+          </div>
+
+          <div class="filtro-item filtro-canal">
+            <label for="filtroCanal">Canal</label>
+            <select id="filtroCanal">
+              <option value="todos">Todos</option>
+              <option value="ml">Com ML</option>
+              <option value="shopee">Com Shopee</option>
+              <option value="tiktok">Com TikTok</option>
+              <option value="todos_canais">Em todos os canais</option>
+              <option value="sem_mkt">Sem nenhum MKT</option>
+            </select>
+          </div>
+
+          <div class="filtro-item filtro-farol">
+            <label for="filtroFarol">Farol</label>
+            <select id="filtroFarol">
+              <option value="todos">Todos os faróis</option>
+              <option value="critico">Crítico &lt;2x</option>
+              <option value="alerta">Alerta &lt;3x</option>
+              <option value="sem_preco">Sem preço</option>
+              <option value="ok">OK ≥3x</option>
+            </select>
+          </div>
+
+          <div class="filtro-item filtro-ordem">
+            <label for="organizarPor">Organizar por</label>
+            <select id="organizarPor">
+              <option value="nome_asc">Nome A → Z</option>
+              <option value="nome_desc">Nome Z → A</option>
+              <option value="sku_asc">SKU A → Z</option>
+              <option value="sku_desc">SKU Z → A</option>
+              <option value="custo_desc">Maior custo</option>
+              <option value="custo_asc">Menor custo</option>
+              <option value="preco_desc">Maior preço</option>
+              <option value="preco_asc">Menor preço</option>
+            </select>
+          </div>
+
+          <div class="filtro-item filtro-tabs-wrap">
+            <label>Visualização rápida</label>
+            <div class="tabs-filtro">
+              <button class="tab-filtro active" data-tab="todos" type="button">Todos</button>
+              <button class="tab-filtro" data-tab="sem_mkt" type="button">Sem nenhum MKT</button>
+              <button class="tab-filtro" data-tab="todos_canais" type="button">Todos os canais</button>
+              <button class="tab-filtro" data-tab="pendencias" type="button">Pendências</button>
+            </div>
+          </div>
+
+          <div class="filtro-acoes">
+            <button class="btn btn-secondary" id="btnLimparFiltros" type="button">Limpar filtros</button>
+          </div>
+        </div>
+
+        <section class="painel-inteligente-produtos">
+          <div class="painel-inteligente-chips">
+            <button class="chip-decisao active" data-decisao="todos" type="button">
+              <span>Todos</span>
+              <strong id="decisaoTodos">0</strong>
+              <small id="decisaoTodosPct">100%</small>
+            </button>
+            <button class="chip-decisao chip-urgente" data-decisao="urgente" type="button">
+              <span>🔥 Urgente</span>
+              <strong id="decisaoUrgente">0</strong>
+              <small id="decisaoUrgentePct">0%</small>
+            </button>
+            <button class="chip-decisao chip-revisar" data-decisao="revisar" type="button">
+              <span>⚠️ Revisar</span>
+              <strong id="decisaoRevisar">0</strong>
+              <small id="decisaoRevisarPct">0%</small>
+            </button>
+            <button class="chip-decisao chip-oportunidade" data-decisao="oportunidade" type="button">
+              <span>💰 Oportunidade</span>
+              <strong id="decisaoOportunidade">0</strong>
+              <small id="decisaoOportunidadePct">0%</small>
+            </button>
+            <button class="chip-decisao chip-sem-preco" data-decisao="sem_preco" type="button">
+              <span>🟡 Sem preço</span>
+              <strong id="decisaoSemPreco">0</strong>
+              <small id="decisaoSemPrecoPct">0%</small>
+            </button>
+            <button class="chip-decisao chip-sem-venda" data-decisao="sem_venda" type="button">
+              <span>📦 Sem venda</span>
+              <strong id="decisaoSemVenda">0</strong>
+              <small id="decisaoSemVendaPct">0%</small>
+            </button>
+          </div>
+        </section>
+      </section>
+
+<section class="table-panel">
+        <div class="panel-header">
+          <div>
+            <p class="panel-kicker">Comparativo</p>
+            <h3>Preço e custo por SKU</h3>
+          </div>
+          <div class="resultado-resumo" id="resultadoResumo">0 item(ns)</div>
+        </div>
+
+        <div class="table-wrap table-wrap-sticky">
+          <table>
+            <thead>
+              <tr>
+                <th>SKU</th>
+                <th>Nome</th>
+                <th>Custo</th>
+                <th>Preço mínimo 3x</th>
+                <th>Preço ML</th>
+                <th>Preço Shopee</th>
+                <th>Preço TikTok</th>
+                <th>Menor preço</th>
+                <th>Maior preço</th>
+                <th>% ML</th>
+                <th>% Shopee</th>
+                <th>% TikTok</th>
+                <th>Farol 3x</th>
+                <th>Status</th>
+                  <th>Ação sugerida</th>
+              </tr>
+            </thead>
+            <tbody id="tbodyProdutos"></tbody>
+          </table>
+        </div>
+      </section>
+
+
+      <section class="table-panel ranking-ultra-panel">
+        <div class="panel-header">
+          <div>
+            <p class="panel-kicker">Ranking Ultra Pro</p>
+            <h3>Produtos mais vendidos + preço de catálogo por marketplace</h3>
+          </div>
+          <div class="resultado-resumo" id="rankingResultadoResumo">0 produto(s)</div>
+        </div>
+
+        <div class="ranking-ultra-toolbar">
+          <div class="filtro-item">
+            <label for="rankingLimite">Top</label>
+            <select id="rankingLimite">
+              <option value="10">Top 10</option>
+              <option value="20" selected>Top 20</option>
+              <option value="50">Top 50</option>
+              <option value="9999">Todos</option>
+            </select>
+          </div>
+
+          <div class="filtro-item">
+            <label for="rankingOrdenar">Organizar por</label>
+            <select id="rankingOrdenar">
+              <option value="qtd_desc">Maior volume vendido</option>
+              <option value="faturado_desc">Maior faturamento</option>
+              <option value="margem_asc">Menor margem</option>
+              <option value="dependencia_desc">Maior dependência de canal</option>
+            </select>
+          </div>
+
+          <div class="filtro-item">
+            <label for="rankingCanal">Canal</label>
+            <select id="rankingCanal">
+              <option value="todos">Todos</option>
+              <option value="ML">ML</option>
+              <option value="Shopee">Shopee</option>
+              <option value="TikTok">TikTok</option>
+            </select>
+          </div>
+
+          <div class="filtro-item" style="min-width:260px;">
+            <label for="rankingBusca">Buscar produto/SKU</label>
+            <input type="text" id="rankingBusca" placeholder="Digite SKU ou nome" />
+          </div>
+        </div>
+
+        <div class="ranking-kpis">
+          <div class="ranking-kpi"><small>Produtos com venda</small><strong id="rkProdutosVendidos">0</strong></div>
+          <div class="ranking-kpi"><small>Unidades vendidas</small><strong id="rkUnidadesVendidas">0</strong></div>
+          <div class="ranking-kpi"><small>Faturamento top</small><strong id="rkFaturamentoTop">R$ 0,00</strong></div>
+          <div class="ranking-kpi"><small>Produto líder</small><strong id="rkProdutoLider">-</strong></div>
+        </div>
+
+        <div id="rankingProdutosVazio" class="ranking-vazio" style="display:none;">
+          Ainda não encontrei vendas para montar o ranking. Confirme se existe <strong>data/vendas.json</strong>.
+        </div>
+
+        <div class="table-wrap table-wrap-sticky">
+          <table class="ranking-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Produto</th>
+                <th>Total vendido</th>
+                <th>ML<br><small>vendas / preço catálogo</small></th>
+                <th>Shopee<br><small>vendas / preço catálogo</small></th>
+                <th>TikTok<br><small>vendas / preço catálogo</small></th>
+                <th>Canal dominante</th>
+                <th>Share</th>
+                <th>Faturamento</th>
+                <th>Margem</th>
+                <th>Insight</th>
+              </tr>
+            </thead>
+            <tbody id="tbodyRankingProdutos"></tbody>
+          </table>
+        </div>
+      </section>
+
+
+      <section class="table-panel">
+        <div class="panel-header">
+          <div>
+            <p class="panel-kicker">Auditoria</p>
+            <h3>Resumo técnico</h3>
+          </div>
+        </div>
+        <pre id="auditoriaResumo" class="auditoria-box">Auditoria: aguardando...</pre>
+      </section>
+    </main>
+  </div>
+
+  <script src="produtos.js?v=18"></script>
+  <script src="scripts/auth-guard.js?v=3"></script>
+
+</body>
+</html>

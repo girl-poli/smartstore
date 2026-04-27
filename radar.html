@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Smart Cosméticos • Radar de Produtos</title>
+
+  <link rel="stylesheet" href="styles/global.css?v=1004" />
+  <link rel="stylesheet" href="styles/radar.css?v=1007" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+
+  <style>
+    .sidebar-user-box {
+      margin-top: auto;
+      padding: 14px;
+      border: 1px solid #f1d7d3;
+      border-radius: 20px;
+      background: #fff8f7;
+    }
+
+    .sidebar-user-box strong {
+      display: block;
+      margin-top: 6px;
+      color: #1f2937;
+      font-size: 13px;
+      line-height: 1.2;
+    }
+
+    .sidebar-user-box span {
+      display: block;
+      margin: 3px 0 12px;
+      color: #8f8f8f;
+      font-size: 12px;
+      line-height: 1.2;
+    }
+
+    .btn-logout-sidebar {
+      width: 100%;
+      border: none;
+      border-radius: 999px;
+      padding: 11px;
+      background: #f26c63;
+      color: #fff;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .btn-logout-sidebar:hover {
+      filter: brightness(.97);
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <img src="assets/logo-smart.png" alt="Smart Cosméticos" class="brand-logo" />
+        <div>
+          <p class="brand-kicker">Smart Cosméticos</p>
+          <h1 class="brand-title">Análise de Vendas</h1>
+        </div>
+      </div>
+
+      <nav class="menu">
+        <a class="menu-link" href="index.html">Resumo</a>
+        <a class="menu-link" href="vendas.html">Vendas</a>
+        <a class="menu-link" href="custo.html">Compras</a>
+        <a class="menu-link" href="produtos.html">Produtos</a>
+        <a class="menu-link" href="conferencia.html">Analise Publicação</a>
+        <a class="menu-link active" href="radar.html">Radar de Produtos</a>
+        <a class="menu-link" href="repricing.html">Preço de Catalogo ML</a>
+        <a class="menu-link" href="estoque-tiktok.html">Estoque Tiktok</a>
+      </nav>
+
+      <div class="sidebar-box">
+        <p class="box-label">Base usada</p>
+        <div class="box-text">
+          Produtos: <strong>data/produtos.json</strong><br>
+          Vendas: <strong>data/vendas.json</strong>
+        </div>
+      </div>
+
+      <div class="sidebar-box">
+        <p class="box-label">Auditoria</p>
+        <div id="radarAuditoriaSidebar" class="box-text">Carregando...</div>
+      </div>
+
+      <div class="sidebar-user-box">
+        <p class="box-label">Usuário logado</p>
+        <strong id="sidebarUserName">Seller Smart Cosméticos</strong>
+        <span id="sidebarUserSeller">Smart Cosméticos</span>
+        <button id="btnLogoutSidebar" class="btn-logout-sidebar" type="button">Sair do sistema</button>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div>
+          <p class="page-kicker">Produtos vendidos</p>
+          <h2 class="page-title">Radar de Produtos</h2>
+          <p class="radar-subtitle">Base 100% produtos + vendas cruzadas por SKU base, usando a mesma lógica da tela Produtos.</p>
+        </div>
+      </header>
+
+      <section class="filters-analitico radar-filtros">
+        <div class="filter-group">
+          <label for="busca">Buscar produto</label>
+          <input id="busca" type="search" placeholder="Buscar SKU ou nome..." />
+        </div>
+
+        <div class="filter-group">
+          <label for="filtroVenda">Venda</label>
+          <select id="filtroVenda">
+            <option value="todos">Todos</option>
+            <option value="comVenda">Com venda</option>
+            <option value="semVenda">Sem venda</option>
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <label for="filtroMargem">Farol</label>
+          <select id="filtroMargem">
+            <option value="todos">Todos os faróis</option>
+            <option value="verde">OK ≥3x</option>
+            <option value="amarelo">Atenção &lt;3x</option>
+            <option value="vermelho">Vermelho &lt;2x</option>
+            <option value="cinza">Sem preço</option>
+          </select>
+        </div>
+
+        <div class="filter-group filter-group-actions">
+          <label>&nbsp;</label>
+          <button id="btnLimparRadar" class="btn btn-secondary" type="button">Limpar filtros</button>
+        </div>
+      </section>
+
+      <section class="cards-grid radar-grid-kpis">
+        <article class="metric-card featured"><p>Produtos base</p><h3 id="kpiTotal">0</h3></article>
+        <article class="metric-card"><p>Produtos vendidos</p><h3 id="kpiComVenda">0</h3></article>
+        <article class="metric-card"><p>Sem venda</p><h3 id="kpiSemVenda">0</h3></article>
+        <article class="metric-card margem-card-resumo"><p>Markup médio</p><h3 id="kpiMargem">0,00x</h3></article>
+      </section>
+
+      <section class="panel radar-panel">
+        <div class="panel-header">
+          <div>
+            <p class="panel-kicker">Mapa visual</p>
+            <h3>SKU x vendas x markup</h3>
+          </div>
+          <span id="badgeFonteRadar" class="badge badge-soft">Carregando</span>
+        </div>
+
+        <div class="radar-legend">
+          <span><i class="dot dot-sale"></i>Vendeu</span>
+          <span><i class="dot dot-no-sale"></i>Não vendeu</span>
+          <span><i class="dot dot-ok"></i>OK ≥3x</span>
+          <span><i class="dot dot-alert"></i>Atenção &lt;3x</span>
+          <span><i class="dot dot-bad"></i>Crítico &lt;2x</span>
+        </div>
+
+        <div id="radarGrid" class="radar-products-grid"></div>
+        <p id="emptyState" class="radar-empty" style="display:none;">Nenhum produto encontrado com os filtros aplicados.</p>
+      </section>
+    </main>
+  </div>
+
+  <div id="modal" class="radar-modal hidden">
+    <div class="radar-modal-card">
+      <button id="fecharModal" class="radar-close" type="button">×</button>
+      <p class="panel-kicker">Detalhe do produto</p>
+      <h2 id="modalSku"></h2>
+      <h3 id="modalNome"></h3>
+      <div id="modalResumo" class="radar-modal-resumo"></div>
+    </div>
+  </div>
+
+  <script src="radar.js?v=1007"></script>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      const nomeEl = document.getElementById('sidebarUserName');
+      const sellerEl = document.getElementById('sidebarUserSeller');
+      const btnLogout = document.getElementById('btnLogoutSidebar');
+
+      try {
+        const resp = await fetch('/api/auth/me');
+        const data = await resp.json();
+
+        if (data && data.ok && data.user) {
+          if (nomeEl) nomeEl.textContent = data.user.nome || 'Seller Smart Cosméticos';
+          if (sellerEl) sellerEl.textContent = data.user.seller || 'Smart Cosméticos';
+        }
+      } catch (e) {
+        // Mantém o texto padrão quando a API não responder.
+      }
+
+      btnLogout?.addEventListener('click', async () => {
+        try {
+          await fetch('/api/auth/logout', { method: 'POST' });
+        } catch (e) {}
+
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        window.location.href = '/login.html';
+      });
+    });
+  </script>
+</body>
+</html>

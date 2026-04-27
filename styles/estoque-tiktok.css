@@ -1,0 +1,160 @@
+.estoque-kpis {
+  margin-bottom: 18px;
+}
+
+.estoque-sidebar-list {
+  margin-top: 12px;
+}
+
+.estoque-panels {
+  grid-template-columns: 1.4fr 0.8fr;
+  margin-bottom: 18px;
+}
+
+.estoque-regua-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(140px, 1fr));
+  gap: 10px;
+}
+
+.estoque-regua-card {
+  border-radius: 18px;
+  border: 1px solid var(--border);
+  background: #fff;
+  padding: 14px;
+}
+
+.estoque-regua-card small {
+  display: block;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: #9b726c;
+  font-weight: 800;
+  margin-bottom: 6px;
+}
+
+.estoque-regua-card strong {
+  display: block;
+  font-size: 28px;
+  line-height: 1;
+  color: #1f2937;
+}
+
+.estoque-regua-card span {
+  display: block;
+  margin-top: 8px;
+  font-size: 12px;
+  color: #7b6d68;
+}
+
+.estoque-regua-card.ok {
+  background: #ecfdf3;
+  border-color: #b7e4c7;
+}
+
+.estoque-regua-card.warn {
+  background: #fff8e6;
+  border-color: #fedf89;
+}
+
+.estoque-regua-card.danger {
+  background: #fff1f3;
+  border-color: #fecdca;
+}
+
+.estoque-regua-card.neutral {
+  background: #f8fafc;
+  border-color: #e5e7eb;
+}
+
+.estoque-table-panel {
+  margin-top: 6px;
+}
+
+.estoque-filtros {
+  grid-template-columns: 1.8fr 1fr 1fr auto;
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.status-badge.ok {
+  background: rgba(78, 163, 122, 0.12);
+  color: #2f7d57;
+}
+
+.status-badge.warn {
+  background: rgba(242, 172, 94, 0.15);
+  color: #a26019;
+}
+
+.status-badge.danger {
+  background: rgba(228, 112, 112, 0.12);
+  color: #b74242;
+}
+
+.status-badge.neutral {
+  background: rgba(120, 120, 120, 0.10);
+  color: #666;
+}
+
+.acao-texto {
+  color: #6b5d58;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.sku-cell {
+  color: #2f2b2a;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.nome-cell {
+  min-width: 360px;
+  max-width: 520px;
+  line-height: 1.35;
+}
+
+.numero-cell {
+  font-weight: 800;
+  color: #2f2b2a;
+  white-space: nowrap;
+}
+
+.dropstok-missing {
+  color: #b74242;
+  font-weight: 800;
+}
+
+.empty-row {
+  text-align: center !important;
+  padding: 28px !important;
+  color: #8e6f6a;
+}
+
+@media (max-width: 1400px) {
+  .estoque-panels,
+  .estoque-filtros {
+    grid-template-columns: 1fr;
+  }
+
+  .estoque-regua-grid {
+    grid-template-columns: repeat(2, minmax(140px, 1fr));
+  }
+}
+
+@media (max-width: 700px) {
+  .estoque-regua-grid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Smart Cosméticos • Cadastro</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles/auth.css?v=31" />
+</head>
+<body class="auth-body">
+  <div class="auth-page">
+    <main class="auth-shell">
+      <section class="auth-brand-panel">
+        <img class="auth-logo" src="assets/logo-smart.png" alt="Smart Cosméticos">
+        <div class="brand-line"></div>
+        <h1 class="auth-headline">Tecnologia e inteligência para impulsionar seus <span>resultados.</span></h1>
+        <p class="auth-copy">Transformamos dados em decisões estratégicas e crescimento sustentável para o seu negócio.</p>
+        <div class="auth-quote-card">
+          <div class="auth-quote-mark">“</div>
+          <p class="auth-quote">Planejamento é trazer o futuro para o presente para que você possa fazer algo a respeito agora.</p>
+          <div class="auth-author">— Alan Lakein</div>
+        </div>
+      </section>
+
+      <section class="auth-card">
+        <p class="auth-kicker">Cadastrar seller</p>
+        <h2 class="auth-title">Crie sua conta</h2>
+        <p class="auth-subtitle">Cadastre seu celular e receba um código de acesso. O e-mail fica como recuperação caso você troque de número.</p>
+
+        <form class="auth-form" id="formCadastroSms">
+          <div class="auth-field"><label for="nome">Nome</label><div class="input-wrap"><span class="input-icon"><svg viewBox="0 0 24 24"><path d="M20 21a8 8 0 0 0-16 0"/><circle cx="12" cy="7" r="4"/></svg></span><input id="nome" name="nome" type="text" placeholder="Nome do usuário" required></div></div>
+          <div class="auth-field"><label for="seller">Seller / Loja</label><div class="input-wrap"><span class="input-icon"><svg viewBox="0 0 24 24"><path d="M3 9h18l-2-5H5L3 9Z"/><path d="M5 9v10h14V9"/><path d="M9 19v-6h6v6"/><path d="M4 9c0 2 3 2 4 0 1 2 3 2 4 0 1 2 3 2 4 0 1 2 4 2 4 0"/></svg></span><input id="seller" name="seller" type="text" placeholder="Nome da sua loja ou seller" value="Smart Cosméticos" required></div></div>
+          <div class="auth-field"><label for="celular">Celular</label><div class="input-wrap"><span class="input-icon"><svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.79 19.79 0 0 1 2.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.12.9.32 1.77.59 2.61a2 2 0 0 1-.45 2.11L8 9.69a16 16 0 0 0 6.31 6.31l1.25-1.25a2 2 0 0 1 2.11-.45c.84.27 1.71.47 2.61.59A2 2 0 0 1 22 16.92Z"/></svg></span><input id="celular" name="celular" type="tel" placeholder="(11) 99999-9999" required></div></div>
+          <div class="auth-field"><label for="email">E-mail de recuperação</label><div class="input-wrap"><span class="input-icon"><svg viewBox="0 0 24 24"><path d="M4 4h16v16H4z"/><path d="m22 6-10 7L2 6"/></svg></span><input id="email" name="email" type="email" placeholder="seu@email.com"></div></div>
+          <div class="auth-field"><label for="canal">Receber código por</label><div class="input-wrap"><span class="input-icon"><svg viewBox="0 0 24 24"><path d="m7 8-4 4 4 4"/><path d="m17 8 4 4-4 4"/><path d="m14 4-4 16"/></svg></span><select id="canal" name="canal"><option value="sms">SMS</option><option value="whatsapp">WhatsApp</option></select></div></div>
+          <button class="auth-btn" id="btnSolicitarCodigo" type="button">Enviar código de acesso →</button>
+          <div class="auth-field" id="campoCodigo" style="display:none"><label for="codigo">Código recebido</label><div class="otp-inline"><div class="input-wrap"><span class="input-icon"><svg viewBox="0 0 24 24"><path d="m7 8-4 4 4 4"/><path d="m17 8 4 4-4 4"/><path d="m14 4-4 16"/></svg></span><input id="codigo" name="codigo" type="text" inputmode="numeric" maxlength="6" placeholder="000000"></div><button class="ghost-btn" id="btnConfirmarCodigo" type="submit">Validar</button></div></div>
+          <div class="auth-message" id="authMessage"></div>
+          <div class="token-box" id="tokenBox"><small>Token de acesso</small><div class="token-row"><input id="tokenValue" readonly><button id="btnCopiarToken" type="button">Copiar</button></div></div>
+          <div class="auth-divider">OU</div>
+          <div class="auth-links"><a class="auth-link" href="login.html">Já tenho cadastro ›</a><a class="auth-link" href="processamento.html">Ir ao painel ›</a></div>
+        </form>
+      </section>
+    </main>
+    <div class="footer-auth">© 2026 Smart Cosméticos. Todos os direitos reservados.</div>
+  </div>
+  <script src="scripts/auth-sms.js?v=31"></script>
+</body>
+</html>

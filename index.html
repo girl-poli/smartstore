@@ -1,0 +1,1350 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Smart Cosméticos • Painel de Análise</title>
+
+  <link rel="stylesheet" href="styles/global.css?v=1004" />
+  <link rel="stylesheet" href="styles/resumo.css?v=1003" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+  <style>
+    .regras-box {
+      margin-top: 12px;
+      padding: 14px 16px;
+      border: 1px solid rgba(242, 108, 99, .25);
+      border-radius: 18px;
+      background: rgba(255, 247, 245, .85);
+      max-width: 820px;
+    }
+
+    .regras-box h4 {
+      margin: 0 0 8px;
+      font-size: 13px;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: #a56d67;
+    }
+
+    .regras-box ul {
+      margin: 0;
+      padding-left: 18px;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(220px, 1fr));
+      gap: 6px 18px;
+      color: #4b5563;
+      font-size: 13px;
+      line-height: 1.4;
+    }
+  </style>
+
+
+  <style>
+    .mkt-fin-list {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(260px, 1fr));
+      gap: 14px;
+    }
+
+    .mkt-fin-card {
+      border: 1px solid rgba(242, 108, 99, .22);
+      border-radius: 18px;
+      padding: 14px;
+      background: rgba(255,255,255,.72);
+      box-shadow: 0 10px 24px rgba(242, 108, 99, .05);
+    }
+
+    .mkt-fin-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid rgba(242, 108, 99, .14);
+    }
+
+    .mkt-fin-header span {
+      font-weight: 700;
+      color: #27323f;
+    }
+
+    .mkt-fin-header strong {
+      font-size: 12px;
+      color: #a56d67;
+      background: #fff3ef;
+      border-radius: 999px;
+      padding: 5px 9px;
+      white-space: nowrap;
+    }
+
+    .mkt-fin-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .mkt-fin-grid div {
+      border-radius: 14px;
+      background: #fff8f6;
+      padding: 10px;
+      min-height: 58px;
+    }
+
+    .mkt-fin-grid small {
+      display: block;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      color: #a9817d;
+      margin-bottom: 5px;
+    }
+
+    .mkt-fin-grid strong {
+      display: block;
+      font-size: 14px;
+      color: #1f2937;
+      word-break: break-word;
+    }
+
+    @media (max-width: 1100px) {
+      .mkt-fin-list {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+
+
+  <style>
+    .percentual-mkt {
+      display: block;
+      margin-top: 3px;
+      font-size: 11px;
+      font-weight: 600;
+      color: #9b726c;
+    }
+
+    .margem-box {
+      border: 1px solid transparent;
+    }
+
+    .margem-box strong {
+      font-size: 18px;
+    }
+
+    .margem-box span {
+      display: block;
+      margin-top: 4px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .margem-ok {
+      background: #ecfdf3 !important;
+      border-color: #b7e4c7 !important;
+    }
+
+    .margem-ok small,
+    .margem-ok span {
+      color: #027a48 !important;
+    }
+
+    .margem-alerta {
+      background: #fff8e6 !important;
+      border-color: #fedf89 !important;
+    }
+
+    .margem-alerta small,
+    .margem-alerta span {
+      color: #b54708 !important;
+    }
+
+    .margem-ruim {
+      background: #fff1f3 !important;
+      border-color: #fecdca !important;
+    }
+
+    .margem-ruim small,
+    .margem-ruim span {
+      color: #b42318 !important;
+    }
+  </style>
+
+
+  <style>
+    .farol-margem-wrap {
+      margin-top: 18px;
+      padding-top: 14px;
+      border-top: 1px solid rgba(242, 108, 99, .16);
+    }
+
+    .farol-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .farol-header span {
+      font-size: 12px;
+      font-weight: 700;
+      color: #9b726c;
+      background: #fff3ef;
+      border-radius: 999px;
+      padding: 5px 10px;
+    }
+
+    .farol-margem-grid {
+      display: grid;
+      grid-template-columns: repeat(10, minmax(86px, 1fr));
+      gap: 8px;
+    }
+
+    .farol-dia {
+      border: 1px solid transparent;
+      border-radius: 14px;
+      padding: 10px;
+      min-height: 86px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .farol-dia strong {
+      font-size: 13px;
+      color: #1f2937;
+    }
+
+    .farol-dia span {
+      font-size: 18px;
+      font-weight: 800;
+      color: #1f2937;
+    }
+
+    .farol-dia small {
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .farol-dia em {
+      font-style: normal;
+      font-size: 11px;
+      color: #6b7280;
+    }
+
+    .farol-ok {
+      background: #ecfdf3;
+      border-color: #b7e4c7;
+    }
+
+    .farol-ok small {
+      color: #027a48;
+    }
+
+    .farol-alerta {
+      background: #fff8e6;
+      border-color: #fedf89;
+    }
+
+    .farol-alerta small {
+      color: #b54708;
+    }
+
+    .farol-ruim {
+      background: #fff1f3;
+      border-color: #fecdca;
+    }
+
+    .farol-ruim small {
+      color: #b42318;
+    }
+
+    .farol-vazio {
+      color: #6b7280;
+      margin: 0;
+    }
+
+    @media (max-width: 1300px) {
+      .farol-margem-grid {
+        grid-template-columns: repeat(5, minmax(86px, 1fr));
+      }
+    }
+  </style>
+
+
+  <style>
+    .entrega-canal-list {
+      display: grid;
+      gap: 14px;
+      margin-top: 8px;
+    }
+
+    .entrega-card {
+      border: 1px solid transparent;
+      border-radius: 18px;
+      padding: 14px;
+      background: #fff8f6;
+    }
+
+    .entrega-card-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid rgba(242, 108, 99, .14);
+    }
+
+    .entrega-card-head strong {
+      font-size: 14px;
+      color: #1f2937;
+    }
+
+    .entrega-card-head span {
+      font-size: 12px;
+      font-weight: 700;
+      color: #a56d67;
+      background: #fff3ef;
+      border-radius: 999px;
+      padding: 5px 9px;
+      white-space: nowrap;
+    }
+
+    .entrega-percentual {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      gap: 10px;
+      margin: 12px 0 10px;
+    }
+
+    .entrega-percentual strong {
+      font-size: 26px;
+      line-height: 1;
+      color: #1f2937;
+    }
+
+    .entrega-percentual small {
+      font-size: 11px;
+      font-weight: 800;
+      text-align: right;
+    }
+
+    .entrega-stack {
+      display: flex;
+      height: 12px;
+      overflow: hidden;
+      border-radius: 999px;
+      background: #f1f5f9;
+      margin-bottom: 12px;
+    }
+
+    .entrega-stack span {
+      display: block;
+      min-width: 2px;
+    }
+
+    .stack-ok { background: #37b26c; }
+    .stack-transito { background: #6b7280; }
+    .stack-sair { background: #f59e0b; }
+    .stack-cancelado { background: #ef4444; }
+
+    .entrega-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 7px;
+    }
+
+    .entrega-grid div {
+      border-radius: 12px;
+      padding: 8px;
+      background: rgba(255,255,255,.75);
+      min-height: 54px;
+    }
+
+    .entrega-grid small {
+      display: block;
+      color: #9b726c;
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      margin-bottom: 4px;
+    }
+
+    .entrega-grid b {
+      font-size: 16px;
+      color: #1f2937;
+    }
+
+    .entrega-ok {
+      background: #ecfdf3;
+      border-color: #b7e4c7;
+    }
+
+    .entrega-ok .entrega-percentual small { color: #027a48; }
+
+    .entrega-alerta {
+      background: #fff8e6;
+      border-color: #fedf89;
+    }
+
+    .entrega-alerta .entrega-percentual small { color: #b54708; }
+
+    .entrega-ruim {
+      background: #fff1f3;
+      border-color: #fecdca;
+    }
+
+    .entrega-ruim .entrega-percentual small { color: #b42318; }
+  </style>
+
+
+  <style>
+    .painel-entrega-canal .insight-box {
+      margin-top: 18px;
+    }
+
+    .entrega-canal-list {
+      display: grid;
+      gap: 14px;
+      margin-top: 8px;
+    }
+
+    .entrega-card {
+      border: 1px solid transparent;
+      border-radius: 18px;
+      padding: 14px;
+      background: #fff8f6;
+    }
+
+    .entrega-card-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid rgba(242,108,99,.14);
+    }
+
+    .entrega-card-head strong {
+      font-size: 14px;
+      color: #1f2937;
+    }
+
+    .entrega-card-head span {
+      font-size: 12px;
+      font-weight: 700;
+      color: #a56d67;
+      background: #fff3ef;
+      border-radius: 999px;
+      padding: 5px 9px;
+      white-space: nowrap;
+    }
+
+    .entrega-percentual {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      gap: 10px;
+      margin: 12px 0 10px;
+    }
+
+    .entrega-percentual strong {
+      font-size: 26px;
+      line-height: 1;
+      color: #1f2937;
+    }
+
+    .entrega-percentual small {
+      font-size: 11px;
+      font-weight: 800;
+      text-align: right;
+    }
+
+    .entrega-stack {
+      display: flex;
+      height: 12px;
+      overflow: hidden;
+      border-radius: 999px;
+      background: #f1f5f9;
+      margin-bottom: 12px;
+    }
+
+    .entrega-stack span {
+      display: block;
+      min-width: 2px;
+    }
+
+    .stack-ok { background: #37b26c; }
+    .stack-transito { background: #6b7280; }
+    .stack-sair { background: #f59e0b; }
+    .stack-cancelado { background: #ef4444; }
+
+    .entrega-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 7px;
+    }
+
+    .entrega-grid div {
+      border-radius: 12px;
+      padding: 8px;
+      background: rgba(255,255,255,.75);
+      min-height: 54px;
+    }
+
+    .entrega-grid small {
+      display: block;
+      color: #9b726c;
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      margin-bottom: 4px;
+    }
+
+    .entrega-grid b {
+      font-size: 16px;
+      color: #1f2937;
+    }
+
+    .entrega-ok { background: #ecfdf3; border-color: #b7e4c7; }
+    .entrega-ok .entrega-percentual small { color: #027a48; }
+    .entrega-alerta { background: #fff8e6; border-color: #fedf89; }
+    .entrega-alerta .entrega-percentual small { color: #b54708; }
+    .entrega-ruim { background: #fff1f3; border-color: #fecdca; }
+    .entrega-ruim .entrega-percentual small { color: #b42318; }
+  </style>
+
+
+  <style>
+    .farol-margem-grid {
+      grid-template-columns: repeat(10, minmax(110px, 1fr)) !important;
+      max-height: 410px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+
+    .farol-dia {
+      min-height: 122px !important;
+    }
+
+    .comparativo-mes {
+      margin-top: 6px;
+      border-top: 1px solid rgba(0,0,0,.06);
+      padding-top: 6px;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .comparativo-mes b {
+      font-size: 11px;
+      line-height: 1.1;
+    }
+
+    .comparativo-mes i {
+      font-style: normal;
+      font-size: 10px;
+      color: #6b7280;
+      line-height: 1.1;
+    }
+
+    .comparativo-mes.positivo b {
+      color: #027a48;
+    }
+
+    .comparativo-mes.negativo b {
+      color: #b42318;
+    }
+
+    .comparativo-mes.neutro b {
+      color: #6b7280;
+    }
+
+    @media (max-width: 1300px) {
+      .farol-margem-grid {
+        grid-template-columns: repeat(5, minmax(110px, 1fr)) !important;
+      }
+    }
+  </style>
+
+
+  <style>
+    .topbar .regras-box { display: none !important; }
+
+    .sidebar-regras-box .sidebar-rules-list {
+      margin: 0;
+      padding-left: 16px;
+      display: grid;
+      gap: 7px;
+      font-size: 12px;
+      line-height: 1.35;
+      color: #4b5563;
+    }
+
+    .sidebar-status-arquivos .file-status-list {
+      display: grid;
+      gap: 8px;
+    }
+
+    .file-status-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid rgba(242,108,99,.18);
+      border-radius: 12px;
+      padding: 8px 9px;
+      background: rgba(255,255,255,.72);
+      font-size: 12px;
+    }
+
+    .file-status-item span {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .file-status-item .badge {
+      font-size: 10px;
+      padding: 4px 7px;
+      border-radius: 999px;
+      white-space: nowrap;
+    }
+
+    .filtros-resumo-linha {
+      display: grid !important;
+      grid-template-columns: 1.05fr 1.05fr 1.05fr 1fr 1fr .9fr !important;
+      gap: 10px !important;
+      align-items: end !important;
+    }
+
+    .filtros-resumo-linha .filter-group { min-width: 0; }
+
+    .filtros-resumo-linha select,
+    .filtros-resumo-linha input,
+    .filtros-resumo-linha button { width: 100%; }
+
+    .resumo-grid-6 {
+      grid-template-columns: repeat(6, minmax(145px, 1fr)) !important;
+      gap: 10px !important;
+    }
+
+    .resumo-grid-6 .metric-card {
+      min-height: 96px;
+      padding: 15px 16px;
+      border-radius: 18px;
+    }
+
+    .resumo-grid-6 .metric-card p {
+      font-size: 10px;
+      letter-spacing: .08em;
+    }
+
+    .resumo-grid-6 .metric-card h3 {
+      font-size: 24px;
+      line-height: 1.05;
+    }
+
+    .margem-card-resumo {
+      border-color: #facc15 !important;
+      background: #fff8e6 !important;
+    }
+
+    .margem-card-resumo.meta-ok {
+      border-color: #86efac !important;
+      background: #ecfdf3 !important;
+    }
+
+    .margem-card-resumo.meta-ruim {
+      border-color: #fca5a5 !important;
+      background: #fff1f3 !important;
+    }
+
+    .margem-card-resumo small {
+      display: block;
+      margin-top: 4px;
+      font-size: 11px;
+      font-weight: 700;
+      color: #6b7280;
+    }
+
+    .margem-card-resumo .positivo { color: #027a48; }
+    .margem-card-resumo .negativo { color: #b42318; }
+
+    .farol-sem-venda {
+      background: #f8fafc !important;
+      border-color: #e5e7eb !important;
+      opacity: .86;
+    }
+
+    .farol-sem-venda span,
+    .farol-sem-venda small,
+    .farol-sem-venda em {
+      color: #94a3b8 !important;
+    }
+
+    .farol-sem-venda strong { color: #64748b !important; }
+
+    @media (max-width: 1500px) {
+      .resumo-grid-6 { grid-template-columns: repeat(3, minmax(145px, 1fr)) !important; }
+      .filtros-resumo-linha { grid-template-columns: repeat(3, 1fr) !important; }
+    }
+  </style>
+
+
+  <style>
+    .input-data-invalida {
+      border-color: #ef4444 !important;
+      background: #fff1f3 !important;
+    }
+  </style>
+
+<style>
+/* CAMPO DE DATA PRO - máscara BR + calendário */
+.date-pro-field {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 42px;
+  gap: 6px;
+  align-items: center;
+}
+
+.date-pro-field input[type="text"] {
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(242,108,99,.25);
+  background: #fff;
+  font-family: inherit;
+}
+
+.date-pro-button {
+  height: 38px;
+  border-radius: 10px;
+  border: 1px solid rgba(242,108,99,.25);
+  background: #fff8f6;
+  color: #a56d67;
+  cursor: pointer;
+}
+
+.date-pro-button:hover {
+  border-color: #f26c63;
+  background: #fff1ef;
+}
+
+.date-pro-picker {
+  position: absolute;
+  right: 0;
+  bottom: -2px;
+  width: 42px;
+  height: 38px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.input-data-invalida {
+  border-color: #ef4444 !important;
+  background: #fff1f3 !important;
+}
+</style>
+
+<style>
+
+/* RÉGUA DE MARGEM POR CANAL - V3 */
+.mkt-regua-slot {
+  grid-column: 1 / -1 !important;
+  padding: 0 !important;
+  min-height: auto !important;
+  background: transparent !important;
+}
+
+.mkt-regua-margem {
+  margin-top: 2px;
+  padding: 11px;
+  border-radius: 16px;
+  background: rgba(255,255,255,.82);
+  border: 1px solid rgba(242,108,99,.18);
+}
+
+.mkt-regua-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.mkt-regua-head small {
+  font-size: 10px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: #a9817d;
+  font-weight: 800;
+}
+
+.mkt-regua-head strong {
+  font-size: 11px;
+  color: #4b5563;
+  background: #fff3ef;
+  border-radius: 999px;
+  padding: 4px 8px;
+  white-space: nowrap;
+}
+
+.mkt-regua-dias {
+  display: grid;
+  grid-template-columns: repeat(16, minmax(22px, 1fr));
+  gap: 5px;
+}
+
+.regua-dia {
+  min-width: 22px;
+  min-height: 24px;
+  border-radius: 7px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 9px;
+  font-weight: 900;
+  border: 1px solid transparent;
+  cursor: default;
+}
+
+.regua-ok {
+  background: #ecfdf3;
+  border-color: #b7e4c7;
+  color: #027a48;
+}
+
+.regua-alerta {
+  background: #fff8e6;
+  border-color: #fedf89;
+  color: #b54708;
+}
+
+.regua-ruim {
+  background: #fff1f3;
+  border-color: #fecdca;
+  color: #b42318;
+}
+
+.regua-neutra {
+  background: #f8fafc;
+  border-color: #e5e7eb;
+  color: #94a3b8;
+}
+
+.mkt-regua-resumo {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-top: 8px;
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.mkt-regua-resumo .ok { color: #027a48; }
+.mkt-regua-resumo .alerta { color: #b54708; }
+.mkt-regua-resumo .ruim { color: #b42318; }
+
+@media (max-width: 1400px) {
+  .mkt-regua-dias {
+    grid-template-columns: repeat(10, minmax(22px, 1fr));
+  }
+}
+
+</style>
+<style>
+
+/* BLINDAGEM: esconder farol duplicado dentro do resumo financeiro */
+.resumo-canais-topo .mkt-regua-slot,
+.resumo-canais-topo .mkt-regua-margem,
+.resumo-canais-topo [class*="mkt-regua"] {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  min-height: 0 !important;
+  max-height: 0 !important;
+  overflow: hidden !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border: 0 !important;
+}
+
+/* Garantir que o farol separado continue aparecendo */
+.farol-mkt-panel,
+.farol-mkt-mensal-list,
+.farol-mkt-card {
+  display: block;
+}
+
+.farol-mkt-mensal-list {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(260px, 1fr));
+  gap: 14px;
+}
+
+@media (max-width: 1400px) {
+  .farol-mkt-mensal-list {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+</style>
+
+<style>
+/* VISÃO 12 MESES + TOP PRODUTOS */
+.painel-mensal-12 {
+  margin-top: 18px;
+}
+
+.painel-mensal-12 .chart-box {
+  min-height: 390px;
+}
+
+.top-produtos-panel {
+  margin-top: 18px;
+}
+
+.top-produtos-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  border: 1px solid rgba(242,108,99,.16);
+  border-radius: 18px;
+  background: rgba(255,255,255,.72);
+}
+
+.top-produtos-table {
+  width: 100%;
+  min-width: 920px;
+  border-collapse: collapse;
+}
+
+.top-produtos-table th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  padding: 12px 14px;
+  background: #fff3ef;
+  color: #9b726c;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  text-align: left;
+  border-bottom: 1px solid rgba(242,108,99,.18);
+}
+
+.top-produtos-table td {
+  padding: 12px 14px;
+  border-bottom: 1px solid rgba(242,108,99,.10);
+  color: #27323f;
+  font-size: 13px;
+  vertical-align: top;
+}
+
+.top-produtos-table td:nth-child(1),
+.top-produtos-table td:nth-child(4),
+.top-produtos-table td:nth-child(5),
+.top-produtos-table td:nth-child(6),
+.top-produtos-table td:nth-child(7),
+.top-produtos-table td:nth-child(8) {
+  white-space: nowrap;
+}
+
+.top-produtos-table td strong {
+  display: block;
+  color: #1f2937;
+}
+
+.top-produtos-table td small {
+  display: block;
+  margin-top: 4px;
+  color: #9b726c;
+  font-weight: 700;
+}
+
+.top-produtos-vazio {
+  margin: 12px 0 0;
+  color: #6b7280;
+  font-size: 13px;
+}
+</style>
+
+
+  <style>
+    .sidebar-logout-box {
+      margin-top: auto;
+      padding: 14px;
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      background: #fff8f7;
+    }
+
+    .sidebar-logout-box strong {
+      display: block;
+      margin-top: 6px;
+      font-size: 14px;
+      color: var(--text-dark);
+    }
+
+    .sidebar-logout-box span {
+      display: block;
+      margin: 3px 0 12px;
+      font-size: 12px;
+      color: var(--text-light);
+    }
+
+    .btn-logout-premium {
+      width: 100%;
+      border: none;
+      border-radius: 999px;
+      padding: 11px 14px;
+      background: var(--primary);
+      color: #fff;
+      font-weight: 700;
+      cursor: pointer;
+      transition: .2s ease;
+    }
+
+    .btn-logout-premium:hover {
+      filter: brightness(.96);
+      transform: translateY(-1px);
+    }
+  </style>
+
+</head>
+
+<script src="app.js?v=..."></script>
+<script src="scripts/auth-guard.js?v=menu-admin"></script>
+</body>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <img src="assets/logo-smart.png" alt="Smart Cosméticos" class="brand-logo" />
+        <div>
+          <p class="brand-kicker">Smart Cosméticos</p>
+          <h1 class="brand-title">Análise de Vendas</h1>
+        </div>
+      </div>
+
+      <nav class="menu">
+<nav class="menu">
+  <a class="menu-link active" href="index.html">Resumo</a>
+  <a class="menu-link" href="vendas.html">Vendas</a>
+  <a class="menu-link" href="custo.html">Compras</a>
+  <a class="menu-link" href="produtos.html">Produtos</a>
+  <a class="menu-link" href="processamento.html">Processamento</a>
+  <!-- NOVO -->
+</nav>
+      </nav>
+
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div>
+          <p class="page-kicker">Cockpit</p>
+          <h2 class="page-title">Resumo executivo</h2>
+        </div>
+     
+      </header>
+
+      <section class="filters-analitico resumo-filtros filtros-resumo-linha">
+        <div class="filter-group">
+          <label for="filtroVisaoDataResumo">Visão de data</label>
+          <select id="filtroVisaoDataResumo">
+            <option value="pedido">Pedido</option>
+            <option value="financeira">Financeira</option>
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <label for="filtroMarketplaceResumo">Marketplace</label>
+          <select id="filtroMarketplaceResumo">
+            <option value="todos">Todos</option>
+            <option value="ML">ML</option>
+            <option value="Shopee">Shopee</option>
+            <option value="TikTok">TikTok</option>
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <label for="filtroStatusResumo">Status</label>
+          <select id="filtroStatusResumo">
+            <option value="todos">Todos</option>
+            <option value="Concluído">Concluído</option>
+            <option value="Em avaliação">Em avaliação</option>
+            <option value="Em transito">Em transito</option>
+            <option value="Envio Manual acompanhar">Envio Manual acompanhar</option>
+            <option value="Precisa enviar">Precisa enviar</option>
+            <option value="Esperando Emitir NF">Esperando Emitir NF</option>
+            <option value="Emitir NF">Emitir NF</option>
+            <option value="Cancelado">Cancelado</option>
+            <option value="Outros">Outros</option>
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <label for="filtroDataInicioResumo">Data inicial</label>
+          <div class="date-pro-field">
+            <input type="text" id="filtroDataInicioResumo" placeholder="dd/mm/aaaa" inputmode="numeric" maxlength="10" autocomplete="off" />
+            <input type="date" id="filtroDataInicioResumoPicker" class="date-pro-picker" aria-label="Selecionar data inicial" tabindex="-1" />
+            <button type="button" class="date-pro-button" data-date-target="filtroDataInicioResumo" data-date-picker="filtroDataInicioResumoPicker" title="Abrir calendário">📅</button>
+          </div>
+        </div>
+
+        <div class="filter-group">
+          <label for="filtroDataFimResumo">Data final</label>
+          <div class="date-pro-field">
+            <input type="text" id="filtroDataFimResumo" placeholder="dd/mm/aaaa" inputmode="numeric" maxlength="10" autocomplete="off" />
+            <input type="date" id="filtroDataFimResumoPicker" class="date-pro-picker" aria-label="Selecionar data final" tabindex="-1" />
+            <button type="button" class="date-pro-button" data-date-target="filtroDataFimResumo" data-date-picker="filtroDataFimResumoPicker" title="Abrir calendário">📅</button>
+          </div>
+        </div>
+
+        <div class="filter-group filter-group-actions">
+          <label>&nbsp;</label>
+          <button class="btn btn-secondary" id="btnLimparFiltrosResumo" type="button">Limpar filtros</button>
+        </div>
+      </section>
+
+      <section class="cards-grid resumo-grid resumo-grid-6">
+        <article class="metric-card featured">
+          <p>Total faturado válido</p>
+          <h3 id="cardFaturado">R$ 0,00</h3>
+        </article>
+
+        <article class="metric-card">
+          <p>Total frete</p>
+          <h3 id="cardFrete">R$ 0,00</h3>
+        </article>
+
+        <article class="metric-card">
+          <p>Total comissão</p>
+          <h3 id="cardComissao">R$ 0,00</h3>
+        </article>
+
+        <article class="metric-card">
+          <p>Total de custo (compras)</p>
+          <h3 id="cardCusto">R$ 0,00</h3>
+        </article>
+
+        <article class="metric-card featured">
+          <p>Repasse</p>
+          <h3 id="cardRepasse">R$ 0,00</h3>
+        </article>
+
+        <article class="metric-card">
+          <p>Receita líquida</p>
+          <h3 id="cardLiquido">R$ 0,00</h3>
+        </article>
+
+        <article class="metric-card">
+          <p>Total de pedidos (vendas)</p>
+          <h3 id="cardTotalPedidos">0</h3>
+        </article>
+
+        <article class="metric-card">
+          <p>Total de produtos</p>
+          <h3 id="cardTotalProdutos">0</h3>
+        </article>
+
+        <article class="metric-card margem-card-resumo">
+          <p>Margem líquida</p>
+          <h3 id="cardMargem">0%</h3>
+          <small id="cardMargemComparativo">Mês anterior: -</small>
+          <small id="cardMargemMeta">Meta atual: 20%</small>
+        </article>
+      </section>
+
+<section class="panel resumo-canais-topo">
+        <div class="panel-header">
+          <div>
+            <p class="panel-kicker">Marketplace</p>
+            <h3>Resumo financeiro por canal</h3>
+          </div>
+        </div>
+
+        <div id="resumoMktFinanceiro" class="mkt-fin-list">
+          <article class="mkt-fin-card">
+            <div class="mkt-fin-header">
+              <span>Carregando...</span>
+              <strong>0 ped.</strong>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="panel farol-mkt-panel">
+        <div class="panel-header">
+          <div>
+            <p class="panel-kicker">Margem por canal</p>
+            <h3>Farol mensal por marketplace</h3>
+          </div>
+          <span class="badge-soft">Mês filtrado</span>
+        </div>
+
+        <div id="farolMktMensal" class="farol-mkt-mensal-list">
+          <article class="farol-mkt-card">
+            <div class="farol-mkt-head">
+              <div>
+                <small>Carregando</small>
+                <strong>Farol mensal</strong>
+              </div>
+              <span>-</span>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="panel-grid resumo-panels-v2">
+        <article class="panel panel-large">
+          <div class="panel-header">
+            <div>
+              <p class="panel-kicker">Evolução</p>
+              <h3>Receita bruta x repasse</h3>
+            </div>
+            <span class="badge badge-soft">Últimos 30 dias</span>
+          </div>
+
+          <div class="chart-box">
+            <canvas id="graficoResumo"></canvas>
+          </div>
+
+          <div class="farol-margem-wrap">
+            <div class="farol-header">
+              <p class="panel-kicker">Margem diária</p>
+              <span>Meta mínima: 20%</span>
+            </div>
+            <div id="farolMargemDiario" class="farol-margem-grid"></div>
+          </div>
+        </article>
+
+        <article class="panel painel-entrega-canal">
+          <div class="panel-header">
+            <div>
+              <p class="panel-kicker">Entrega por canal</p>
+              <h3>Status operacional por marketplace</h3>
+            </div>
+            <span class="badge-soft">Últimos 30 dias</span>
+          </div>
+
+          <div id="entregaPorCanal" class="entrega-canal-list"></div>
+
+          <div class="insight-box">
+            <p class="panel-kicker">Leitura</p>
+            <h3>Resumo inteligente</h3>
+            <p id="resumoInteligente">Carregando análise...</p>
+          </div>
+        </article>
+      </section>
+
+      <section class="panel painel-mensal-12">
+        <div class="panel-header">
+          <div>
+            <p class="panel-kicker">Visão mensal</p>
+            <h3>Receita bruta x repasse x margem x vendas</h3>
+          </div>
+          <span id="badgeGraficoMensal12" class="badge badge-soft">Últimos 12 meses</span>
+        </div>
+
+        <div class="chart-box">
+          <canvas id="graficoMensal12"></canvas>
+        </div>
+      </section>
+
+      <section class="panel top-produtos-panel">
+        <div class="panel-header">
+          <div>
+            <p class="panel-kicker">Ranking</p>
+            <h3>Top 10 produtos mais vendidos</h3>
+          </div>
+          <span class="badge-soft">Últimos 12 meses</span>
+        </div>
+
+        <div class="top-produtos-table-wrap">
+          <table class="top-produtos-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Produto / SKU</th>
+                <th>Canal</th>
+                <th>Qtd.</th>
+                <th>Pedidos</th>
+                <th>Receita bruta</th>
+                <th>Repasse</th>
+                <th>Margem</th>
+              </tr>
+            </thead>
+            <tbody id="topProdutosBody"></tbody>
+          </table>
+        </div>
+
+        <p id="topProdutosVazio" class="top-produtos-vazio" style="display:none;">Sem produtos vendidos nos últimos 12 meses.</p>
+      </section>
+    </main>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="app.js?v=1005"></script>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      const sidebar = document.querySelector('.sidebar');
+      if (!sidebar) return;
+
+      let user = null;
+
+      try {
+        const resp = await fetch('/api/auth/me');
+        const data = await resp.json();
+        if (data && data.ok) user = data.user;
+      } catch {}
+
+      const box = document.createElement('div');
+      box.className = 'sidebar-logout-box';
+      box.innerHTML = `
+        <p class="box-label">Usuário logado</p>
+        <strong id="sidebarUserName">${user?.nome || 'Smart Seller'}</strong>
+        <span id="sidebarSellerName">${user?.seller || user?.loja || 'Smart Cosméticos'}</span>
+
+        <button id="btnLogoutPremium" class="btn-logout-premium" type="button">
+          Sair do sistema
+        </button>
+      `;
+
+      sidebar.appendChild(box);
+
+      document.getElementById('btnLogoutPremium')?.addEventListener('click', async () => {
+        try {
+          await fetch('/api/auth/logout', { method: 'POST' });
+        } catch {}
+
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+
+        window.location.href = '/login.html';
+      });
+    });
+  </script>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      try {
+        const resp = await fetch('/api/auth/me');
+        const data = await resp.json();
+
+        if (data && data.ok && data.user && data.user.role === 'ADMIN') {
+          const menu = document.getElementById('menuUsuarios');
+          if (menu) menu.style.display = 'block';
+        }
+      } catch {}
+    });
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Smart Cosméticos • Conferência</title>
+  <link rel="stylesheet" href="styles/global.css?v=8" />
+  <link rel="stylesheet" href="styles/conferencia.css?v=8" />
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <img src="assets/logo-smart.png" alt="Smart Cosméticos" class="brand-logo" />
+        <div>
+          <p class="brand-kicker">Smart Cosméticos</p>
+          <h1 class="brand-title">Análise de Vendas</h1>
+        </div>
+      </div>
+
+      <nav class="menu">
+        <a class="menu-link" href="index.html">Resumo</a>
+        <a class="menu-link" href="vendas.html">Vendas</a>
+                <a class="menu-link" href="custo.html">Compras</a>
+        <a class="menu-link" href="produtos.html">Produtos</a>
+        <a class="menu-link active" href="conferencia.html">Analise Publicação</a>
+                 <a class="menu-link" href="radar.html">Radar de Produtos</a>
+            <a class="menu-link" href="repricing.html">Preço de Catalogo ML</a>
+                        <a class="menu-link" href="estoque-tiktok.html">Estoque Tiktok</a>
+
+
+      </nav>
+
+      <div class="sidebar-box">
+        <p class="box-label">Base</p>
+        <p class="box-text">Produtos base cadastrados</p>
+        <h3 class="sidebar-kpi" id="cardBase">0</h3>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div>
+          <p class="page-kicker">Auditoria</p>
+          <h2 class="page-title">Conferência de SKUs</h2>
+        </div>
+      </header>
+
+      <section class="cards-grid conferencia-grid">
+        <!-- LINHA 1 - ML -->
+        <article class="mini-card">
+          <p>ML no arquivo</p>
+          <h3 id="cardMlArquivo">0</h3>
+        </article>
+
+        <article class="mini-card">
+          <p>ML casados</p>
+          <h3 id="cardMlCasados">0</h3>
+        </article>
+
+        <article class="mini-card">
+          <p>ML pendentes</p>
+          <h3 id="cardMlPendentes">0</h3>
+        </article>
+
+        <article class="mini-card">
+          <p>ML esgotados</p>
+          <h3 id="cardMlEsgotados">0</h3>
+        </article>
+
+        <article class="mini-card">
+          <p>ML variações</p>
+          <h3 id="cardMlVariacoes">0</h3>
+        </article>
+
+        <article class="mini-card">
+          <p>ML duplicados</p>
+          <h3 id="cardMlDuplicados">0</h3>
+        </article>
+
+        <!-- LINHA 2 - SHOPEE -->
+        <article class="mini-card">
+          <p>Shopee no arquivo</p>
+          <h3 id="cardShopeeArquivo">0</h3>
+        </article>
+
+        <article class="mini-card">
+          <p>Shopee casados</p>
+          <h3 id="cardShopeeCasados">0</h3>
+        </article>
+
+        <article class="mini-card">
+          <p>Shopee pendentes</p>
+          <h3 id="cardShopeePendentes">0</h3>
+        </article>
+
+        <article class="mini-card">
+          <p>Shopee esgotados</p>
+          <h3 id="cardShopeeEsgotados">0</h3>
+        </article>
+
+        <article class="mini-card">
+          <p>Shopee variações</p>
+          <h3 id="cardShopeeVariacoes">0</h3>
+        </article>
+
+        <article class="mini-card">
+          <p>Shopee duplicados</p>
+          <h3 id="cardShopeeDuplicados">0</h3>
+        </article>
+
+        <!-- LINHA 3 - TIKTOK -->
+        <article class="mini-card">
+          <p>TikTok no arquivo</p>
+          <h3 id="cardTikTokArquivo">0</h3>
+        </article>
+
+        <article class="mini-card">
+          <p>TikTok casados</p>
+          <h3 id="cardTikTokCasados">0</h3>
+        </article>
+
+        <article class="mini-card">
+          <p>TikTok pendentes</p>
+          <h3 id="cardTikTokPendentes">0</h3>
+        </article>
+
+        <article class="mini-card">
+          <p>TikTok esgotados</p>
+          <h3 id="cardTikTokEsgotados">0</h3>
+        </article>
+
+        <article class="mini-card">
+          <p>TikTok variações</p>
+          <h3 id="cardTikTokVariacoes">0</h3>
+        </article>
+
+        <article class="mini-card">
+          <p>TikTok duplicados</p>
+          <h3 id="cardTikTokDuplicados">0</h3>
+        </article>
+      </section>
+
+      <section class="tabs-bar">
+        <button class="tab-btn active" data-tab="ml-pendentes">Pendências ML</button>
+        <button class="tab-btn" data-tab="ml-esgotados">Esgotados ML</button>
+        <button class="tab-btn" data-tab="ml-variacoes">Variações ML</button>
+        <button class="tab-btn" data-tab="ml-duplicados">Duplicados ML</button>
+
+        <button class="tab-btn" data-tab="shopee-pendentes">Pendências Shopee</button>
+        <button class="tab-btn" data-tab="shopee-esgotados">Esgotados Shopee</button>
+        <button class="tab-btn" data-tab="shopee-variacoes">Variações Shopee</button>
+        <button class="tab-btn" data-tab="shopee-duplicados">Duplicados Shopee</button>
+
+        <button class="tab-btn" data-tab="tiktok-pendentes">Pendências TikTok</button>
+        <button class="tab-btn" data-tab="tiktok-esgotados">Esgotados TikTok</button>
+        <button class="tab-btn" data-tab="tiktok-variacoes">Variações TikTok</button>
+        <button class="tab-btn" data-tab="tiktok-duplicados">Duplicados TikTok</button>
+      </section>
+
+      <section class="table-panel">
+        <div class="panel-header panel-header-conferencia">
+          <div>
+            <p class="panel-kicker">Conferência</p>
+            <h3 id="tituloTabela">Pendências ML</h3>
+          </div>
+        </div>
+
+        <div class="filtros-conferencia">
+          <div class="filtro-item">
+            <label for="filtroSku">SKU</label>
+            <input type="text" id="filtroSku" placeholder="Digite o SKU original ou tratado" />
+          </div>
+
+          <div class="filtro-item">
+            <label for="filtroNome">Nome / palavra-chave</label>
+            <input type="text" id="filtroNome" placeholder="Digite parte do nome do produto" />
+          </div>
+
+          <div class="filtro-item">
+            <label for="ordenacaoConferencia">Organizar por</label>
+            <select id="ordenacaoConferencia">
+              <option value="linhaExcel_asc">Linha Excel ↑</option>
+              <option value="linhaExcel_desc">Linha Excel ↓</option>
+              <option value="skuOriginal_asc">SKU original A-Z</option>
+              <option value="skuOriginal_desc">SKU original Z-A</option>
+              <option value="skuTratado_asc">SKU tratado A-Z</option>
+              <option value="skuTratado_desc">SKU tratado Z-A</option>
+              <option value="nome_asc">Nome A-Z</option>
+              <option value="nome_desc">Nome Z-A</option>
+              <option value="preco_desc">Preço maior</option>
+              <option value="preco_asc">Preço menor</option>
+              <option value="estoque_desc">Estoque maior</option>
+              <option value="estoque_asc">Estoque menor</option>
+            </select>
+          </div>
+
+          <div class="filtro-item filtro-item-botao">
+            <label>&nbsp;</label>
+            <button id="btnLimparFiltros" class="btn btn-secondary" type="button">Limpar filtros</button>
+          </div>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Linha</th>
+                <th>Marketplace</th>
+                <th>SKU original</th>
+                <th>SKU tratado</th>
+                <th>Nome</th>
+                <th>Preço</th>
+                <th>Estoque</th>
+                <th>Motivo</th>
+              </tr>
+            </thead>
+            <tbody id="tbodyConferencia">
+              <tr>
+                <td colspan="8" style="text-align:center;">Carregando...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="conferencia.js?v=8"></script>
+  <script src="scripts/auth-guard.js?v=3"></script>
+
+</body>
+</html>

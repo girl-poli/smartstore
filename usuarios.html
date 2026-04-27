@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Smart Cosméticos • Usuários</title>
+  <link rel="stylesheet" href="styles/global.css?v=admin-users" />
+  <style>
+    .user-admin-grid{display:grid;grid-template-columns:repeat(4,minmax(160px,1fr));gap:12px;margin-bottom:18px}
+    .user-card{border:1px solid var(--border);border-radius:20px;background:#fff;padding:16px;box-shadow:var(--shadow)}
+    .user-card p{margin:0 0 8px;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#c08a84;font-weight:800}
+    .user-card h3{margin:0;font-size:26px;color:#1f2937}
+    .admin-panel{border:1px solid var(--border);border-radius:26px;background:#fff;padding:18px;box-shadow:var(--shadow)}
+    .admin-form{display:grid;grid-template-columns:1fr 1fr 1fr 160px auto;gap:10px;align-items:end;margin-bottom:18px}
+    .field{display:flex;flex-direction:column;gap:6px}
+    .field label{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#a88a85;font-weight:800}
+    .field input,.field select{height:42px;border:1px solid #f1d9d4;border-radius:12px;padding:0 12px;background:#fff;outline:none}
+    .users-table-wrap{overflow:auto;border:1px solid #f3e7e4;border-radius:18px}
+    table{width:100%;border-collapse:collapse;min-width:900px}
+    th,td{padding:12px;border-bottom:1px solid #f3e7e4;text-align:left;font-size:13px}
+    th{background:#fff3f1;color:#8a5049;text-transform:uppercase;letter-spacing:.06em;font-size:11px}
+    .badge-role{border-radius:999px;padding:5px 9px;font-weight:800;font-size:11px}
+    .badge-admin{background:#fff1f3;color:#b42318}.badge-seller{background:#ecfdf3;color:#027a48}
+    .btn-mini{border:1px solid #f1d7d3;border-radius:999px;padding:7px 10px;background:#fff;color:#f26c63;font-weight:800;cursor:pointer}
+    .btn-danger{background:#fff1f3;color:#b42318}
+    .msg{font-weight:800;margin:10px 0;color:#027a48}
+    @media(max-width:1200px){.admin-form,.user-admin-grid{grid-template-columns:1fr 1fr}}
+    @media(max-width:700px){.admin-form,.user-admin-grid{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <img src="assets/logo-smart.png" alt="Smart Cosméticos" class="brand-logo" />
+        <div>
+          <p class="brand-kicker">Smart Cosméticos</p>
+          <h1 class="brand-title">Admin</h1>
+        </div>
+      </div>
+
+      <nav class="menu">
+        <a class="menu-link" href="index.html">Resumo</a>
+        <a class="menu-link" href="vendas.html">Vendas</a>
+        <a class="menu-link" href="custo.html">Compras</a>
+        <a class="menu-link" href="produtos.html">Produtos</a>
+        <a class="menu-link" href="processamento.html">Processamento</a>
+        <a class="menu-link active" href="usuarios.html">Usuários</a>
+      </nav>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div>
+          <p class="page-kicker">Administração</p>
+          <h2 class="page-title">Usuários cadastrados</h2>
+        </div>
+        <div class="topbar-actions">
+          <button class="btn btn-secondary" id="btnAtualizarUsuarios">Atualizar</button>
+        </div>
+      </header>
+
+      <section class="user-admin-grid">
+        <article class="user-card"><p>Total usuários</p><h3 id="kpiTotalUsuarios">0</h3></article>
+        <article class="user-card"><p>Admins</p><h3 id="kpiAdmins">0</h3></article>
+        <article class="user-card"><p>Sellers</p><h3 id="kpiSellers">0</h3></article>
+        <article class="user-card"><p>Ativos</p><h3 id="kpiAtivos">0</h3></article>
+      </section>
+
+      <section class="admin-panel">
+        <p class="panel-kicker">Cadastro rápido</p>
+        <h3>Novo usuário</h3>
+
+        <form id="formNovoUsuario" class="admin-form">
+          <div class="field"><label>Nome</label><input id="novoNome" required placeholder="Nome" /></div>
+          <div class="field"><label>Celular</label><input id="novoCelular" required placeholder="11999999999" /></div>
+          <div class="field"><label>E-mail recuperação</label><input id="novoEmail" type="email" placeholder="email@loja.com" /></div>
+          <div class="field"><label>Perfil</label><select id="novoRole"><option value="SELLER">SELLER</option><option value="ADMIN">ADMIN</option></select></div>
+          <button class="btn btn-primary" type="submit">Cadastrar</button>
+        </form>
+
+        <div id="msgUsuarios" class="msg"></div>
+
+        <div class="users-table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Nome</th><th>Celular</th><th>E-mail</th><th>Seller</th><th>Perfil</th><th>Status</th><th>Ações</th>
+              </tr>
+            </thead>
+            <tbody id="tbodyUsuarios"></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="scripts/auth-guard-admin.js?v=1"></script>
+  <script src="scripts/usuarios.js?v=1"></script>
+</body>
+</html>

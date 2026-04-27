@@ -1,0 +1,337 @@
+.radar-topbar {
+  margin-bottom: 14px;
+}
+
+.radar-subtitle {
+  margin: 6px 0 0;
+  color: var(--text-body);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.radar-filtros {
+  display: grid;
+  grid-template-columns: 1.6fr 1fr 1fr .8fr;
+  gap: 10px;
+  align-items: end;
+  margin-bottom: 14px;
+}
+
+.radar-filtros .filter-group {
+  min-width: 0;
+}
+
+.radar-filtros label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 10px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: #a9817d;
+  font-weight: 800;
+}
+
+.radar-filtros input,
+.radar-filtros select {
+  width: 100%;
+  min-height: 40px;
+  border: 1px solid var(--border-strong);
+  border-radius: 12px;
+  padding: 8px 11px;
+  background: #fff;
+  color: var(--text-dark);
+  outline: none;
+}
+
+.radar-filtros input:focus,
+.radar-filtros select:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 4px rgba(242,108,99,.10);
+}
+
+.radar-grid-kpis {
+  grid-template-columns: repeat(4, minmax(160px, 1fr));
+  margin-bottom: 16px;
+}
+
+.radar-grid-kpis .metric-card {
+  min-height: 92px;
+}
+
+.radar-panel {
+  margin-top: 0;
+}
+
+.radar-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 14px;
+  padding: 10px 12px;
+  border-radius: 18px;
+  border: 1px solid var(--border);
+  background: var(--primary-soft-2);
+  margin-bottom: 14px;
+  font-size: 11px;
+  color: var(--text-body);
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  display: inline-block;
+  border-radius: 50%;
+  margin-right: 6px;
+  vertical-align: -1px;
+}
+
+.dot-sale,
+.dot-ok {
+  background: var(--success-text);
+}
+
+.dot-no-sale {
+  background: white;
+  border: 2px solid #e15b5b;
+}
+
+.dot-alert {
+  background: #f4c400;
+}
+
+.dot-bad {
+  background: #e15b5b;
+}
+
+.radar-products-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(118px, 1fr));
+  gap: 10px;
+  align-items: start;
+}
+
+.product-card {
+  min-height: 118px;
+  border: 1px solid var(--border-strong);
+  background: #fff;
+  display: grid;
+  grid-template-rows: 50px 34px 32px;
+  cursor: pointer;
+  transition: .18s ease;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 8px 18px rgba(242,108,99,.05);
+}
+
+.product-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 14px 30px rgba(242,108,99,.16);
+  border-color: var(--primary);
+}
+
+.product-top {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  text-align: center;
+  padding: 7px 6px;
+  background: #fff8f7;
+  border-bottom: 1px solid var(--border);
+}
+
+.product-sku {
+  color: #006a9e;
+  font-weight: 900;
+  font-size: 11px;
+  line-height: 1.1;
+}
+
+.product-name {
+  color: var(--text-body);
+  font-weight: 700;
+  font-size: 9.5px;
+  line-height: 1.15;
+  margin-top: 4px;
+  max-height: 22px;
+  overflow: hidden;
+}
+
+.product-middle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  border-bottom: 1px solid var(--border);
+  font-size: 16px;
+  font-weight: 900;
+}
+
+.product-middle.verde {
+  background: var(--success-bg);
+  color: var(--success-text);
+}
+
+.product-middle.amarelo {
+  background: var(--warning-bg);
+  color: var(--warning-text);
+}
+
+.product-middle.vermelho {
+  background: #fff1f3;
+  color: #b42318;
+}
+
+.product-middle.cinza {
+  background: #f8fafc;
+  color: #94a3b8;
+}
+
+.product-bottom {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.market {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  font-size: 8.5px;
+  font-weight: 900;
+  border-right: 1px solid var(--border);
+  position: relative;
+  padding-bottom: 9px;
+}
+
+.market:last-child {
+  border-right: 0;
+}
+
+.market.vendeu {
+  background: #f4fbf7;
+  color: var(--success-text);
+}
+
+.market.nao-vendeu {
+  background: #fff;
+  color: #e15b5b;
+  text-decoration: underline wavy #e15b5b;
+}
+
+.market.vendeu::after {
+  content: '';
+  width: 6px;
+  height: 6px;
+  position: absolute;
+  bottom: 4px;
+  border-radius: 50%;
+  background: var(--success-text);
+}
+
+.market.nao-vendeu::after {
+  content: '';
+  width: 6px;
+  height: 6px;
+  position: absolute;
+  bottom: 4px;
+  border-radius: 50%;
+  background: white;
+  border: 1.5px solid #e15b5b;
+}
+
+.radar-empty {
+  margin: 0;
+  padding: 30px;
+  text-align: center;
+  color: var(--text-body);
+  background: var(--primary-soft-2);
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius-md);
+}
+
+.hidden {
+  display: none !important;
+}
+
+.radar-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(74,74,74,.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 22px;
+  z-index: 20;
+}
+
+.radar-modal-card {
+  width: min(560px, 100%);
+  background: white;
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  box-shadow: 0 24px 80px rgba(74,74,74,.25);
+  position: relative;
+  border: 1px solid var(--border);
+}
+
+.radar-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--primary-soft);
+  color: var(--primary);
+  font-size: 22px;
+  line-height: 1;
+}
+
+.radar-modal-card h2 {
+  margin: 0;
+  font-size: 28px;
+}
+
+.radar-modal-card h3 {
+  margin: 4px 0 16px;
+  color: var(--text-body);
+}
+
+.radar-modal-resumo {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+.radar-modal-resumo div {
+  padding: 12px;
+  border-radius: var(--radius-sm);
+  background: var(--primary-soft-2);
+  border: 1px solid var(--border);
+  color: var(--text-body);
+}
+
+.radar-modal-resumo strong {
+  color: var(--text-dark);
+}
+
+@media (max-width: 1300px) {
+  .radar-filtros {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .radar-grid-kpis {
+    grid-template-columns: repeat(2, minmax(160px, 1fr));
+  }
+}
+
+@media (max-width: 700px) {
+  .radar-filtros,
+  .radar-grid-kpis {
+    grid-template-columns: 1fr;
+  }
+
+  .radar-modal-resumo {
+    grid-template-columns: 1fr;
+  }
+}

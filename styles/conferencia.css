@@ -1,0 +1,199 @@
+.conferencia-grid {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(160px, 1fr));
+  gap: 14px;
+  margin-bottom: 22px;
+}
+
+.conferencia-grid .mini-card {
+  position: relative;
+  background: linear-gradient(180deg, #ffffff 0%, #fff6f5 100%);
+  border: 1px solid #f1d9d4;
+  border-radius: 18px;
+  padding: 14px 16px;
+  min-height: 92px;
+  box-shadow: 0 8px 22px rgba(242, 108, 99, 0.06);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  transition: all 0.2s ease;
+  text-decoration: none;
+}
+
+.conferencia-grid .mini-card::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 4px;
+  height: 100%;
+  background: linear-gradient(180deg, #f26c63, #ff9b8f);
+  border-radius: 18px 0 0 18px;
+  opacity: 0.9;
+}
+
+.conferencia-grid .mini-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 26px rgba(242, 108, 99, 0.10);
+}
+
+.conferencia-grid .mini-card p {
+  margin: 0 0 8px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #a88a85;
+  line-height: 1.3;
+}
+
+.conferencia-grid .mini-card h3 {
+  margin: 0;
+  font-size: 26px;
+  font-weight: 700;
+  color: #2f2b2a;
+  line-height: 1;
+}
+
+.panel-header-conferencia {
+  margin-bottom: 14px;
+}
+
+.filtros-conferencia {
+  display: grid;
+  grid-template-columns: 1.2fr 1.5fr 1fr auto;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.filtro-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.filtro-item label {
+  font-size: 11px;
+  text-transform: uppercase;
+  color: #a88a85;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+}
+
+.filtro-item input,
+.filtro-item select {
+  height: 42px;
+  padding: 0 12px;
+  border: 1px solid #f1d9d4;
+  border-radius: 12px;
+  background: #fff;
+  color: #2f2b2a;
+  font-size: 14px;
+  outline: none;
+}
+
+.filtro-item input:focus,
+.filtro-item select:focus {
+  border-color: #f26c63;
+  box-shadow: 0 0 0 3px rgba(242, 108, 99, 0.08);
+}
+
+.filtro-item-botao {
+  justify-content: flex-end;
+}
+
+.filtro-item-botao .btn {
+  min-width: 160px;
+  height: 42px;
+}
+
+.table-wrap {
+  max-height: 640px;
+  overflow: auto;
+  border: 1px solid #f1d9d4;
+  border-radius: 18px;
+}
+
+.table-wrap table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 1100px;
+}
+
+.table-wrap thead th {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  background: #fff6f5;
+  color: #8e6f6a;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 700;
+  border-bottom: 1px solid #f1d9d4;
+}
+
+.table-wrap th,
+.table-wrap td {
+  padding: 12px 14px;
+  text-align: left;
+  border-bottom: 1px solid #f4e3df;
+  vertical-align: top;
+}
+
+.table-wrap tbody tr:hover {
+  background: #fffaf9;
+}
+
+.tabs-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.tab-btn {
+  border: 1px solid #f1d9d4;
+  background: #fff;
+  color: #7f6661;
+  border-radius: 999px;
+  padding: 10px 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.tab-btn.active {
+  background: #f26c63;
+  color: #fff;
+  border-color: #f26c63;
+}
+
+.tab-btn:hover {
+  transform: translateY(-1px);
+}
+
+@media (max-width: 1600px) {
+  .conferencia-grid {
+    grid-template-columns: repeat(3, minmax(160px, 1fr));
+  }
+
+  .filtros-conferencia {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 900px) {
+  .conferencia-grid {
+    grid-template-columns: repeat(2, minmax(160px, 1fr));
+  }
+
+  .filtros-conferencia {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .conferencia-grid {
+    grid-template-columns: 1fr;
+  }
+}

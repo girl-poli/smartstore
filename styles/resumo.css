@@ -1,0 +1,134 @@
+.resumo-grid {
+  grid-template-columns: repeat(4, 1fr);
+  margin-bottom: 22px;
+}
+
+.resumo-canais-topo {
+  margin-bottom: 18px;
+}
+
+.market-list-topo {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.resumo-panels-v2 {
+  grid-template-columns: 2fr 1fr;
+}
+
+.panel-large {
+  min-height: 320px;
+}
+
+.chart-box {
+  position: relative;
+  height: 380px;
+}
+
+.auditoria-box {
+  margin-top: 12px;
+  padding: 10px 12px;
+  border: 1px dashed #f26c63;
+  border-radius: 10px;
+  font-size: 12px;
+  background: #fff6f5;
+  color: #7f6661;
+  max-width: 760px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
+
+.painel-mini-graficos {
+  display: flex;
+  flex-direction: column;
+}
+
+.mini-chart-wrap {
+  margin-bottom: 14px;
+}
+
+.mini-chart-title {
+  margin: 0 0 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #8e6f6a;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.mini-chart-box {
+  position: relative;
+  height: 140px;
+}
+
+.resumo-inteligente {
+  margin: 0;
+  line-height: 1.7;
+  color: var(--text-body);
+}
+
+.market-list-compact .market-item {
+  padding: 8px 10px;
+}
+
+.resumo-filtros {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.filters-analitico .filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.filters-analitico .filter-group label {
+  font-size: 11px;
+  text-transform: uppercase;
+  color: #a88a85;
+  font-weight: 600;
+}
+
+.filters-analitico input,
+.filters-analitico select {
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid #f1d9d4;
+  background: #fff;
+  font-size: 13px;
+}
+
+.filter-group-actions {
+  justify-content: flex-end;
+}
+
+@media (max-width: 1200px) {
+  .resumo-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .resumo-panels-v2 {
+    grid-template-columns: 1fr;
+  }
+
+  .market-list-topo {
+    grid-template-columns: 1fr;
+  }
+
+  .resumo-filtros {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 700px) {
+  .resumo-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .resumo-filtros {
+    grid-template-columns: 1fr;
+  }
+}

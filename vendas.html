@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Smart Cosméticos • Vendas</title>
+  <link rel="stylesheet" href="styles/global.css?v=11" />
+  <link rel="stylesheet" href="styles/vendas.css?v=11" />
+
+  <style>
+    .table-wrap {
+      max-height: 650px;
+      overflow: auto;
+      border-radius: 18px;
+    }
+
+    .table-wrap thead th {
+      position: sticky;
+      top: 0;
+      z-index: 5;
+      background: #f8eeeb;
+      box-shadow: 0 1px 0 rgba(0,0,0,0.06);
+    }
+  </style>
+
+
+  <style>
+    .calc-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border-radius: 999px;
+      padding: 5px 9px;
+      font-size: 11px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .calc-direto {
+      background: #f3f4f6;
+      color: #374151;
+    }
+
+    .calc-rateio {
+      background: #fff8e6;
+      color: #92400e;
+      border: 1px solid #fedf89;
+    }
+
+    .calc-info {
+      display: block;
+      font-size: 10px;
+      color: #6b7280;
+      margin-top: 4px;
+      line-height: 1.25;
+      max-width: 210px;
+    }
+
+    .money-strong {
+      font-weight: 800;
+      color: #1f2937;
+      white-space: nowrap;
+    }
+
+    .money-muted {
+      color: #6b7280;
+      white-space: nowrap;
+    }
+
+    .margem-negativa {
+      color: #b42318;
+      font-weight: 800;
+    }
+
+    .margem-ok {
+      color: #027a48;
+      font-weight: 800;
+    }
+
+    .produto-cell {
+      min-width: 220px;
+      max-width: 280px;
+      line-height: 1.25;
+    }
+
+    .sku-cell {
+      white-space: nowrap;
+    }
+
+    .pedido-cell {
+      white-space: nowrap;
+      font-weight: 700;
+    }
+  </style>
+
+
+  <style>
+    .margem-nao-calcula {
+      color: #6b7280;
+      font-weight: 700;
+      background: #f3f4f6;
+      border-radius: 999px;
+      padding: 4px 8px;
+      display: inline-block;
+      white-space: nowrap;
+    }
+  </style>
+
+
+  <style>
+    .margem-badge {
+      display: inline-flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 2px;
+      min-width: 82px;
+      border-radius: 14px;
+      padding: 7px 9px;
+      border: 1px solid transparent;
+      line-height: 1.05;
+    }
+
+    .margem-badge b {
+      font-size: 14px;
+      font-weight: 900;
+    }
+
+    .margem-badge small {
+      font-size: 10px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .margem-verde {
+      background: #ecfdf3;
+      border-color: #b7e4c7;
+      color: #027a48;
+    }
+
+    .margem-amarela {
+      background: #fff8e6;
+      border-color: #fedf89;
+      color: #b54708;
+    }
+
+    .margem-vermelha {
+      background: #fff1f3;
+      border-color: #fecdca;
+      color: #b42318;
+    }
+
+    .margem-nao-calcula {
+      color: #6b7280;
+      font-weight: 800;
+      background: #f3f4f6;
+      border-radius: 999px;
+      padding: 6px 9px;
+      display: inline-block;
+      white-space: nowrap;
+    }
+  </style>
+
+
+  <style>
+    .cards-vendas-compactos{grid-template-columns:repeat(6,minmax(130px,1fr))!important;gap:10px!important;margin-bottom:12px!important}
+    .cards-vendas-compactos .mini-card{min-height:82px!important;padding:14px 16px!important;border-radius:18px!important}
+    .cards-vendas-compactos .mini-card p{font-size:10px!important;letter-spacing:.08em!important;margin-bottom:6px!important}
+    .cards-vendas-compactos .mini-card h3{font-size:24px!important;line-height:1!important;margin:0!important}
+    .cards-vendas-compactos .mini-card small{font-size:10px!important;line-height:1.15!important}
+    .calculadora-margem-box{border:1px solid #f3cfc8;border-radius:22px;padding:16px;background:linear-gradient(180deg,#fffefe 0%,#fff8f6 100%);margin:8px 0 18px;box-shadow:0 14px 34px rgba(242,108,99,.08)}
+    .calculadora-header{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:12px}
+    .calculadora-header h3{margin:0;font-size:17px}.badge-soft{background:#fff1ed;color:#bf5b52;border-radius:999px;padding:6px 10px;font-size:11px;font-weight:800;white-space:nowrap}
+    .calculadora-grid-v2{display:grid;grid-template-columns:1.8fr 1fr repeat(6,minmax(105px,1fr)) auto!important;gap:10px;align-items:end}
+    .calc-regra{margin:10px 0 0;color:#6b7280;font-size:12px;line-height:1.35}.calc-regra strong{color:#374151}
+    .resultado-calculadora{margin-top:12px;display:grid;grid-template-columns:repeat(4,minmax(140px,1fr));gap:10px}.resultado-card{border:1px solid transparent;border-radius:16px;padding:12px;min-height:82px}
+    .resultado-card p{margin:0 0 6px;font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:#9b726c;font-weight:800}.resultado-card h3{margin:0;font-size:22px;color:#1f2937}.resultado-card small{display:block;margin-top:5px;font-size:11px;color:#6b7280;line-height:1.25}
+    .resultado-card.verde{background:#ecfdf3;border-color:#b7e4c7}.resultado-card.verde h3,.resultado-card.verde small{color:#027a48}.resultado-card.amarelo{background:#fff8e6;border-color:#fedf89}.resultado-card.amarelo h3,.resultado-card.amarelo small{color:#b54708}.resultado-card.vermelho{background:#fff1f3;border-color:#fecdca}.resultado-card.vermelho h3,.resultado-card.vermelho small{color:#b42318}.resultado-card.neutro{background:#f9fafb;border-color:#e5e7eb}
+    .btn-usar-calculadora{margin-top:6px;border:1px solid #f3cfc8;background:#fff;color:#bf5b52;border-radius:999px;padding:5px 9px;font-size:10px;font-weight:800;cursor:pointer;white-space:nowrap}.btn-usar-calculadora:hover{background:#fff1ed}
+    .calc-achou{border-color:#86efac!important;background:#f0fdf4!important}.calc-nao-achou{border-color:#fca5a5!important;background:#fff1f2!important}
+    @media(max-width:1500px){.calculadora-grid-v2{grid-template-columns:repeat(4,1fr)!important}.resultado-calculadora{grid-template-columns:repeat(2,minmax(140px,1fr))}}
+
+    .cards-cancelamento .mini-card {
+      background: #fff7f7;
+    }
+
+    .mini-card.alerta-cancelamento {
+      border-color: #f04438 !important;
+      background: #fff1f3 !important;
+      box-shadow: 0 12px 30px rgba(240, 68, 56, 0.12) !important;
+    }
+
+    .mini-card.alerta-cancelamento h3,
+    .mini-card.alerta-cancelamento small {
+      color: #b42318 !important;
+    }
+  </style>
+
+
+  <style>
+    .cards-vendas-compactos {
+      grid-template-columns: repeat(6, minmax(130px, 1fr)) !important;
+      gap: 10px !important;
+      align-items: stretch !important;
+    }
+
+    .cards-vendas-compactos .mini-card {
+      min-height: 82px !important;
+    }
+
+    @media(max-width:1500px) {
+      .cards-vendas-compactos {
+        grid-template-columns: repeat(3, minmax(130px, 1fr)) !important;
+      }
+    }
+  </style>
+
+
+  <style>
+    .cards-totais-financeiros {
+      grid-template-columns: repeat(7, minmax(110px, 1fr)) !important;
+      gap: 8px !important;
+      margin: 0 0 14px !important;
+    }
+    .cards-totais-financeiros .mini-card {
+      min-height: 68px !important;
+      padding: 10px 12px !important;
+      border-radius: 14px !important;
+    }
+    .cards-totais-financeiros .mini-card p {
+      font-size: 9px !important;
+      margin-bottom: 5px !important;
+      letter-spacing: .07em !important;
+    }
+    .cards-totais-financeiros .mini-card h3 {
+      font-size: 18px !important;
+      line-height: 1.05 !important;
+      margin: 0 !important;
+      white-space: nowrap !important;
+    }
+    @media(max-width:1500px) {
+      .cards-totais-financeiros {
+        grid-template-columns: repeat(4, minmax(110px, 1fr)) !important;
+      }
+    }
+  </style>
+
+</head>
+<script src="app.js?v=..."></script>
+<script src="scripts/auth-guard.js?v=menu-admin"></script>
+</body>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <img src="assets/logo-smart.png" alt="Smart Cosméticos" class="brand-logo" />
+        <div>
+          <p class="brand-kicker">Smart Cosméticos</p>
+          <h1 class="brand-title">Análise de Vendas</h1>
+        </div>
+      </div>
+
+<nav class="menu">
+  <a class="menu-link" href="index.html">Resumo</a>
+  <a class="menu-link active" href="vendas.html">Vendas</a>
+  <a class="menu-link" href="custo.html">Compras</a>
+  <a class="menu-link" href="produtos.html">Produtos</a>
+ <a class="menu-link" href="processamento.html">Processamento</a>
+
+</nav>
+
+      <div class="sidebar-box">
+        <p class="box-label">Regra de leitura</p>
+        <p class="box-text">A base considera 100% dos pedidos das plataformas, mesmo os não efetivados.</p>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div>
+          <p class="page-kicker">Analítico</p>
+          <h2 class="page-title">Vendas por pedido</h2>
+        </div>
+
+        <div class="topbar-actions">
+          <button class="btn btn-primary" id="btnAtualizar" type="button">Atualizar</button>
+          <button class="btn btn-secondary" id="btnExportar" type="button">Exportar</button>
+        </div>
+      </header>
+
+      <section class="filtros-box">
+        <div class="filtros-box-header">
+          <p class="panel-kicker">Filtros</p>
+          <h3>Refine a análise</h3>
+        </div>
+
+        <div class="filtros-grid">
+          <div class="filter-group">
+            <label for="filtroVisaoData">Visão de data</label>
+            <select id="filtroVisaoData" class="select-mkt">
+              <option value="pedido">Pedido</option>
+              <option value="financeira">Financeira</option>
+            </select>
+          </div>
+
+          <div class="filter-group">
+            <label for="filtroMarketplace">Marketplace</label>
+            <select id="filtroMarketplace" class="select-mkt">
+              <option value="todos">Todos</option>
+              <option value="ML">ML</option>
+              <option value="Shopee">Shopee</option>
+              <option value="TikTok">TikTok</option>
+            </select>
+          </div>
+
+          <div class="filter-group">
+            <label for="filtroPedido">Pedido</label>
+            <input type="text" id="filtroPedido" class="input-date" placeholder="Digite o número do pedido" />
+          </div>
+
+          <div class="filter-group">
+            <label for="filtroDataInicio">Data inicial</label>
+            <input type="date" id="filtroDataInicio" class="input-date" />
+          </div>
+
+          <div class="filter-group">
+            <label for="filtroDataFim">Data final</label>
+            <input type="date" id="filtroDataFim" class="input-date" />
+          </div>
+
+          <div class="filter-group filter-group-actions">
+            <label>&nbsp;</label>
+            <button class="btn btn-secondary" id="btnLimparDatas" type="button">Limpar datas</button>
+          </div>
+        </div>
+      </section>
+
+      <section id="painelVendas">
+        <section class="cards-grid produtos-grid produtos-grid-principal cards-vendas-compactos">
+          <article class="mini-card">
+            <p>Total de Pedidos (Vendas)</p>
+            <h3 id="cardTotalPedidos">0</h3>
+          </article>
+
+          <article class="mini-card ok">
+            <p>Total de pedidos válidos</p>
+            <h3 id="cardPedidosValidos">0</h3>
+            <small>Total - Cancelados</small>
+          </article>
+
+          <article class="mini-card ok">
+            <p>Pedidos Concluídos</p>
+            <h3 id="cardConcluido">0</h3>
+            <small>Concluído + Em avaliação + Outros</small>
+          </article>
+
+          <article class="mini-card medio">
+            <p>Pedidos em andamento</p>
+            <h3 id="cardEmAndamento">0</h3>
+            <small>Em transito + Envio manual</small>
+          </article>
+
+          <article class="mini-card medio">
+            <p>Pedidos para sair</p>
+            <h3 id="cardParaSair">0</h3>
+            <small>Precisa enviar + Esperando NF + Emitir NF</small>
+          </article>
+
+          <article class="mini-card ruim">
+            <p>Pedidos cancelados</p>
+            <h3 id="cardCancelado">0</h3>
+          </article>
+        </section>
+
+
+        <section class="calculadora-margem-box">
+          <div class="calculadora-header">
+            <div>
+              <p class="panel-kicker">Simulador</p>
+              <h3>Calculadora de margem</h3>
+            </div>
+            <span class="badge-soft">Meta mínima: 20%</span>
+          </div>
+
+          <div class="calculadora-grid calculadora-grid-v2">
+            <div class="filter-group">
+              <label for="calcProduto">SKU / Produto</label>
+              <input type="text" id="calcProduto" class="input-date" placeholder="Digite o SKU ou nome" list="listaSkuCatalogo" />
+              <datalist id="listaSkuCatalogo"></datalist>
+            </div>
+
+            <div class="filter-group">
+              <label for="calcMarketplace">Marketplace</label>
+              <select id="calcMarketplace" class="select-mkt">
+                <option value="manual">Manual</option>
+                <option value="ML">Mercado Livre</option>
+                <option value="Shopee">Shopee</option>
+                <option value="TikTok">TikTok</option>
+              </select>
+            </div>
+
+            <div class="filter-group">
+              <label for="calcCusto">Custo</label>
+              <input type="number" id="calcCusto" class="input-date" placeholder="0,00" step="0.01" min="0" />
+            </div>
+
+            <div class="filter-group">
+              <label for="calcPreco">Preço de venda</label>
+              <input type="number" id="calcPreco" class="input-date" placeholder="0,00" step="0.01" min="0" />
+            </div>
+
+            <div class="filter-group">
+              <label for="calcDesconto">Desconto / cupom</label>
+              <input type="number" id="calcDesconto" class="input-date" value="0" step="0.01" min="0" />
+            </div>
+
+            <div class="filter-group">
+              <label for="calcFrete">Frete vendedor</label>
+              <input type="number" id="calcFrete" class="input-date" value="0" step="0.01" min="0" />
+            </div>
+
+            <div class="filter-group">
+              <label for="calcTaxa">Taxa MKT %</label>
+              <input type="number" id="calcTaxa" class="input-date" value="25" step="0.1" min="0" max="100" />
+            </div>
+
+            <div class="filter-group">
+              <label for="calcRepasse">Repasse manual</label>
+              <input type="number" id="calcRepasse" class="input-date" placeholder="opcional" step="0.01" min="0" />
+            </div>
+
+            <div class="filter-group filter-group-actions">
+              <label>&nbsp;</label>
+              <button class="btn btn-primary" id="btnCalcularMargem" type="button">Calcular</button>
+            </div>
+          </div>
+
+          <p class="calc-regra">
+            Regra: se o repasse manual estiver vazio, calcula <strong>preço - desconto - frete - taxa</strong>.
+            Margem = <strong>(repasse - custo) / preço</strong>.
+          </p>
+
+          <div class="resultado-calculadora" id="resultadoCalculadoraMargem">
+            <article class="resultado-card neutro">
+              <p>Margem simulada</p>
+              <h3>Preencha os campos</h3>
+              <small>Digite um SKU para buscar o custo automaticamente.</small>
+            </article>
+          </div>
+        </section>
+
+        <section class="cards-grid produtos-grid produtos-grid-principal cards-vendas-compactos cards-totais-financeiros">
+          <article class="mini-card ok">
+            <p>Total valor item válido</p>
+            <h3 id="cardTotalValorItem">R$ 0</h3>
+            <small>Sem cancelados</small>
+          </article>
+
+          <article class="mini-card ok">
+            <p>Total custo válido</p>
+            <h3 id="cardTotalCusto">R$ 0</h3>
+            <small>Sem cancelados</small>
+          </article>
+
+          <article class="mini-card ok">
+            <p>Total comissão válida</p>
+            <h3 id="cardTotalComissao">R$ 0</h3>
+            <small>Sem cancelados</small>
+          </article>
+
+          <article class="mini-card ok">
+            <p>Total frete válido</p>
+            <h3 id="cardTotalFrete">R$ 0</h3>
+            <small>Sem cancelados</small>
+          </article>
+
+          <article class="mini-card ok">
+            <p>Total repasse válido</p>
+            <h3 id="cardTotalRepasse">R$ 0</h3>
+            <small>Sem cancelados</small>
+          </article>
+
+          <article class="mini-card ok">
+            <p>Margem válida</p>
+            <h3 id="cardMargemGeral">0,0%</h3>
+            <small>Repasse - custo / valor</small>
+          </article>
+        </section>
+
+        <section class="cards-grid produtos-grid produtos-grid-principal cards-vendas-compactos cards-totais-financeiros cards-cancelamento">
+          <article class="mini-card ruim">
+            <p>Valor cancelado</p>
+            <h3 id="cardCanceladoValor">R$ 0</h3>
+            <small>Somente cancelados</small>
+          </article>
+
+          <article class="mini-card ruim">
+            <p>Custo cancelado</p>
+            <h3 id="cardCanceladoCusto">R$ 0</h3>
+            <small>Somente cancelados</small>
+          </article>
+
+          <article class="mini-card ruim">
+            <p>Comissão cancelada</p>
+            <h3 id="cardCanceladoComissao">R$ 0</h3>
+            <small>Somente cancelados</small>
+          </article>
+
+          <article class="mini-card ruim">
+            <p>Frete cancelado</p>
+            <h3 id="cardCanceladoFrete">R$ 0</h3>
+            <small>Somente cancelados</small>
+          </article>
+
+          <article class="mini-card ruim">
+            <p>Repasse cancelado</p>
+            <h3 id="cardCanceladoRepasse">R$ 0</h3>
+            <small>Somente cancelados</small>
+          </article>
+
+          <article class="mini-card ruim">
+            <p>% cancelamento</p>
+            <h3 id="cardPercentualCancelamento">0,0%</h3>
+            <small id="cardPercentualCancelamentoInfo">OK: abaixo de 10,0%</small>
+          </article>
+        </section>
+
+        <section class="tabs-bar tabs-bar-pos-kpi">
+          <div class="tabs-right">
+            <button class="tab-btn active" data-tab="vendas" type="button">Vendas</button>
+            <button class="tab-btn" data-tab="status" type="button">Mapa de status</button>
+          </div>
+        </section>
+
+        <section class="filters-bar" id="statusFilters"></section>
+
+        <section class="filters-bar" id="conciliacaoFilters"></section>
+
+        <section class="table-panel">
+          <div class="panel-header">
+            <div>
+              <p class="panel-kicker">Tabela</p>
+              <h3>Detalhamento das vendas</h3>
+            </div>
+          </div>
+
+          <div class="table-wrap">
+            <table>
+              
+<thead>
+  <tr>
+    <th>Marketplace</th>
+    <th>Data</th>
+    <th>Pedido</th>
+    <th>SKU</th>
+    <th>Produto</th>
+
+    <th>Valor item</th>
+    <th>Custo final</th>
+    <th>Comissão</th>
+    <th>Frete</th>
+    <th>Repasse item</th>
+    <th>Margem item</th>
+
+    <th>Tipo de cálculo</th>
+    <th>% no pedido</th>
+    <th>Total pedido</th>
+    <th>Pedido item</th>
+
+    <th>Custo compras</th>
+    <th>Custo catálogo</th>
+    <th>Origem custo</th>
+
+    <th>Status original</th>
+    <th>Status harmonizado</th>
+    <th>Conc. compras?</th>
+    <th>Conc. catálogo?</th>
+  </tr>
+</thead>
+
+              <tbody id="tbodyVendas"></tbody>
+            </table>
+          </div>
+        </section>
+      </section>
+
+      <section id="painelStatus" style="display:none;">
+        <section class="tabs-bar tabs-bar-pos-kpi">
+          <div class="tabs-right">
+            <button class="tab-btn" data-tab="vendas" type="button">Vendas</button>
+            <button class="tab-btn active" data-tab="status" type="button">Mapa de status</button>
+          </div>
+        </section>
+
+        <section class="table-panel">
+          <div class="panel-header">
+            <div>
+              <p class="panel-kicker">Mapeamento</p>
+              <h3>Status original vs harmonizado</h3>
+            </div>
+          </div>
+
+          <div class="table-wrap">
+            <table>
+              
+
+<thead>
+  <tr>
+    <th>Marketplace</th>
+    <th>Status original</th>
+    <th>Status harmonizado</th>
+    <th>Quantidade</th>
+  </tr>
+</thead>
+
+
+              <tbody id="tbodyStatus"></tbody>
+            </table>
+          </div>
+        </section>
+      </section>
+    </main>
+  </div>
+
+  <script src="vendas.js?v=11"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', async () => {
+  const sidebar = document.querySelector('.sidebar');
+  if (!sidebar) return;
+
+  let user = null;
+
+  try {
+    const resp = await fetch('/api/auth/me');
+    const data = await resp.json();
+    if (data && data.ok) user = data.user;
+  } catch {}
+
+  const box = document.createElement('div');
+  box.style.marginTop = 'auto';
+  box.style.padding = '14px';
+  box.style.borderRadius = '20px';
+  box.style.border = '1px solid #f1d7d3';
+  box.style.background = '#fff8f7';
+
+  box.innerHTML = `
+    <p style="font-size:10px;letter-spacing:.15em;color:#c08a84;text-transform:uppercase;margin:0">Usuário</p>
+    <strong style="display:block;margin-top:6px">${user?.nome || 'Smart Seller'}</strong>
+    <span style="display:block;margin:3px 0 12px;font-size:12px;color:#8f8f8f">
+      ${user?.seller || 'Smart Cosméticos'}
+    </span>
+    <button id="btnLogoutPremium" style="
+      width:100%;
+      border:none;
+      border-radius:999px;
+      padding:11px;
+      background:#f26c63;
+      color:white;
+      font-weight:700;
+      cursor:pointer;">
+      Sair do sistema
+    </button>
+  `;
+
+  sidebar.appendChild(box);
+
+  document.getElementById('btnLogoutPremium')?.addEventListener('click', async () => {
+    try {
+      await fetch('/api/auth/logout', { method: 'POST' });
+    } catch {}
+
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+
+    window.location.href = '/login.html';
+  });
+});
+</script>
+
+</body>
+</html>

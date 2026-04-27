@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Estoque TikTok x Dropstok</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles/global.css">
+  <style>
+    :root{--primary:#f26c63;--primary-soft:#fff1ef;--primary-soft-2:#fff8f7;--text-dark:#4a4a4a;--text-body:#6f6f6f;--border:#f2e1de;--border-strong:#f1d7d3;--shadow:0 8px 25px rgba(242,108,99,.06)}
+    *{box-sizing:border-box} body{margin:0;font-family:Inter,Arial,sans-serif;background:#fcfafa;color:var(--text-dark)}
+    .app-shell{min-height:100vh;display:grid;grid-template-columns:270px 1fr}.sidebar{background:#fffdfd;border-right:1px solid var(--border);padding:24px 20px;min-height:100vh}
+    .brand{display:flex;align-items:center;gap:12px;margin-bottom:24px}.brand-logo{width:58px;height:58px;border-radius:18px;background:var(--primary-soft);padding:6px}.brand-kicker{font-size:10px;letter-spacing:.2em;color:#c08a84;text-transform:uppercase;margin:0}.brand-title{font-size:18px;margin:4px 0 0}
+    .menu{display:grid;gap:8px;margin-bottom:20px}.menu-link{padding:12px 14px;border:1px solid var(--border-strong);border-radius:999px;color:var(--text-body);font-size:13px;background:white;text-decoration:none}.menu-link.active,.menu-link:hover{background:var(--primary);color:white}
+    .sidebar-box{padding:14px;border-radius:20px;border:1px solid var(--border);margin-bottom:12px}.box-label{font-size:10px;letter-spacing:.15em;color:#c08a84;text-transform:uppercase;margin:0}.box-text{margin-top:6px;font-size:13px;color:var(--text-body);line-height:1.5}
+    .main{padding:24px;min-width:0}.topbar{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:18px}.topbar-actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.page-kicker{font-size:10px;letter-spacing:.2em;color:#c08a84;text-transform:uppercase;margin:0}.page-title{font-size:26px;margin:6px 0 0}
+    .btn{border-radius:999px;padding:10px 18px;font-size:13px;transition:.2s ease;cursor:pointer}.btn-primary{background:var(--primary);color:white;border:none}.btn-secondary{background:white;border:1px solid var(--border-strong);color:var(--text-body)}
+    .cards-grid{display:grid;gap:14px;margin-bottom:18px}.estoque-kpis{grid-template-columns:repeat(5,minmax(170px,1fr))}
+    .mini-card{position:relative;background:linear-gradient(180deg,#fff 0%,#fff6f5 100%);border:1px solid #f1d9d4;border-radius:20px;padding:18px 20px;min-height:108px;box-shadow:0 8px 22px rgba(242,108,99,.06);display:flex;flex-direction:column;justify-content:center}
+    .mini-card:before{content:"";position:absolute;left:0;top:0;width:4px;height:100%;background:linear-gradient(180deg,#f26c63,#ff9b8f);border-radius:20px 0 0 20px}.mini-card p{margin:0 0 8px;font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#a88a85}.mini-card h3{margin:0;font-size:34px;font-weight:800;color:#2f2b2a;line-height:1}.mini-card span{margin-top:8px;font-size:12px;color:#8e6f6a}.mini-card.ok{background:#eaf8f0}.mini-card.warn{background:#fff3e3}.mini-card.danger{background:#fff1f3}
+    .panel{padding:16px;border-radius:26px;border:1px solid var(--border);background:white;box-shadow:var(--shadow);margin-bottom:18px}.panel-header{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:14px}.panel-kicker{font-size:10px;letter-spacing:.2em;color:#c08a84;text-transform:uppercase;margin:0 0 4px}.panel-header h3{margin:0}
+    .risco-grid{display:grid;grid-template-columns:repeat(4,minmax(160px,1fr));gap:10px}.risco-card{border:1px solid var(--border);border-radius:18px;padding:12px;background:#fff}.risco-card strong{display:block;font-size:28px;color:#102033}.risco-card small{font-weight:900;text-transform:uppercase;letter-spacing:.1em;color:#a56d67}.risco-card span{display:block;margin-top:6px;font-size:12px;color:#667085}.risco-card.danger{background:#fff1f3;border-color:#fecdca}.risco-card.warn{background:#fff8e6;border-color:#fedf89}.risco-card.ok{background:#ecfdf3;border-color:#b7e4c7}
+    .filters-grid{display:grid;grid-template-columns:1fr 220px 220px auto;gap:10px;align-items:end;margin-bottom:14px}.filter-group{display:flex;flex-direction:column;gap:6px}.filter-group label{font-size:11px;text-transform:uppercase;color:#a88a85;font-weight:700;letter-spacing:.06em}.filter-group input,.filter-group select{height:42px;border:1px solid #ecd6d1;border-radius:12px;padding:0 12px;background:#fff;color:#4a4a4a;outline:none}.filter-group input:focus,.filter-group select:focus{border-color:#f26c63}
+    .table-info{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-size:13px;color:#8e6f6a;font-weight:700;margin:8px 0 10px}.table-wrap{max-height:620px;overflow:auto;border:1px solid #f3e7e4;border-radius:18px;background:#fff}table{width:100%;border-collapse:collapse;min-width:1250px}thead th{position:sticky;top:0;z-index:3;background:#fff3f1;color:#8a5049;font-size:11px;text-transform:uppercase;letter-spacing:.06em}th,td{padding:12px 10px;font-size:13px;border-bottom:1px solid #f3e7e4;text-align:left;vertical-align:top}tbody tr:hover{background:#fffaf9}
+    .sku-ok{font-weight:900;color:#102033}.sku-missing{font-weight:900;color:#b42318}.sku-drop{font-weight:900;color:#027a48}.muted{color:#8e6f6a}.badge{display:inline-flex;border-radius:999px;padding:6px 9px;font-size:11px;font-weight:900;white-space:nowrap}.badge.ok{background:#d1fadf;color:#027a48}.badge.warn{background:#fff3cd;color:#b54708}.badge.danger{background:#fee4e2;color:#b42318}.badge.neutral{background:#eef2f6;color:#344054}
+    @media(max-width:1300px){.app-shell{grid-template-columns:1fr}.sidebar{min-height:auto;border-right:none;border-bottom:1px solid var(--border)}.estoque-kpis{grid-template-columns:repeat(2,1fr)}.filters-grid{grid-template-columns:1fr 1fr}.risco-grid{grid-template-columns:repeat(2,1fr)}}@media(max-width:700px){.estoque-kpis,.filters-grid,.risco-grid{grid-template-columns:1fr}.topbar{flex-direction:column}}
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <img class="brand-logo" src="assets/logo-smart.png" alt="Smart Cosméticos" onerror="this.style.display='none'">
+        <div>
+          <p class="brand-kicker">Smart Cosméticos</p>
+          <h1 class="brand-title">Análise de Vendas</h1>
+        </div>
+      </div>
+      <nav class="menu">
+        <a class="menu-link" href="index.html">Resumo</a>
+        <a class="menu-link" href="vendas.html">Vendas</a>
+        <a class="menu-link" href="custo.html">Compras</a>
+        <a class="menu-link" href="produtos.html">Produtos</a>
+        <a class="menu-link" href="conferencia.html">Analise de Publicação</a>
+                 <a class="menu-link" href="radar.html">Radar de Produtos</a>
+
+        <a class="menu-link" href="repricing.html">Preço de Catalogo ML</a>
+                    <a class="menu-link active" href="estoque-tiktok.html">Estoque Tiktok</a>
+      </nav>
+      <div class="sidebar-box">
+        <p class="box-label">Base TikTok</p>
+        <div class="box-text">A tela preserva 100% da base TikTok. Quando o SKU TikTok vier vazio, ela mostra o SKU encontrado no Dropstok em coluna separada.</div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div>
+          <p class="page-kicker">Estoque e auditoria</p>
+          <h2 class="page-title">Estoque TikTok x Dropstok</h2>
+        </div>
+        <div class="topbar-actions">
+          <button class="btn btn-primary" id="btnReload">Atualizar dados</button>
+          <button class="btn btn-secondary" id="btnCsv">Exportar CSV</button>
+        </div>
+      </header>
+
+      <section class="cards-grid estoque-kpis">
+        <div class="mini-card"><p>Linhas TikTok</p><h3 id="kpiTotal">0</h3><span>Base 100% preservada</span></div>
+        <div class="mini-card"><p>Com SKU TikTok</p><h3 id="kpiComSku">0</h3><span>SKU preenchido na coluna L</span></div>
+        <div class="mini-card"><p>SKU Dropstok</p><h3 id="kpiSkuDrop">0</h3><span>SKU encontrado no Dropstok</span></div>
+        <div class="mini-card danger"><p>Críticos</p><h3 id="kpiCriticos">0</h3><span>reduzir ou zerar</span></div>
+        <div class="mini-card warn"><p>TikTok acima seguro</p><h3 id="kpiAcima">0</h3><span>reduzir exposição</span></div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-header">
+          <div>
+            <p class="panel-kicker">Risco operacional</p>
+            <h3>Visão executiva do estoque TikTok</h3>
+          </div>
+          <div class="muted" id="txtResumo">Carregando...</div>
+        </div>
+        <div class="risco-grid">
+          <div class="risco-card danger"><small>Crítico</small><strong id="rCritico">0</strong><span>reduzir/zerar urgente</span></div>
+          <div class="risco-card warn"><small>TikTok acima do seguro</small><strong id="rAcima">0</strong><span>reduzir exposição</span></div>
+          <div class="risco-card ok"><small>OK</small><strong id="rOk">0</strong><span>manter</span></div>
+          <div class="risco-card"><small>Sem SKU TikTok</small><strong id="rSemSku">0</strong><span>auditar coluna L</span></div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-header">
+          <div>
+            <p class="panel-kicker">Filtros e organização</p>
+            <h3>Conferência da base TikTok</h3>
+          </div>
+        </div>
+        <div class="filters-grid">
+          <div class="filter-group">
+            <label>Busca</label>
+            <input id="fBusca" placeholder="Buscar SKU TikTok, SKU Dropstok, nome ou ação">
+          </div>
+          <div class="filter-group">
+            <label>Risco</label>
+            <select id="fRisco">
+              <option value="">Todos os riscos</option>
+              <option value="CRÍTICO">Crítico</option>
+              <option value="TIKTOK ACIMA DO SEGURO">TikTok acima do seguro</option>
+              <option value="OK">OK</option>
+              <option value="SKU NÃO ENCONTRADO">SKU não encontrado</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label>Organizar</label>
+            <select id="fSort">
+              <option value="risco">Maior risco primeiro</option>
+              <option value="linha">Linha TikTok</option>
+              <option value="nome">Nome A→Z</option>
+              <option value="estoque_tiktok">Maior estoque TikTok</option>
+              <option value="dropstok">Menor estoque Dropstok</option>
+            </select>
+          </div>
+          <button class="btn btn-secondary" id="btnLimpar">Limpar filtros</button>
+        </div>
+
+        <div class="table-info">
+          <span id="txtQtd">Mostrando 0 de 0 linhas TikTok.</span>
+          <span>Observação: “SKY” foi corrigido para “SKU Dropstok”.</span>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Linha</th>
+                <th>SKU TikTok<br><span class="muted">coluna L</span></th>
+                <th>SKU Dropstok<br><span class="muted">antigo SKY</span></th>
+                <th>Nome TikTok</th>
+                <th>Est. TikTok<br><span class="muted">coluna K</span></th>
+                <th>Est. Dropstok</th>
+                <th>Sugerido</th>
+                <th>Risco</th>
+                <th>Ação</th>
+              </tr>
+            </thead>
+            <tbody id="tbody"></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="estoque-tiktok.js"></script>
+  <script src="scripts/auth-guard.js?v=1"></script>
+
+</body>
+</html>

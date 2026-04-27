@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Smart Cosméticos • Mapa de Status</title>
+
+  <link rel="stylesheet" href="styles/global.css?v=10" />
+  <link rel="stylesheet" href="styles/vendas.css?v=10" />
+
+  <style>
+    .table-wrap {
+      max-height: 620px;
+      overflow: auto;
+      border-radius: 18px;
+    }
+
+    .table-wrap thead th {
+      position: sticky;
+      top: 0;
+      z-index: 5;
+      background: #f8eeeb;
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <img src="assets/logo-smart.png" alt="Smart Cosméticos" class="brand-logo" />
+        <div>
+          <p class="brand-kicker">Smart Cosméticos</p>
+          <h1 class="brand-title">Mapa de Status</h1>
+        </div>
+      </div>
+
+      <nav class="menu">
+        <a class="menu-link" href="index.html">Resumo</a>
+        <a class="menu-link" href="vendas.html">Vendas</a>
+        <a class="menu-link" href="custo.html">Custo</a>
+        <a class="menu-link" href="produtos.html">Produtos</a>
+        <a class="menu-link" href="conferencia.html">Conferência</a>
+        <a class="menu-link active" href="status.html">Mapa de status</a>
+      </nav>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div>
+          <p class="page-kicker">Auditoria</p>
+          <h2 class="page-title">Mapa de status</h2>
+        </div>
+      </header>
+
+      <section class="table-panel">
+        <div class="panel-header">
+          <div>
+            <p class="panel-kicker">Tabela</p>
+            <h3>Mapa de status do custo</h3>
+          </div>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Status original</th>
+                <th>Status do custo</th>
+                <th>Regra aplicada</th>
+                <th>Quantidade</th>
+              </tr>
+            </thead>
+            <tbody id="tbodyStatus"></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="data/status.js?v=10"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', async () => {
+  const sidebar = document.querySelector('.sidebar');
+  if (!sidebar) return;
+
+  let user = null;
+
+  try {
+    const resp = await fetch('/api/auth/me');
+    const data = await resp.json();
+    if (data && data.ok) user = data.user;
+  } catch {}
+
+  const box = document.createElement('div');
+  box.style.marginTop = 'auto';
+  box.style.padding = '14px';
+  box.style.borderRadius = '20px';
+  box.style.border = '1px solid #f1d7d3';
+  box.style.background = '#fff8f7';
+
+  box.innerHTML = `
+    <p style="font-size:10px;letter-spacing:.15em;color:#c08a84;text-transform:uppercase;margin:0">Usuário</p>
+    <strong style="display:block;margin-top:6px">${user?.nome || 'Smart Seller'}</strong>
+    <span style="display:block;margin:3px 0 12px;font-size:12px;color:#8f8f8f">
+      ${user?.seller || 'Smart Cosméticos'}
+    </span>
+    <button id="btnLogoutPremium" style="
+      width:100%;
+      border:none;
+      border-radius:999px;
+      padding:11px;
+      background:#f26c63;
+      color:white;
+      font-weight:700;
+      cursor:pointer;">
+      Sair do sistema
+    </button>
+  `;
+
+  sidebar.appendChild(box);
+
+  document.getElementById('btnLogoutPremium')?.addEventListener('click', async () => {
+    try {
+      await fetch('/api/auth/logout', { method: 'POST' });
+    } catch {}
+
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+
+    window.location.href = '/login.html';
+  });
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Smart Cosméticos • Processamento</title>
+
+  <link rel="stylesheet" href="styles/global.css?v=1004" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+  <style>
+    .processamento-grid {
+      display: grid;
+      grid-template-columns: repeat(6, minmax(130px, 1fr));
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .proc-card {
+      border: 1px solid var(--border);
+      background: white;
+      border-radius: 18px;
+      padding: 13px 14px;
+      box-shadow: var(--shadow);
+      min-height: 84px;
+    }
+
+    .proc-card p {
+      margin: 0;
+      font-size: 9px;
+      letter-spacing: .11em;
+      text-transform: uppercase;
+      color: #a9817d;
+      font-weight: 800;
+    }
+
+    .proc-card h3 {
+      margin: 8px 0 0;
+      font-size: 22px;
+      color: #1f2937;
+      line-height: 1.05;
+    }
+
+    .proc-card small {
+      display: block;
+      margin-top: 5px;
+      color: #6b7280;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .pipeline-grid {
+      display: grid;
+      grid-template-columns: repeat(6, minmax(150px, 1fr));
+      gap: 10px;
+    }
+
+    .pipeline-card {
+      border: 1px solid rgba(242,108,99,.22);
+      border-radius: 18px;
+      background: rgba(255,255,255,.92);
+      padding: 12px;
+      box-shadow: var(--shadow);
+      min-height: 245px;
+      font-size: 12px;
+    }
+
+    .pipeline-card.ok { background: #ecfdf3; border-color: #b7e4c7; }
+    .pipeline-card.pendente { background: #fff8e6; border-color: #fedf89; }
+    .pipeline-card.erro { background: #fff1f3; border-color: #fecdca; }
+    .pipeline-card.atencao { background: #fff8e6; border-color: #fedf89; }
+
+    .pipeline-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 8px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid rgba(242,108,99,.16);
+    }
+
+    .pipeline-head h4 { margin: 0; font-size: 13px; color: #102033; }
+
+    .pipeline-badge {
+      border-radius: 999px;
+      padding: 4px 7px;
+      font-size: 9px;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+
+    .pipeline-badge.ok { background: #d1fadf; color: #027a48; }
+    .pipeline-badge.pendente { background: #fff3cd; color: #b54708; }
+    .pipeline-badge.erro { background: #fee4e2; color: #b42318; }
+    .pipeline-badge.atencao { background: #fff3cd; color: #b54708; }
+
+    .pipeline-info { display: grid; gap: 5px; margin-top: 10px; }
+
+    .pipeline-info div {
+      background: rgba(255,255,255,.7);
+      border-radius: 10px;
+      padding: 7px 8px;
+      min-height: 34px;
+    }
+
+    .pipeline-info small {
+      display: block;
+      color: #a9817d;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      font-weight: 800;
+      font-size: 8px;
+      margin-bottom: 3px;
+    }
+
+    .pipeline-info strong {
+      display: block;
+      color: #102033;
+      font-size: 11px;
+      word-break: break-word;
+    }
+
+    .pipeline-actions {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-top: 10px;
+    }
+
+    .pipeline-actions .btn {
+      padding: 7px 10px;
+      font-size: 11px;
+      min-width: auto;
+    }
+
+    .core-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(260px, 1fr));
+      gap: 10px;
+    }
+
+    .log-box {
+      min-height: 180px;
+      max-height: 360px;
+      overflow: auto;
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 14px;
+      background: #1f2937;
+      white-space: pre-wrap;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 12px;
+      color: #f9fafb;
+    }
+
+    .panel + .panel { margin-top: 16px; }
+    .topbar-actions .btn { min-width: 130px; }
+
+    @media (max-width: 1700px) {
+      .pipeline-grid { grid-template-columns: repeat(3, minmax(210px, 1fr)); }
+      .processamento-grid { grid-template-columns: repeat(3, minmax(140px, 1fr)); }
+    }
+
+
+    /* PIPELINE ANALÍTICO - VISÃO DE NEGÓCIO */
+    .pipeline-analytics-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(260px, 1fr));
+      gap: 12px;
+    }
+
+    .analytics-card {
+      border: 1px solid rgba(242,108,99,.22);
+      border-radius: 18px;
+      background: rgba(255,255,255,.92);
+      padding: 14px;
+      box-shadow: var(--shadow);
+    }
+
+    .analytics-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid rgba(242,108,99,.16);
+      margin-bottom: 10px;
+    }
+
+    .analytics-head h4 {
+      margin: 0;
+      font-size: 15px;
+      color: #102033;
+    }
+
+    .analytics-steps {
+      display: grid;
+      gap: 8px;
+    }
+
+    .analytics-step {
+      display: grid;
+      grid-template-columns: 28px 1fr auto;
+      gap: 8px;
+      align-items: center;
+      border-radius: 14px;
+      background: #fff8f6;
+      padding: 8px;
+      border: 1px solid rgba(242,108,99,.14);
+    }
+
+    .analytics-dot {
+      width: 28px;
+      height: 28px;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 900;
+      background: #fff;
+      color: #a56d67;
+      border: 1px solid var(--border-strong);
+    }
+
+    .analytics-step small {
+      display: block;
+      font-size: 9px;
+      color: #a9817d;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      font-weight: 800;
+    }
+
+    .analytics-step strong {
+      display: block;
+      font-size: 13px;
+      color: #102033;
+      margin-top: 2px;
+    }
+
+    .analytics-value {
+      font-size: 15px;
+      font-weight: 900;
+      color: #102033;
+      white-space: nowrap;
+    }
+
+    @media (max-width: 1300px) {
+      .pipeline-analytics-grid { grid-template-columns: 1fr; }
+    }
+
+
+    @media (max-width: 1100px) {
+      .pipeline-grid, .core-grid { grid-template-columns: 1fr; }
+      .processamento-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <img src="assets/logo-smart.png" alt="Smart Cosméticos" class="brand-logo" />
+        <div>
+          <p class="brand-kicker">Smart Cosméticos</p>
+          <h1 class="brand-title">Processamento</h1>
+        </div>
+      </div>
+
+      <nav class="menu">
+        <a class="menu-link" href="index.html">Resumo</a>
+        <a class="menu-link" href="vendas.html">Vendas</a>
+        <a class="menu-link" href="custo.html">Compras</a>
+        <a class="menu-link" href="produtos.html">Produtos</a>
+        <a class="menu-link active" href="processamento.html">Processamento</a>
+      </nav>
+
+      <div class="sidebar-box">
+        <p class="box-label">Objetivo</p>
+        <p class="box-text">Controlar arquivos importados, registros, carga incremental e logs por pipeline.</p>
+      </div>
+
+      <div class="sidebar-box">
+        <p class="box-label">Pasta padrão</p>
+        <p class="box-value">/data_external</p>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div>
+          <p class="page-kicker">Dados</p>
+          <h2 class="page-title">Pipeline de processamento</h2>
+        </div>
+        <div class="topbar-actions">
+          <button class="btn btn-secondary" id="btnAtualizarStatus" type="button">Atualizar status</button>
+          <button class="btn btn-primary" id="btnProcessarTodos" type="button">Processar todos</button>
+        </div>
+      </header>
+
+      <section class="processamento-grid">
+        <article class="proc-card"><p>Arquivos rastreados</p><h3 id="kpiArquivos">0</h3><small>Total monitorado</small></article>
+        <article class="proc-card"><p>Arquivos válidos</p><h3 id="kpiValidos">0</h3><small>Encontrados</small></article>
+        <article class="proc-card"><p>Pendentes/erro</p><h3 id="kpiPendentes">0</h3><small>Revisar</small></article>
+        <article class="proc-card"><p>Registros MKT</p><h3 id="kpiRegistrosMkt">0</h3><small>Planilhas de venda/catálogo</small></article>
+        <article class="proc-card"><p>Registros core</p><h3 id="kpiRegistrosCore">0</h3><small>JSON Dropstok</small></article>
+        <article class="proc-card"><p>Última execução</p><h3 id="kpiUltimaExecucao">-</h3><small>Pipeline</small></article>
+      </section>
+
+      <section class="panel">
+        <div class="panel-header">
+          <div><p class="panel-kicker">Marketplaces</p><h3>Pipeline por marketplace</h3></div>
+          <span class="badge badge-soft" id="pipelineAtualizadoEm">Carregando...</span>
+        </div>
+        <div class="pipeline-grid" id="pipelineMarketplaces"></div>
+      </section>
+
+
+      <section class="panel">
+        <div class="panel-header">
+          <div><p class="panel-kicker">Fluxo inteligente</p><h3>Pipeline analítico por marketplace</h3></div>
+          <span class="badge badge-soft">Visão de negócio</span>
+        </div>
+        <div class="pipeline-analytics-grid" id="pipelineAnalitico"></div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-header">
+          <div><p class="panel-kicker">Core</p><h3>Arquivos base e consolidações</h3></div>
+          <span class="badge badge-soft">Status técnico</span>
+        </div>
+        <div class="core-grid" id="pipelineCore"></div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-header">
+          <div><p class="panel-kicker">Log</p><h3>Últimas execuções</h3></div>
+          <button class="btn btn-secondary" id="btnCopiarLog" type="button">Copiar log</button>
+        </div>
+        <div class="log-box" id="logProcessamento">Carregando...</div>
+      </section>
+    </main>
+  </div>
+
+  <script src="processamento.js?v=1005"></script>
+  <script src="scripts/auth-guard.js?v=1"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', async () => {
+  const sidebar = document.querySelector('.sidebar');
+  if (!sidebar) return;
+
+  let user = null;
+
+  try {
+    const resp = await fetch('/api/auth/me');
+    const data = await resp.json();
+    if (data && data.ok) user = data.user;
+  } catch {}
+
+  const box = document.createElement('div');
+  box.style.marginTop = 'auto';
+  box.style.padding = '14px';
+  box.style.borderRadius = '20px';
+  box.style.border = '1px solid #f1d7d3';
+  box.style.background = '#fff8f7';
+
+  box.innerHTML = `
+    <p style="font-size:10px;letter-spacing:.15em;color:#c08a84;text-transform:uppercase;margin:0">Usuário</p>
+    <strong style="display:block;margin-top:6px">${user?.nome || 'Smart Seller'}</strong>
+    <span style="display:block;margin:3px 0 12px;font-size:12px;color:#8f8f8f">
+      ${user?.seller || 'Smart Cosméticos'}
+    </span>
+    <button id="btnLogoutPremium" style="
+      width:100%;
+      border:none;
+      border-radius:999px;
+      padding:11px;
+      background:#f26c63;
+      color:white;
+      font-weight:700;
+      cursor:pointer;">
+      Sair do sistema
+    </button>
+  `;
+
+  sidebar.appendChild(box);
+
+  document.getElementById('btnLogoutPremium')?.addEventListener('click', async () => {
+    try {
+      await fetch('/api/auth/logout', { method: 'POST' });
+    } catch {}
+
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+
+    window.location.href = '/login.html';
+  });
+});
+</script>
+
+</body>
+</html>
