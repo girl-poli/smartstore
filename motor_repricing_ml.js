@@ -4,7 +4,7 @@ const path = require('path');
 /* =========================================================
    MOTOR DE REPRICING ML - FASE 2
    Entrada:
-     - progresso-repricing-ml.json OU data/repricing-ml.json
+     - data_external/repricing-ml-lista-completa.json
      - data/produtos.json opcional para custo
      - relatorio-dropstok-mapeamento.json opcional para custo
    Saída:
@@ -15,7 +15,7 @@ const path = require('path');
 const INPUT_REPRICING =
   process.env.INPUT_REPRICING ||
   process.env.REPRICING_INPUT ||
-  'progresso-repricing-ml.json';
+  path.join('data_external', 'repricing-ml-lista-completa.json');
 
 const PRODUTOS_JSON =
   process.env.PRODUTOS_JSON || 'data/produtos.json';
@@ -24,10 +24,10 @@ const DROPSTOK_JSON =
   process.env.DROPSTOK_JSON || 'relatorio-dropstok-mapeamento.json';
 
 const OUT_JSON =
-  process.env.OUT_JSON || 'data/repricing-ml-inteligencia.json';
+  process.env.OUT_JSON || path.join('data_external', 'repricing-ml-inteligencia.json');
 
 const OUT_CSV =
-  process.env.OUT_CSV || 'data/repricing-ml-inteligencia.csv';
+  process.env.OUT_CSV || path.join('data_external', 'repricing-ml-inteligencia.csv');
 
 const MARGEM_MINIMA =
   Number(process.env.MARGEM_MINIMA || 18) / 100;

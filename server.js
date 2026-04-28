@@ -458,14 +458,23 @@ app.get('/api/estoque-tiktok', (req, res) => {
 });
 
 const PIPELINES = [
+  // PRODUTOS / CATÁLOGOS
+  { id: 'dropstok_mapeamento', grupo: 'core', titulo: 'Dropstok Mapeamento', arquivo: 'relatorio-dropstok-mapeamento.json', tipo: 'Base Produto/Custo', script: 'gerar-produtos-json.js' },
   { id: 'catalogo_ml', grupo: 'marketplace', titulo: 'Catálogo ML', arquivo: 'catalogo-ml.xlsx', tipo: 'Produtos', script: 'gerar-produtos-json.js' },
   { id: 'catalogo_shopee', grupo: 'marketplace', titulo: 'Catálogo Shopee', arquivo: 'catalogo-shopee.xlsx', tipo: 'Produtos', script: 'gerar-produtos-json.js' },
   { id: 'catalogo_tiktok', grupo: 'marketplace', titulo: 'Catálogo TikTok', arquivo: 'catalogo-tiktok.xlsx', tipo: 'Produtos', script: 'gerar-produtos-json.js' },
+
+  // VENDAS
   { id: 'vendas_ml', grupo: 'marketplace', titulo: 'Vendas ML', arquivo: 'vendas-ml.xlsx', tipo: 'Vendas', script: 'gerar-vendas-json.js' },
   { id: 'vendas_shopee', grupo: 'marketplace', titulo: 'Vendas Shopee', arquivo: 'vendas-shopee.xlsx', tipo: 'Vendas', script: 'gerar-vendas-json.js' },
   { id: 'vendas_tiktok', grupo: 'marketplace', titulo: 'Vendas TikTok', arquivo: 'vendas-tiktok.xlsx', tipo: 'Vendas', script: 'gerar-vendas-json.js' },
-  { id: 'dropstok_mapeamento', grupo: 'core', titulo: 'Dropstok Mapeamento', arquivo: 'relatorio-dropstok-mapeamento.json', tipo: 'Base Produto/Custo', script: 'gerar-produtos-json.js' },
-  { id: 'dropstok_vendas', grupo: 'core', titulo: 'Dropstok Vendas', arquivo: 'relatorio-dropstok-vendas.json', tipo: 'Compras/Custo', script: 'gerar-vendas-json.js' }
+
+  // CUSTOS / COMPRAS
+  { id: 'custos', grupo: 'core', titulo: 'Custos / Compras', arquivo: 'relatorio-dropstok-vendas.json', tipo: 'Compras/Custo', script: 'gerar-custos-json.js' },
+
+  // MOTORES INTELIGENTES
+  { id: 'estoque_tiktok', grupo: 'inteligencia', titulo: 'Estoque TikTok', arquivo: 'catalogo-tiktok.xlsx', tipo: 'Estoque / TikTok', script: 'motor-estoque-tiktok.js' },
+  { id: 'repricing_ml', grupo: 'inteligencia', titulo: 'Repricing ML', arquivo: 'repricing-ml-lista-completa.json', tipo: 'Preço / Concorrência', script: 'motor_repricing_ml.js' }
 ];
 
 function readMeta() {
@@ -500,7 +509,15 @@ function countRecords(filePath) {
 
     if ((ext === '.xlsx' || ext === '.xls') && XLSX) {
       const wb = XLSX.readFile(filePath, { cellDates: false, raw: false });
-      const sheet = wb.Sheets[wb.SheetNames[0]];
+      const nomeArquivo = path.basename(filePath).toLowerCase();
+
+      let sheetName = wb.SheetNames[0];
+
+      if (nomeArquivo === 'catalogo-ml.xlsx' && wb.Sheets['Anúncios']) {
+        sheetName = 'Anúncios';
+      }
+
+      const sheet = wb.Sheets[sheetName];
       const rows = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: '' });
       return rows.filter(row => Array.isArray(row) && row.some(cell => String(cell ?? '').trim() !== '')).length;
     }
@@ -648,14 +665,18 @@ app.post('/api/processamento/processar/:pipeline', async (req, res) => {
 
     if (id === 'todos') {
       const ordem = [
-        'catalogo_ml',
-        'catalogo_shopee',
-        'catalogo_tiktok',
+        // Ordem inteligente:
+        // 1) Produtos / base
+        // 2) Vendas
+        // 3) Custos / compras
+        // 4) Motores inteligentes independentes
         'dropstok_mapeamento',
-        'dropstok_vendas',
         'vendas_ml',
         'vendas_shopee',
-        'vendas_tiktok'
+        'vendas_tiktok',
+        'custos',
+        'estoque_tiktok',
+        'repricing_ml'
       ];
 
       const resultados = [];
@@ -675,7 +696,7 @@ app.post('/api/processamento/processar/:pipeline', async (req, res) => {
 app.use(express.static(ROOT));
 
 app.listen(PORT, () => {
-  console.log('🔥 SERVER COMPLETO RESTAURADO RODANDO');
+  console.log('🔥 SERVER FINAL ESTAVEL - PIPELINE + MOTORES');
   console.log(`Servidor em http://localhost:${PORT}`);
   console.log(`Login: http://localhost:${PORT}/login.html`);
   console.log(`Pasta de entrada monitorada: ${IMPORT_DIR}`);

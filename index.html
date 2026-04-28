@@ -1292,45 +1292,6 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="app.js?v=1005"></script>
 
-  <script>
-    document.addEventListener('DOMContentLoaded', async () => {
-      const sidebar = document.querySelector('.sidebar');
-      if (!sidebar) return;
-
-      let user = null;
-
-      try {
-        const resp = await fetch('/api/auth/me');
-        const data = await resp.json();
-        if (data && data.ok) user = data.user;
-      } catch {}
-
-      const box = document.createElement('div');
-      box.className = 'sidebar-logout-box';
-      box.innerHTML = `
-        <p class="box-label">Usuário logado</p>
-        <strong id="sidebarUserName">${user?.nome || 'Smart Seller'}</strong>
-        <span id="sidebarSellerName">${user?.seller || user?.loja || 'Smart Cosméticos'}</span>
-
-        <button id="btnLogoutPremium" class="btn-logout-premium" type="button">
-          Sair do sistema
-        </button>
-      `;
-
-      sidebar.appendChild(box);
-
-      document.getElementById('btnLogoutPremium')?.addEventListener('click', async () => {
-        try {
-          await fetch('/api/auth/logout', { method: 'POST' });
-        } catch {}
-
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-
-        window.location.href = '/login.html';
-      });
-    });
-  </script>
 
   <script>
     document.addEventListener('DOMContentLoaded', async () => {

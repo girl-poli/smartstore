@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Smart Cosméticos • Vendas</title>
   <link rel="stylesheet" href="styles/global.css?v=11" />
-  <link rel="stylesheet" href="styles/vendas.css?v=11" />
+  <link rel="stylesheet" href="styles/vendas.css?v=14" />
 
   <style>
     .table-wrap {
@@ -217,7 +217,7 @@
 
   <style>
     .cards-totais-financeiros {
-      grid-template-columns: repeat(7, minmax(110px, 1fr)) !important;
+      grid-template-columns: repeat(6, minmax(130px, 1fr)) !important;
       gap: 8px !important;
       margin: 0 0 14px !important;
     }
@@ -239,15 +239,100 @@
     }
     @media(max-width:1500px) {
       .cards-totais-financeiros {
-        grid-template-columns: repeat(4, minmax(110px, 1fr)) !important;
+        grid-template-columns: repeat(3, minmax(130px, 1fr)) !important;
       }
     }
   </style>
 
+
+  <style>
+    /* CORREÇÃO FINAL SIMPLES - 6 CARDS POR LINHA */
+    #painelVendas .bloco-operacional-vendas,
+    #painelVendas .bloco-executivo-financeiro,
+    #painelVendas .bloco-cancelamento-executivo {
+      display: grid !important;
+      grid-template-columns: repeat(6, minmax(130px, 1fr)) !important;
+      gap: 10px !important;
+      width: 100% !important;
+      margin: 0 0 14px !important;
+      align-items: stretch !important;
+    }
+
+    #painelVendas .bloco-operacional-vendas .mini-card,
+    #painelVendas .bloco-executivo-financeiro .mini-card,
+    #painelVendas .bloco-cancelamento-executivo .mini-card {
+      min-height: 82px !important;
+      height: 82px !important;
+      padding: 12px 14px !important;
+      border-radius: 16px !important;
+      box-sizing: border-box !important;
+      display: flex !important;
+      flex-direction: column !important;
+      justify-content: center !important;
+      overflow: hidden !important;
+      background: linear-gradient(180deg, #ffffff 0%, #fff8f7 100%) !important;
+      border: 1px solid #f1d9d4 !important;
+    }
+
+    #painelVendas .mini-card p {
+      font-size: 9px !important;
+      line-height: 1.15 !important;
+      margin: 0 0 5px !important;
+      letter-spacing: .07em !important;
+      text-transform: uppercase !important;
+    }
+
+    #painelVendas .mini-card h3 {
+      font-size: 20px !important;
+      line-height: 1.05 !important;
+      margin: 0 !important;
+      white-space: nowrap !important;
+    }
+
+    #painelVendas .mini-card small {
+      font-size: 9px !important;
+      line-height: 1.15 !important;
+      margin-top: 4px !important;
+    }
+
+    #painelVendas .mini-card.margem-card-verde {
+      background: #ecfdf3 !important;
+      border-color: #b7e4c7 !important;
+    }
+
+    #painelVendas .mini-card.margem-card-verde h3,
+    #painelVendas .mini-card.margem-card-verde small {
+      color: #027a48 !important;
+    }
+
+    #painelVendas .mini-card.margem-card-alerta {
+      background: #fff8e6 !important;
+      border-color: #fedf89 !important;
+    }
+
+    #painelVendas .mini-card.margem-card-ruim,
+    #painelVendas .mini-card.alerta-cancelamento {
+      background: #fff1f3 !important;
+      border-color: #f04438 !important;
+    }
+
+    @media(max-width:1500px) {
+      #painelVendas .bloco-operacional-vendas,
+      #painelVendas .bloco-executivo-financeiro,
+      #painelVendas .bloco-cancelamento-executivo {
+        grid-template-columns: repeat(3, minmax(130px, 1fr)) !important;
+      }
+    }
+
+    @media(max-width:700px) {
+      #painelVendas .bloco-operacional-vendas,
+      #painelVendas .bloco-executivo-financeiro,
+      #painelVendas .bloco-cancelamento-executivo {
+        grid-template-columns: 1fr !important;
+      }
+    }
+  </style>
 </head>
-<script src="app.js?v=..."></script>
-<script src="scripts/auth-guard.js?v=menu-admin"></script>
-</body>
 <body>
   <div class="app-shell">
     <aside class="sidebar">
@@ -282,12 +367,16 @@
         </div>
 
         <div class="topbar-actions">
+          <button class="btn btn-secondary" id="btnAbrirCalculadora" type="button">Simular margem</button>
           <button class="btn btn-primary" id="btnAtualizar" type="button">Atualizar</button>
           <button class="btn btn-secondary" id="btnExportar" type="button">Exportar</button>
         </div>
       </header>
+        
+        
 
-      <section class="filtros-box">
+
+      <section class="filtros-box filtros-executivos">
         <div class="filtros-box-header">
           <p class="panel-kicker">Filtros</p>
           <h3>Refine a análise</h3>
@@ -334,121 +423,11 @@
         </div>
       </section>
 
-      <section id="painelVendas">
-        <section class="cards-grid produtos-grid produtos-grid-principal cards-vendas-compactos">
-          <article class="mini-card">
-            <p>Total de Pedidos (Vendas)</p>
-            <h3 id="cardTotalPedidos">0</h3>
-          </article>
-
-          <article class="mini-card ok">
-            <p>Total de pedidos válidos</p>
-            <h3 id="cardPedidosValidos">0</h3>
-            <small>Total - Cancelados</small>
-          </article>
-
-          <article class="mini-card ok">
-            <p>Pedidos Concluídos</p>
-            <h3 id="cardConcluido">0</h3>
-            <small>Concluído + Em avaliação + Outros</small>
-          </article>
-
-          <article class="mini-card medio">
-            <p>Pedidos em andamento</p>
-            <h3 id="cardEmAndamento">0</h3>
-            <small>Em transito + Envio manual</small>
-          </article>
-
-          <article class="mini-card medio">
-            <p>Pedidos para sair</p>
-            <h3 id="cardParaSair">0</h3>
-            <small>Precisa enviar + Esperando NF + Emitir NF</small>
-          </article>
-
-          <article class="mini-card ruim">
-            <p>Pedidos cancelados</p>
-            <h3 id="cardCancelado">0</h3>
-          </article>
-        </section>
-
-
-        <section class="calculadora-margem-box">
-          <div class="calculadora-header">
-            <div>
-              <p class="panel-kicker">Simulador</p>
-              <h3>Calculadora de margem</h3>
-            </div>
-            <span class="badge-soft">Meta mínima: 20%</span>
-          </div>
-
-          <div class="calculadora-grid calculadora-grid-v2">
-            <div class="filter-group">
-              <label for="calcProduto">SKU / Produto</label>
-              <input type="text" id="calcProduto" class="input-date" placeholder="Digite o SKU ou nome" list="listaSkuCatalogo" />
-              <datalist id="listaSkuCatalogo"></datalist>
-            </div>
-
-            <div class="filter-group">
-              <label for="calcMarketplace">Marketplace</label>
-              <select id="calcMarketplace" class="select-mkt">
-                <option value="manual">Manual</option>
-                <option value="ML">Mercado Livre</option>
-                <option value="Shopee">Shopee</option>
-                <option value="TikTok">TikTok</option>
-              </select>
-            </div>
-
-            <div class="filter-group">
-              <label for="calcCusto">Custo</label>
-              <input type="number" id="calcCusto" class="input-date" placeholder="0,00" step="0.01" min="0" />
-            </div>
-
-            <div class="filter-group">
-              <label for="calcPreco">Preço de venda</label>
-              <input type="number" id="calcPreco" class="input-date" placeholder="0,00" step="0.01" min="0" />
-            </div>
-
-            <div class="filter-group">
-              <label for="calcDesconto">Desconto / cupom</label>
-              <input type="number" id="calcDesconto" class="input-date" value="0" step="0.01" min="0" />
-            </div>
-
-            <div class="filter-group">
-              <label for="calcFrete">Frete vendedor</label>
-              <input type="number" id="calcFrete" class="input-date" value="0" step="0.01" min="0" />
-            </div>
-
-            <div class="filter-group">
-              <label for="calcTaxa">Taxa MKT %</label>
-              <input type="number" id="calcTaxa" class="input-date" value="25" step="0.1" min="0" max="100" />
-            </div>
-
-            <div class="filter-group">
-              <label for="calcRepasse">Repasse manual</label>
-              <input type="number" id="calcRepasse" class="input-date" placeholder="opcional" step="0.01" min="0" />
-            </div>
-
-            <div class="filter-group filter-group-actions">
-              <label>&nbsp;</label>
-              <button class="btn btn-primary" id="btnCalcularMargem" type="button">Calcular</button>
-            </div>
-          </div>
-
-          <p class="calc-regra">
-            Regra: se o repasse manual estiver vazio, calcula <strong>preço - desconto - frete - taxa</strong>.
-            Margem = <strong>(repasse - custo) / preço</strong>.
-          </p>
-
-          <div class="resultado-calculadora" id="resultadoCalculadoraMargem">
-            <article class="resultado-card neutro">
-              <p>Margem simulada</p>
-              <h3>Preencha os campos</h3>
-              <small>Digite um SKU para buscar o custo automaticamente.</small>
-            </article>
-          </div>
-        </section>
-
-        <section class="cards-grid produtos-grid produtos-grid-principal cards-vendas-compactos cards-totais-financeiros">
+      <section id="painelVendas"><div class="vendas-section-title">
+          <p class="panel-kicker">Resumo executivo</p>
+          <h3>Financeiro válido</h3>
+        </div>
+        <section class="cards-grid produtos-grid produtos-grid-principal cards-vendas-compactos cards-totais-financeiros bloco-executivo-financeiro">
           <article class="mini-card ok">
             <p>Total valor item válido</p>
             <h3 id="cardTotalValorItem">R$ 0</h3>
@@ -486,7 +465,11 @@
           </article>
         </section>
 
-        <section class="cards-grid produtos-grid produtos-grid-principal cards-vendas-compactos cards-totais-financeiros cards-cancelamento">
+        <div class="vendas-section-title">
+          <p class="panel-kicker">Atenção</p>
+          <h3>Cancelamentos</h3>
+        </div>
+        <section class="cards-grid produtos-grid produtos-grid-principal cards-vendas-compactos cards-totais-financeiros cards-cancelamento bloco-cancelamento-executivo">
           <article class="mini-card ruim">
             <p>Valor cancelado</p>
             <h3 id="cardCanceladoValor">R$ 0</h3>
@@ -521,6 +504,46 @@
             <p>% cancelamento</p>
             <h3 id="cardPercentualCancelamento">0,0%</h3>
             <small id="cardPercentualCancelamentoInfo">OK: abaixo de 10,0%</small>
+          </article>
+        </section>
+
+        <div class="vendas-section-title">
+          <p class="panel-kicker">Operacional</p>
+          <h3>Status dos pedidos</h3>
+        </div>
+        <section class="cards-grid produtos-grid produtos-grid-principal cards-vendas-compactos bloco-operacional-vendas">
+          <article class="mini-card">
+            <p>Total de Pedidos (Vendas)</p>
+            <h3 id="cardTotalPedidos">0</h3>
+          </article>
+
+          <article class="mini-card ok">
+            <p>Total de pedidos válidos</p>
+            <h3 id="cardPedidosValidos">0</h3>
+            <small>Total - Cancelados</small>
+          </article>
+
+          <article class="mini-card ok">
+            <p>Pedidos Concluídos</p>
+            <h3 id="cardConcluido">0</h3>
+            <small>Concluído + Em avaliação + Outros</small>
+          </article>
+
+          <article class="mini-card medio">
+            <p>Pedidos em andamento</p>
+            <h3 id="cardEmAndamento">0</h3>
+            <small>Em transito + Envio manual</small>
+          </article>
+
+          <article class="mini-card medio">
+            <p>Pedidos para sair</p>
+            <h3 id="cardParaSair">0</h3>
+            <small>Precisa enviar + Esperando NF + Emitir NF</small>
+          </article>
+
+          <article class="mini-card ruim">
+            <p>Pedidos cancelados</p>
+            <h3 id="cardCancelado">0</h3>
           </article>
         </section>
 
@@ -621,61 +644,7 @@
     </main>
   </div>
 
-  <script src="vendas.js?v=11"></script>
-
-<script>
-document.addEventListener('DOMContentLoaded', async () => {
-  const sidebar = document.querySelector('.sidebar');
-  if (!sidebar) return;
-
-  let user = null;
-
-  try {
-    const resp = await fetch('/api/auth/me');
-    const data = await resp.json();
-    if (data && data.ok) user = data.user;
-  } catch {}
-
-  const box = document.createElement('div');
-  box.style.marginTop = 'auto';
-  box.style.padding = '14px';
-  box.style.borderRadius = '20px';
-  box.style.border = '1px solid #f1d7d3';
-  box.style.background = '#fff8f7';
-
-  box.innerHTML = `
-    <p style="font-size:10px;letter-spacing:.15em;color:#c08a84;text-transform:uppercase;margin:0">Usuário</p>
-    <strong style="display:block;margin-top:6px">${user?.nome || 'Smart Seller'}</strong>
-    <span style="display:block;margin:3px 0 12px;font-size:12px;color:#8f8f8f">
-      ${user?.seller || 'Smart Cosméticos'}
-    </span>
-    <button id="btnLogoutPremium" style="
-      width:100%;
-      border:none;
-      border-radius:999px;
-      padding:11px;
-      background:#f26c63;
-      color:white;
-      font-weight:700;
-      cursor:pointer;">
-      Sair do sistema
-    </button>
-  `;
-
-  sidebar.appendChild(box);
-
-  document.getElementById('btnLogoutPremium')?.addEventListener('click', async () => {
-    try {
-      await fetch('/api/auth/logout', { method: 'POST' });
-    } catch {}
-
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-
-    window.location.href = '/login.html';
-  });
-});
-</script>
-
+  <script src="vendas.js?v=13"></script>
+  <script src="scripts/auth-guard.js?v=menu-admin"></script>
 </body>
 </html>

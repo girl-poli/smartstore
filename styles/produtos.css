@@ -514,3 +514,738 @@ tr.linha-decisao-sem_venda td { background: #f8fafc !important; }
   }
 }
 /* ===== FIM PRODUTOS FIX FINAL - FILTROS + PAINEL INTELIGENTE ===== */
+
+
+/* =========================================================
+   PRODUTOS - LAYOUT LIMPO: CARDS + RÉGUA EM CIMA / CALCULADORA EMBAIXO
+   ========================================================= */
+.main { padding-top: 12px !important; }
+
+.executive-top-layout-limpo {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1.05fr) minmax(420px, .95fr) !important;
+  gap: 10px !important;
+  align-items: start !important;
+  margin: 6px 0 12px !important;
+}
+
+.executive-top-layout-limpo .produtos-grid-principal {
+  display: grid !important;
+  grid-template-columns: repeat(4, minmax(118px, 1fr)) !important;
+  gap: 8px !important;
+  margin: 0 !important;
+}
+
+.executive-top-layout-limpo .mini-card {
+  min-height: 58px !important;
+  padding: 8px 10px !important;
+  border-radius: 13px !important;
+  box-shadow: 0 4px 12px rgba(242,108,99,.05) !important;
+}
+
+.executive-top-layout-limpo .mini-card::before { width: 3px !important; border-radius: 13px 0 0 13px !important; }
+.executive-top-layout-limpo .mini-card p { font-size: 8px !important; line-height: 1.08 !important; margin: 0 0 4px !important; letter-spacing: .09em !important; }
+.executive-top-layout-limpo .mini-card h3 { font-size: 19px !important; line-height: 1 !important; margin: 0 !important; }
+.executive-top-layout-limpo .mini-card span { font-size: 8px !important; line-height: 1.1 !important; margin-top: 3px !important; }
+
+.executive-top-layout-limpo .pricing-market-card {
+  min-height: 0 !important;
+  padding: 10px 12px !important;
+  border-radius: 14px !important;
+  box-shadow: 0 4px 12px rgba(242,108,99,.05) !important;
+}
+.executive-top-layout-limpo .pricing-market-card h3 { font-size: 13px !important; margin: 0 0 4px !important; }
+.executive-top-layout-limpo .pricing-sub { font-size: 9px !important; line-height: 1.2 !important; margin: 0 0 6px !important; }
+.executive-top-layout-limpo .pricing-legend { margin: 4px 0 6px !important; gap: 7px !important; }
+.executive-top-layout-limpo .pricing-legend span { font-size: 9px !important; }
+.executive-top-layout-limpo .pricing-dot { width: 8px !important; height: 8px !important; }
+.executive-top-layout-limpo .regua-market-list { gap: 6px !important; }
+.executive-top-layout-limpo .regua-market-item { padding: 7px 9px !important; border-radius: 12px !important; }
+.executive-top-layout-limpo .regua-market-top { margin-bottom: 5px !important; }
+.executive-top-layout-limpo .regua-market-name { font-size: 12px !important; }
+.executive-top-layout-limpo .regua-market-risk { font-size: 15px !important; }
+.executive-top-layout-limpo .regua-market-risk small { font-size: 9px !important; }
+.executive-top-layout-limpo .regua-bar { height: 13px !important; }
+.executive-top-layout-limpo .regua-numeros { gap: 5px !important; margin-top: 5px !important; }
+.executive-top-layout-limpo .regua-num { padding: 5px 6px !important; border-radius: 9px !important; }
+.executive-top-layout-limpo .regua-num strong { font-size: 11px !important; }
+.executive-top-layout-limpo .regua-num span { font-size: 8px !important; margin-top: 2px !important; }
+
+.pricing-market-panel-limpo { display: block !important; margin: 8px 0 12px !important; }
+.pricing-market-panel-limpo .calculadora-card { width: 100% !important; padding: 14px 16px !important; border-radius: 18px !important; box-shadow: 0 4px 12px rgba(242,108,99,.05) !important; }
+.pricing-market-panel-limpo .calc-grid { display: grid !important; grid-template-columns: 1.4fr .8fr .7fr .8fr .8fr .8fr .7fr .8fr !important; gap: 8px !important; align-items: end !important; }
+.pricing-market-panel-limpo .calc-grid .span-2 { grid-column: span 1 !important; }
+.pricing-market-panel-limpo .calc-field label { font-size: 9px !important; margin-bottom: 4px !important; }
+.pricing-market-panel-limpo .calc-field input,
+.pricing-market-panel-limpo .calc-field select { height: 36px !important; border-radius: 10px !important; font-size: 12px !important; }
+.pricing-market-panel-limpo .calc-rule { font-size: 10px !important; margin: 8px 0 !important; }
+.pricing-market-panel-limpo .calc-actions { margin-bottom: 8px !important; }
+.pricing-market-panel-limpo .calc-actions .btn { height: 34px !important; font-size: 12px !important; }
+.pricing-market-panel-limpo .calc-result { max-width: 300px !important; min-height: 72px !important; padding: 10px 12px !important; }
+.pricing-market-panel-limpo .calc-result .valor { font-size: 20px !important; }
+
+@media(max-width: 1250px) {
+  .executive-top-layout-limpo { grid-template-columns: 1fr !important; }
+  .pricing-market-panel-limpo .calc-grid { grid-template-columns: repeat(4, 1fr) !important; }
+}
+@media(max-width: 760px) {
+  .executive-top-layout-limpo .produtos-grid-principal,
+  .pricing-market-panel-limpo .calc-grid { grid-template-columns: 1fr 1fr !important; }
+}
+
+/* =========================================================
+   PRODUTOS - BÁSICO CORRIGIDO E ESTÁVEL
+   Objetivo: cards + régua no topo, calculadora abaixo, sem conflito.
+   ========================================================= */
+
+.produtos-basico-top {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) minmax(330px, 360px) !important;
+  gap: 12px !important;
+  align-items: stretch !important;
+  margin: 10px 0 12px !important;
+  width: 100% !important;
+  overflow: visible !important;
+}
+
+.produtos-basico-top .produtos-grid-principal {
+  display: grid !important;
+  grid-template-columns: repeat(4, minmax(120px, 1fr)) !important;
+  gap: 8px !important;
+  margin: 0 !important;
+  width: 100% !important;
+}
+
+.produtos-basico-top .mini-card {
+  min-height: 70px !important;
+  padding: 10px 12px !important;
+  border-radius: 14px !important;
+  box-shadow: 0 4px 12px rgba(242, 108, 99, 0.05) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+}
+
+.produtos-basico-top .mini-card::before {
+  width: 3px !important;
+  border-radius: 14px 0 0 14px !important;
+}
+
+.produtos-basico-top .mini-card p {
+  font-size: 8.5px !important;
+  line-height: 1.15 !important;
+  margin: 0 0 4px !important;
+  letter-spacing: .08em !important;
+}
+
+.produtos-basico-top .mini-card h3 {
+  font-size: 20px !important;
+  line-height: 1 !important;
+  margin: 0 !important;
+}
+
+.produtos-basico-top .mini-card span {
+  font-size: 9px !important;
+  line-height: 1.15 !important;
+  margin-top: 4px !important;
+}
+
+.produtos-basico-top .pricing-market-card {
+  margin: 0 !important;
+  padding: 12px !important;
+  border-radius: 16px !important;
+  min-width: 0 !important;
+  overflow: hidden !important;
+  box-shadow: 0 4px 12px rgba(242, 108, 99, 0.05) !important;
+}
+
+.produtos-basico-top .pricing-market-card h3 {
+  font-size: 13px !important;
+  line-height: 1.15 !important;
+  margin: 0 0 6px !important;
+}
+
+.produtos-basico-top .pricing-sub {
+  font-size: 9.5px !important;
+  line-height: 1.25 !important;
+  margin: 0 0 8px !important;
+}
+
+.produtos-basico-top .pricing-legend {
+  gap: 7px !important;
+  margin: 6px 0 10px !important;
+}
+
+.produtos-basico-top .pricing-legend span {
+  font-size: 9.5px !important;
+}
+
+.produtos-basico-top .pricing-dot {
+  width: 8px !important;
+  height: 8px !important;
+}
+
+.produtos-basico-top .regua-market-list {
+  display: grid !important;
+  gap: 8px !important;
+}
+
+.produtos-basico-top .regua-market-item {
+  padding: 8px !important;
+  border-radius: 12px !important;
+}
+
+.produtos-basico-top .regua-market-top {
+  margin-bottom: 7px !important;
+}
+
+.produtos-basico-top .regua-market-name {
+  font-size: 13px !important;
+}
+
+.produtos-basico-top .regua-market-risk {
+  font-size: 15px !important;
+}
+
+.produtos-basico-top .regua-market-risk small,
+.produtos-basico-top .pricing-sub {
+  font-size: 9px !important;
+}
+
+.produtos-basico-top .regua-bar {
+  height: 14px !important;
+}
+
+.produtos-basico-top .regua-numeros {
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  gap: 5px !important;
+  margin-top: 6px !important;
+}
+
+.produtos-basico-top .regua-num {
+  padding: 5px 6px !important;
+  border-radius: 9px !important;
+}
+
+.produtos-basico-top .regua-num strong {
+  font-size: 11px !important;
+}
+
+.produtos-basico-top .regua-num span {
+  font-size: 8px !important;
+  line-height: 1.1 !important;
+}
+
+.produtos-basico-calculadora {
+  display: block !important;
+  margin: 10px 0 14px !important;
+  width: 100% !important;
+}
+
+.produtos-basico-calculadora .calculadora-card {
+  width: 100% !important;
+  max-width: none !important;
+  padding: 14px 16px !important;
+  border-radius: 18px !important;
+  box-shadow: 0 4px 12px rgba(242,108,99,.05) !important;
+}
+
+.produtos-basico-calculadora .calc-grid {
+  display: grid !important;
+  grid-template-columns: 1.35fr .8fr .7fr .8fr .8fr .8fr .7fr .8fr !important;
+  gap: 8px !important;
+  align-items: end !important;
+}
+
+.produtos-basico-calculadora .calc-grid .span-2 {
+  grid-column: span 1 !important;
+}
+
+.produtos-basico-calculadora .calc-field label {
+  font-size: 9px !important;
+  margin-bottom: 4px !important;
+}
+
+.produtos-basico-calculadora .calc-field input,
+.produtos-basico-calculadora .calc-field select {
+  height: 36px !important;
+  border-radius: 10px !important;
+  font-size: 12px !important;
+}
+
+.produtos-basico-calculadora .calc-rule {
+  font-size: 10px !important;
+  margin: 8px 0 !important;
+}
+
+.produtos-basico-calculadora .calc-actions .btn {
+  height: 34px !important;
+  font-size: 12px !important;
+}
+
+.produtos-basico-calculadora .calc-result {
+  max-width: 320px !important;
+  min-height: 72px !important;
+  padding: 10px 12px !important;
+}
+
+.produtos-basico-calculadora .calc-result .valor {
+  font-size: 20px !important;
+}
+
+/* Evita que regras antigas voltem a bagunçar esta página */
+.executive-top-layout:not(.produtos-basico-top),
+.executive-top-layout-limpo:not(.produtos-basico-top),
+.pricing-market-panel-limpo:not(.produtos-basico-calculadora) {
+  all: revert-layer;
+}
+
+@media (max-width: 1250px) {
+  .produtos-basico-top {
+    grid-template-columns: 1fr !important;
+  }
+
+  .produtos-basico-calculadora .calc-grid {
+    grid-template-columns: repeat(4, 1fr) !important;
+  }
+}
+
+@media (max-width: 760px) {
+  .produtos-basico-top .produtos-grid-principal,
+  .produtos-basico-calculadora .calc-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+/* ===== AJUSTE BÁSICO FUNCIONAL ===== */
+
+/* MAIS ESPAÇO PARA RÉGUA */
+.executive-top-layout-limpo {
+  grid-template-columns: minmax(0, 1fr) 520px !important;
+  gap: 12px !important;
+}
+
+/* CARDS MENORES */
+.executive-top-layout-limpo .produtos-grid-principal {
+  grid-template-columns: repeat(4, 1fr) !important;
+  gap: 8px !important;
+}
+
+.executive-top-layout-limpo .mini-card {
+  min-height: 60px !important;
+  padding: 10px !important;
+}
+
+/* TEXTO MENOR */
+.executive-top-layout-limpo .mini-card p {
+  font-size: 9px !important;
+}
+
+.executive-top-layout-limpo .mini-card h3 {
+  font-size: 20px !important;
+}
+
+.executive-top-layout-limpo .mini-card span {
+  font-size: 9px !important;
+}
+
+
+
+
+/* STYLE EXTRAIDO DO HTML: fix-produtos-premium-estavel */
+/* =========================================================
+   FIX FINAL ESTÁVEL - PRODUTOS
+   Motivo: esta página usa .produtos-basico-top no HTML.
+   As regras antigas em .executive-top-layout não pegavam aqui.
+   ========================================================= */
+
+.produtos-basico-top {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) minmax(560px, 620px) !important;
+  gap: 10px !important;
+  align-items: stretch !important;
+  margin: 8px 0 12px !important;
+  width: 100% !important;
+}
+
+.produtos-basico-top .produtos-grid-principal {
+  display: grid !important;
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  gap: 7px !important;
+  margin: 0 !important;
+  width: 100% !important;
+}
+
+.produtos-basico-top .produtos-grid-principal .mini-card,
+.produtos-basico-top .mini-card,
+.produtos-basico-top .mini-card.mini-card-small {
+  min-height: 56px !important;
+  height: auto !important;
+  padding: 8px 9px !important;
+  border-radius: 12px !important;
+  box-shadow: 0 3px 10px rgba(242,108,99,.04) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+}
+
+.produtos-basico-top .mini-card::before {
+  width: 3px !important;
+  border-radius: 12px 0 0 12px !important;
+}
+
+.produtos-basico-top .mini-card p {
+  font-size: 8px !important;
+  line-height: 1.05 !important;
+  margin: 0 0 3px !important;
+  letter-spacing: .08em !important;
+}
+
+.produtos-basico-top .mini-card h3,
+.produtos-basico-top .mini-card-small h3 {
+  font-size: 18px !important;
+  line-height: 1 !important;
+  margin: 0 !important;
+}
+
+.produtos-basico-top .mini-card span {
+  font-size: 8px !important;
+  line-height: 1.1 !important;
+  margin-top: 3px !important;
+}
+
+.produtos-basico-top .pricing-market-card {
+  margin: 0 !important;
+  padding: 14px 16px !important;
+  border-radius: 18px !important;
+  min-width: 0 !important;
+  overflow: hidden !important;
+  box-shadow: 0 8px 22px rgba(242,108,99,.07) !important;
+}
+
+.produtos-basico-top .pricing-market-card h3 {
+  font-size: 15px !important;
+  line-height: 1.15 !important;
+  margin: 0 0 7px !important;
+}
+
+.produtos-basico-top .pricing-sub {
+  font-size: 10.5px !important;
+  line-height: 1.28 !important;
+  margin: 0 0 9px !important;
+}
+
+.produtos-basico-top .pricing-legend {
+  gap: 8px !important;
+  margin: 7px 0 10px !important;
+}
+
+.produtos-basico-top .pricing-legend span {
+  font-size: 10px !important;
+}
+
+.produtos-basico-top .pricing-dot {
+  width: 8px !important;
+  height: 8px !important;
+}
+
+.produtos-basico-top .regua-market-list {
+  display: grid !important;
+  gap: 9px !important;
+}
+
+.produtos-basico-top .regua-market-item {
+  padding: 9px 10px !important;
+  border-radius: 14px !important;
+}
+
+.produtos-basico-top .regua-market-top {
+  margin-bottom: 7px !important;
+}
+
+.produtos-basico-top .regua-market-name {
+  font-size: 13.5px !important;
+}
+
+.produtos-basico-top .regua-market-risk {
+  font-size: 17px !important;
+}
+
+.produtos-basico-top .regua-market-risk small {
+  font-size: 9px !important;
+}
+
+.produtos-basico-top .regua-bar {
+  height: 16px !important;
+}
+
+.produtos-basico-top .regua-numeros {
+  display: grid !important;
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  gap: 6px !important;
+  margin-top: 6px !important;
+}
+
+.produtos-basico-top .regua-num {
+  padding: 6px 7px !important;
+  border-radius: 10px !important;
+}
+
+.produtos-basico-top .regua-num strong {
+  font-size: 12px !important;
+}
+
+.produtos-basico-top .regua-num span {
+  font-size: 8px !important;
+  line-height: 1.1 !important;
+}
+
+.produtos-basico-calculadora {
+  margin-top: 8px !important;
+}
+
+.produtos-basico-calculadora .calculadora-card {
+  max-width: 760px !important;
+}
+
+@media (max-width: 1380px) {
+  .produtos-basico-top {
+    grid-template-columns: minmax(0, 1fr) 520px !important;
+  }
+}
+
+@media (max-width: 1180px) {
+  .produtos-basico-top {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+@media (max-width: 760px) {
+  .produtos-basico-top .produtos-grid-principal {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+
+/* =========================================================
+   FIX PRODUTOS - BÁSICO FUNCIONAL
+   Objetivo:
+   - manter régua à direita
+   - manter cards compactos
+   - calculadora limpa
+   - CAMPOS DA CALCULADORA MAIORES
+   ========================================================= */
+
+.produtos-basico-top {
+  display: grid !important;
+  grid-template-columns: minmax(0, 60%) minmax(420px, 40%) !important;
+  gap: 14px !important;
+  align-items: start !important;
+  margin: 8px 0 12px !important;
+  width: 100% !important;
+}
+
+.produtos-basico-top .produtos-grid-principal {
+  display: grid !important;
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  gap: 8px !important;
+  margin: 0 !important;
+  width: 100% !important;
+}
+
+.produtos-basico-top .produtos-grid-principal .mini-card,
+.produtos-basico-top .mini-card,
+.produtos-basico-top .mini-card.mini-card-small {
+  min-height: 52px !important;
+  height: auto !important;
+  padding: 8px 9px !important;
+  border-radius: 12px !important;
+  box-shadow: 0 3px 10px rgba(242,108,99,.04) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+}
+
+.produtos-basico-top .mini-card p {
+  font-size: 8px !important;
+  line-height: 1.05 !important;
+  margin: 0 0 3px !important;
+  letter-spacing: .08em !important;
+}
+
+.produtos-basico-top .mini-card h3,
+.produtos-basico-top .mini-card-small h3 {
+  font-size: 18px !important;
+  line-height: 1 !important;
+  margin: 0 !important;
+}
+
+.produtos-basico-top .mini-card span {
+  font-size: 8px !important;
+  line-height: 1.1 !important;
+  margin-top: 3px !important;
+}
+
+/* Régua */
+.produtos-basico-top .pricing-market-card {
+  margin: 0 !important;
+  padding: 16px 18px !important;
+  border-radius: 18px !important;
+  min-width: 0 !important;
+  overflow: hidden !important;
+  box-shadow: 0 8px 22px rgba(242,108,99,.07) !important;
+}
+
+.produtos-basico-top .pricing-market-card h3 {
+  font-size: 15px !important;
+  line-height: 1.15 !important;
+  margin: 0 0 7px !important;
+}
+
+.produtos-basico-top .pricing-sub {
+  font-size: 10.5px !important;
+  line-height: 1.28 !important;
+  margin: 0 0 9px !important;
+}
+
+.produtos-basico-top .regua-market-list {
+  gap: 10px !important;
+}
+
+.produtos-basico-top .regua-bar {
+  height: 17px !important;
+}
+
+.produtos-basico-top .regua-numeros {
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  gap: 7px !important;
+}
+
+/* Calculadora: não força altura, apenas deixa os campos bons */
+.produtos-basico-calculadora {
+  margin: 8px 0 14px !important;
+  width: 100% !important;
+}
+
+.produtos-basico-calculadora .calculadora-card {
+  width: 100% !important;
+  max-width: none !important;
+  min-height: 190px !important;
+  padding: 18px 20px !important;
+  border-radius: 18px !important;
+  box-shadow: 0 4px 12px rgba(242,108,99,.05) !important;
+}
+
+.produtos-basico-calculadora .calc-head {
+  margin-bottom: 14px !important;
+}
+
+.produtos-basico-calculadora .calc-title {
+  font-size: 16px !important;
+}
+
+.produtos-basico-calculadora .calc-meta {
+  padding: 7px 12px !important;
+  font-size: 12px !important;
+}
+
+/* CAMPOS MAIORES */
+.produtos-basico-calculadora .calc-grid {
+  display: grid !important;
+  grid-template-columns: 1.55fr 1.15fr 1fr 1fr 1fr !important;
+  gap: 12px !important;
+  align-items: end !important;
+}
+
+.produtos-basico-calculadora .calc-grid .span-2 {
+  grid-column: span 1 !important;
+}
+
+.produtos-basico-calculadora .calc-field label {
+  font-size: 10px !important;
+  margin-bottom: 6px !important;
+  letter-spacing: .09em !important;
+}
+
+.produtos-basico-calculadora .calc-field input,
+.produtos-basico-calculadora .calc-field select {
+  height: 44px !important;
+  border-radius: 12px !important;
+  padding: 0 12px !important;
+  font-size: 13px !important;
+}
+
+.produtos-basico-calculadora .calc-rule {
+  font-size: 11px !important;
+  line-height: 1.35 !important;
+  margin: 12px 0 12px !important;
+}
+
+.produtos-basico-calculadora .calc-actions {
+  display: flex !important;
+  gap: 10px !important;
+  margin-top: 4px !important;
+}
+
+.produtos-basico-calculadora .calc-actions .btn {
+  height: 38px !important;
+  padding: 0 18px !important;
+  font-size: 12px !important;
+}
+
+.produtos-basico-calculadora .calc-result {
+  display: none;
+  max-width: none !important;
+  min-height: 0 !important;
+  margin-top: 12px !important;
+}
+
+/* Responsivo */
+@media (max-width: 1180px) {
+  .produtos-basico-top {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+@media (max-width: 900px) {
+  .produtos-basico-calculadora .calc-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .produtos-basico-top .produtos-grid-principal,
+  .produtos-basico-calculadora .calc-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* ===== ALTURA IGUAL RÉGUA ===== */
+
+.produtos-basico-calculadora .calculadora-card {
+  min-height: 380px !important; /* altura base alinhada */
+}
+
+/* Deixa mais espaçado internamente */
+.produtos-basico-calculadora .calc-grid {
+  gap: 14px !important;
+}
+
+/* Campos ainda maiores */
+.produtos-basico-calculadora .calc-field input,
+.produtos-basico-calculadora .calc-field select {
+  height: 48px !important;
+  font-size: 14px !important;
+  border-radius: 12px !important;
+}
+
+/* Botões mais proporcionais */
+.produtos-basico-calculadora .calc-actions .btn {
+  height: 42px !important;
+  font-size: 13px !important;
+}
+
+/* Respiro geral */
+.produtos-basico-calculadora .calculadora-card {
+  padding: 20px !important;
+}

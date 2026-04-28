@@ -133,6 +133,12 @@
       min-width: auto;
     }
 
+    .inteligencia-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(260px, 1fr));
+      gap: 10px;
+    }
+
     .core-grid {
       display: grid;
       grid-template-columns: repeat(2, minmax(260px, 1fr));
@@ -252,7 +258,7 @@
 
 
     @media (max-width: 1100px) {
-      .pipeline-grid, .core-grid { grid-template-columns: 1fr; }
+      .pipeline-grid, .core-grid, .inteligencia-grid { grid-template-columns: 1fr; }
       .processamento-grid { grid-template-columns: repeat(2, 1fr); }
     }
   </style>
@@ -325,6 +331,15 @@
         <div class="pipeline-analytics-grid" id="pipelineAnalitico"></div>
       </section>
 
+
+      <section class="panel">
+        <div class="panel-header">
+          <div><p class="panel-kicker">Motores inteligentes</p><h3>Automações por arquivo</h3></div>
+          <span class="badge badge-soft">Processamento individual</span>
+        </div>
+        <div class="inteligencia-grid" id="pipelineInteligencia"></div>
+      </section>
+
       <section class="panel">
         <div class="panel-header">
           <div><p class="panel-kicker">Core</p><h3>Arquivos base e consolidações</h3></div>
@@ -343,62 +358,8 @@
     </main>
   </div>
 
-  <script src="processamento.js?v=1005"></script>
+  <script src="processamento.js?v=1011"></script>
   <script src="scripts/auth-guard.js?v=1"></script>
-
-<script>
-document.addEventListener('DOMContentLoaded', async () => {
-  const sidebar = document.querySelector('.sidebar');
-  if (!sidebar) return;
-
-  let user = null;
-
-  try {
-    const resp = await fetch('/api/auth/me');
-    const data = await resp.json();
-    if (data && data.ok) user = data.user;
-  } catch {}
-
-  const box = document.createElement('div');
-  box.style.marginTop = 'auto';
-  box.style.padding = '14px';
-  box.style.borderRadius = '20px';
-  box.style.border = '1px solid #f1d7d3';
-  box.style.background = '#fff8f7';
-
-  box.innerHTML = `
-    <p style="font-size:10px;letter-spacing:.15em;color:#c08a84;text-transform:uppercase;margin:0">Usuário</p>
-    <strong style="display:block;margin-top:6px">${user?.nome || 'Smart Seller'}</strong>
-    <span style="display:block;margin:3px 0 12px;font-size:12px;color:#8f8f8f">
-      ${user?.seller || 'Smart Cosméticos'}
-    </span>
-    <button id="btnLogoutPremium" style="
-      width:100%;
-      border:none;
-      border-radius:999px;
-      padding:11px;
-      background:#f26c63;
-      color:white;
-      font-weight:700;
-      cursor:pointer;">
-      Sair do sistema
-    </button>
-  `;
-
-  sidebar.appendChild(box);
-
-  document.getElementById('btnLogoutPremium')?.addEventListener('click', async () => {
-    try {
-      await fetch('/api/auth/logout', { method: 'POST' });
-    } catch {}
-
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-
-    window.location.href = '/login.html';
-  });
-});
-</script>
 
 </body>
 </html>

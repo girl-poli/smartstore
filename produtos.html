@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Smart Cosméticos • Produtos</title>
 <link rel="stylesheet" href="styles/global.css?v=18" />
-<link rel="stylesheet" href="styles/produtos.css?v=18" />
+<link rel="stylesheet" href="styles/produtos.css?v=40" />
 
 <style>
   .produtos-grid-principal {
@@ -515,6 +515,272 @@
 </style>
 
 
+
+
+
+
+<style id="fix-produtos-sem-buraco-final">
+/* =========================================================
+   FIX FINAL: SEM BURACO + CALCULADORA NO LADO ESQUERDO
+   Estrutura:
+   esquerda = cards + calculadora
+   direita = régua
+   ========================================================= */
+
+.produtos-basico-top {
+  display: grid !important;
+  grid-template-columns: minmax(0, 60%) minmax(420px, 40%) !important;
+  gap: 14px !important;
+  align-items: start !important;
+  margin: 8px 0 12px !important;
+  width: 100% !important;
+}
+
+.produtos-left-stack {
+  display: grid !important;
+  grid-template-rows: auto auto !important;
+  gap: 8px !important;
+  min-width: 0 !important;
+}
+
+/* Cards compactos */
+.produtos-left-stack .produtos-grid-principal {
+  display: grid !important;
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  gap: 8px !important;
+  margin: 0 !important;
+  width: 100% !important;
+}
+
+.produtos-left-stack .mini-card,
+.produtos-left-stack .mini-card.mini-card-small {
+  min-height: 52px !important;
+  height: auto !important;
+  padding: 8px 9px !important;
+  border-radius: 12px !important;
+  box-shadow: 0 3px 10px rgba(242,108,99,.04) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+}
+
+.produtos-left-stack .mini-card::before {
+  width: 3px !important;
+  border-radius: 12px 0 0 12px !important;
+}
+
+.produtos-left-stack .mini-card p {
+  font-size: 8px !important;
+  line-height: 1.05 !important;
+  margin: 0 0 3px !important;
+  letter-spacing: .08em !important;
+}
+
+.produtos-left-stack .mini-card h3,
+.produtos-left-stack .mini-card-small h3 {
+  font-size: 18px !important;
+  line-height: 1 !important;
+  margin: 0 !important;
+}
+
+.produtos-left-stack .mini-card span {
+  font-size: 8px !important;
+  line-height: 1.1 !important;
+  margin-top: 3px !important;
+}
+
+/* Régua */
+.produtos-basico-top .pricing-market-card {
+  margin: 0 !important;
+  width: 100% !important;
+  height: auto !important;
+  padding: 16px 18px !important;
+  border-radius: 18px !important;
+  min-width: 0 !important;
+  overflow: hidden !important;
+  box-shadow: 0 8px 22px rgba(242,108,99,.07) !important;
+}
+
+.produtos-basico-top .pricing-market-card h3 {
+  font-size: 15px !important;
+  line-height: 1.15 !important;
+  margin: 0 0 7px !important;
+}
+
+.produtos-basico-top .pricing-sub {
+  font-size: 10.5px !important;
+  line-height: 1.28 !important;
+  margin: 0 0 9px !important;
+}
+
+.produtos-basico-top .pricing-legend {
+  gap: 8px !important;
+  margin: 7px 0 10px !important;
+}
+
+.produtos-basico-top .pricing-legend span {
+  font-size: 10px !important;
+}
+
+.produtos-basico-top .pricing-dot {
+  width: 8px !important;
+  height: 8px !important;
+}
+
+.produtos-basico-top .regua-market-list {
+  display: grid !important;
+  gap: 10px !important;
+}
+
+.produtos-basico-top .regua-market-item {
+  padding: 9px 10px !important;
+  border-radius: 14px !important;
+}
+
+.produtos-basico-top .regua-market-top {
+  margin-bottom: 7px !important;
+}
+
+.produtos-basico-top .regua-market-name {
+  font-size: 13.5px !important;
+}
+
+.produtos-basico-top .regua-market-risk {
+  font-size: 17px !important;
+}
+
+.produtos-basico-top .regua-market-risk small {
+  font-size: 9px !important;
+}
+
+.produtos-basico-top .regua-bar {
+  height: 17px !important;
+}
+
+.produtos-basico-top .regua-numeros {
+  display: grid !important;
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  gap: 7px !important;
+  margin-top: 7px !important;
+}
+
+.produtos-basico-top .regua-num {
+  padding: 6px 7px !important;
+  border-radius: 10px !important;
+}
+
+.produtos-basico-top .regua-num strong {
+  font-size: 12px !important;
+}
+
+.produtos-basico-top .regua-num span {
+  font-size: 8px !important;
+  line-height: 1.1 !important;
+}
+
+/* Calculadora dentro do lado esquerdo */
+.produtos-left-stack .produtos-basico-calculadora {
+  margin: 0 !important;
+  width: 100% !important;
+}
+
+.produtos-left-stack .calculadora-card {
+  width: 100% !important;
+  max-width: none !important;
+  min-height: 0 !important;
+  height: auto !important;
+  padding: 14px 16px !important;
+  border-radius: 18px !important;
+  box-shadow: 0 4px 12px rgba(242,108,99,.05) !important;
+}
+
+.produtos-left-stack .calc-head {
+  margin-bottom: 10px !important;
+}
+
+.produtos-left-stack .calc-title {
+  font-size: 16px !important;
+}
+
+.produtos-left-stack .calc-meta {
+  padding: 7px 12px !important;
+  font-size: 12px !important;
+}
+
+.produtos-left-stack .calc-grid {
+  display: grid !important;
+  grid-template-columns: 1.4fr 1.05fr 1fr 1fr !important;
+  gap: 10px !important;
+  align-items: end !important;
+}
+
+.produtos-left-stack .calc-grid .span-2 {
+  grid-column: span 1 !important;
+}
+
+.produtos-left-stack .calc-field label {
+  font-size: 9.5px !important;
+  margin-bottom: 5px !important;
+  letter-spacing: .09em !important;
+  line-height: 1.1 !important;
+}
+
+.produtos-left-stack .calc-field input,
+.produtos-left-stack .calc-field select {
+  height: 40px !important;
+  border-radius: 11px !important;
+  padding: 0 11px !important;
+  font-size: 12px !important;
+  border: 1px solid rgba(242,108,99,.32) !important;
+  box-shadow: none !important;
+}
+
+.produtos-left-stack .calc-rule {
+  font-size: 10.5px !important;
+  line-height: 1.32 !important;
+  margin: 10px 0 10px !important;
+}
+
+.produtos-left-stack .calc-actions {
+  display: flex !important;
+  gap: 10px !important;
+  margin-top: 2px !important;
+}
+
+.produtos-left-stack .calc-actions .btn {
+  height: 38px !important;
+  padding: 0 16px !important;
+  font-size: 12px !important;
+}
+
+.produtos-left-stack .calc-result {
+  display: none;
+  max-width: none !important;
+  min-height: 0 !important;
+  margin-top: 10px !important;
+}
+
+/* Responsivo */
+@media (max-width: 1180px) {
+  .produtos-basico-top {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+@media (max-width: 900px) {
+  .produtos-left-stack .calc-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .produtos-left-stack .produtos-grid-principal,
+  .produtos-left-stack .calc-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+</style>
+
 </head>
 <body>
   <div class="app-shell">
@@ -560,8 +826,9 @@
         </div>
       </header>
 
-      <div class="executive-top-layout">
-        <section class="cards-grid produtos-grid produtos-grid-principal">
+      <div class="produtos-basico-top">
+        <div class="produtos-left-stack">
+<section class="cards-grid produtos-grid produtos-grid-principal">
         <article class="mini-card">
           <p>Produtos base</p>
           <h3 id="cardTotalBase">0</h3>
@@ -649,51 +916,7 @@
           <h3 id="cardMediaPercentual">0,00x</h3>
         </article>
       </section>
-
-        <section class="diretoria-panel diretoria-stack">
-        <article class="diretoria-card" id="cardRiscoDiretoria">
-          <h3>Risco de pricing</h3>
-          <div class="diretoria-big" id="kpiRiscoPricing">-</div>
-          <div class="diretoria-sub" id="kpiRiscoDescricao">Aguardando cálculo...</div>
-          <div class="barra-markup" id="barraMarkup">
-            <span style="width:0%"></span>
-            <span style="width:0%"></span>
-            <span style="width:0%"></span>
-            <span style="width:0%"></span>
-          </div>
-        </article>
-
-        <article class="diretoria-card">
-          <h3>Distribuição de markup</h3>
-          <div class="diretoria-tags">
-            <span class="diretoria-tag" id="pctAte2">Até 2x: 0%</span>
-            <span class="diretoria-tag" id="pctAte25">Até 2,5x: 0%</span>
-            <span class="diretoria-tag" id="pctAte3">Até 3x: 0%</span>
-            <span class="diretoria-tag" id="pctMaior3">> 3x: 0%</span>
-          </div>
-        </article>
-
-        <article class="diretoria-card">
-          <h3>Ação recomendada</h3>
-          <div class="diretoria-big" id="kpiAcaoRecomendada">-</div>
-          <div class="diretoria-sub" id="kpiAcaoDescricao">Produtos abaixo da política mínima precisam de revisão.</div>
-        </article>
-      </section>
-
-      </div>
-
-      <section class="pricing-market-panel">
-        <article class="pricing-market-card">
-          <h3>Régua executiva de pricing por marketplace</h3>
-          <p class="pricing-sub">Distribuição por faixa de markup. Vermelho, laranja e amarelo indicam risco abaixo de 3x; verde indica preço saudável acima de 3x.</p>
-          <div class="pricing-legend">
-            <span><i class="pricing-dot dot-ate2"></i>Até 2x</span>
-            <span><i class="pricing-dot dot-ate25"></i>2x até 2,5x</span>
-            <span><i class="pricing-dot dot-ate3"></i>2,5x até 3x</span>
-            <span><i class="pricing-dot dot-maior3"></i>Maior que 3x</span>
-          </div>
-          <div class="regua-market-list" id="reguaPricingMarketplaces"></div>
-        </article>
+<section class="produtos-basico-calculadora">
         <article class="calculadora-card">
           <div class="calc-head">
             <div>
@@ -757,17 +980,23 @@
             <button class="btn btn-secondary" id="btnCalcLimpar">Limpar</button>
           </div>
 
-          <div class="calc-result" id="calcResultado">
-            <p class="label">Margem simulada</p>
-            <p class="valor">Preencha os campos</p>
-            <div class="detalhe">Digite um SKU para buscar o custo automaticamente.</div>
-          </div>
+          <div class="calc-result" id="calcResultado" style="display:none;"></div>
         </article>
       </section>
-
-
-      
-      <section class="table-panel filtros-panel filtros-produtos-fixo">
+</div>
+        <article class="pricing-market-card">
+          <h3>Régua executiva de pricing por marketplace</h3>
+          <p class="pricing-sub">Distribuição por faixa de markup. Vermelho, laranja e amarelo indicam risco abaixo de 3x; verde indica preço saudável acima de 3x.</p>
+          <div class="pricing-legend">
+            <span><i class="pricing-dot dot-ate2"></i>Até 2x</span>
+            <span><i class="pricing-dot dot-ate25"></i>2x até 2,5x</span>
+            <span><i class="pricing-dot dot-ate3"></i>2,5x até 3x</span>
+            <span><i class="pricing-dot dot-maior3"></i>Maior que 3x</span>
+          </div>
+          <div class="regua-market-list" id="reguaPricingMarketplaces"></div>
+        </article>
+      </div>
+<section class="table-panel filtros-panel filtros-produtos-fixo">
         <div class="panel-header filtros-header-compacto">
           <div>
             <p class="panel-kicker">Filtros e organização</p>

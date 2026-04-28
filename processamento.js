@@ -269,9 +269,12 @@ async function carregarStatus() {
 
     const marketplaces = pipelines.filter(p => p.grupo === 'marketplace');
     const core = pipelines.filter(p => p.grupo === 'core');
+    const inteligencia = pipelines.filter(p => p.grupo === 'inteligencia');
 
     $('pipelineMarketplaces').innerHTML = marketplaces.map(cardPipeline).join('') || '<p>Nenhum pipeline de marketplace encontrado.</p>';
     $('pipelineCore').innerHTML = core.map(cardPipeline).join('') || '<p>Nenhum arquivo core encontrado.</p>';
+    const elInteligencia = $('pipelineInteligencia');
+    if (elInteligencia) elInteligencia.innerHTML = inteligencia.map(cardPipeline).join('') || '<p>Nenhum motor inteligente encontrado.</p>';
 
     $('kpiArquivos').textContent = fmtQtd(data.resumo?.total || 0);
     $('kpiValidos').textContent = fmtQtd(data.resumo?.validos || 0);

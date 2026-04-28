@@ -12,6 +12,11 @@ document.addEventListener('DOMContentLoaded', () => {
   const custoPadraoInput = $('custoPadrao');
 
   const ARQUIVOS_REPRICING = [
+    // Arquivo real que existe na sua pasta data_external
+    '/data_external/repricing-ml-lista-completa.json',
+    './data_external/repricing-ml-lista-completa.json',
+
+    // Mantidos como fallback, caso você gere arquivos consolidados depois
     '/data_external/repricing-final.json',
     '/data_external/repricing-consolidado.json',
     '/data_external/repricing-ml-inteligencia.json',
@@ -90,6 +95,37 @@ document.addEventListener('DOMContentLoaded', () => {
     return negativo ? -n : n;
   }
 
+  function extrairMoedasDoTexto(texto) {
+    return String(texto || '')
+      .match(/R\\$\\s*\\d{1,3}(?:\\.\\d{3})*,\\d{2}|R\\$\\s*\\d+(?:[\\.,]\\d{2})?/gi)
+      ?.map(v => numero(v))
+      .filter(v => v > 0) || [];
+  }
+
+  function obterRecebeFallback(item, precoAtual) {
+    const direto = numero(item.valor_recebe || item.recebe || item.valorRecebe || item.recebe_txt);
+    if (direto > 0) return direto;
+
+    const moedas = extrairMoedasDoTexto(item.texto_card);
+    if (!moedas.length) return 0;
+
+    const preco = numero(precoAtual);
+    const tarifa = Math.abs(numero(item.tarifa_valor));
+    const frete = Math.abs(numero(item.frete_pago));
+
+    // No card do ML normalmente aparece: preço, tarifa, frete e depois o valor que recebe.
+    // Então escolhemos um valor menor que o preço e diferente de tarifa/frete.
+    const candidatos = moedas
+      .filter(v => (!preco || v < preco) && Math.abs(v - tarifa) > 0.01 && Math.abs(v - frete) > 0.01)
+      .sort((a, b) => b - a);
+
+    return candidatos[0] || 0;
+  }
+
+  function obterTitulo(item) {
+    return item.titulo || item.titulo_estimado || item.nome || item.produto || item.title || 'Selecionar anúncio';
+  }
+
   function moeda(valor) {
     const n = numero(valor);
     return n.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -114,8 +150,12 @@ document.addEventListener('DOMContentLoaded', () => {
       try {
         log(`Tentando carregar: ${caminho}`);
         const resp = await fetch(caminho + (caminho.includes('?') ? '&' : '?') + 'v=' + Date.now());
-        if (!resp.ok) continue;
+        if (!resp.ok) {
+          log(`Não encontrado: ${caminho} (${resp.status})`);
+          continue;
+        }
         const json = await resp.json();
+        log(`OK carregado: ${caminho}`);
         return { caminho, json };
       } catch (e) {
         console.warn('Falha caminho', caminho, e.message);
@@ -181,7 +221,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const custo = numero(item.custo) || numero(custoInfo?.custo) || custoPadrao;
 
     const precoAtual = numero(item.preco_atual || item.preco || item.precoAtual);
-    const recebe = numero(item.valor_recebe || item.recebe || item.valorRecebe);
+    const recebe = obterRecebeFallback(item, precoAtual);
     const tarifa = numero(item.tarifa_percentual || item.tarifa);
     const frete = Math.abs(numero(item.frete_pago || item.frete || item.custo_envio));
     const statusMl = String(item.status_competicao || item.status_ml || '').toUpperCase();
@@ -244,6 +284,7 @@ document.addEventListener('DOMContentLoaded', () => {
     return {
       ...item,
       sku,
+      titulo: obterTitulo(item),
       custo,
       custo_origem: custoInfo?.origem || (custoPadrao > 0 ? 'custo padrão' : ''),
       custo_produto_nome: custoInfo?.produto || '',
@@ -399,8 +440,8 @@ document.addEventListener('DOMContentLoaded', () => {
     baseCusto = Array.isArray(custo.json) ? custo.json : [];
 
     if (!repricingRaw.length) {
-      if (tbody) tbody.innerHTML = '<tr><td colspan="10" class="empty-row">Erro: arquivo JSON de pricing não encontrado ou vazio.</td></tr>';
-      log('Erro: arquivo JSON de pricing não encontrado ou vazio.');
+      if (tbody) tbody.innerHTML = '<tr><td colspan="10" class="empty-row">Erro: arquivo JSON de pricing não encontrado ou vazio. Verifique se existe data_external/repricing-ml-lista-completa.json.</td></tr>';
+      log('Erro: arquivo JSON de pricing não encontrado ou vazio. Verifique se existe data_external/repricing-ml-lista-completa.json.');
       return;
     }
 

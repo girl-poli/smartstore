@@ -237,3 +237,553 @@ th[data-sort] {
 .tab-content.active {
   display: block;
 }
+
+
+/* =========================================================
+   VENDAS - VERSÃO EXECUTIVA SMART COSMÉTICOS
+   Mantém os IDs antigos para não quebrar o vendas.js.
+   ========================================================= */
+
+.topbar {
+  align-items: center;
+}
+
+.filtros-executivos {
+  padding: 14px 16px !important;
+  margin-bottom: 12px !important;
+}
+
+.filtros-executivos .filtros-box-header {
+  margin-bottom: 10px !important;
+}
+
+.filtros-executivos .filtros-box-header h3 {
+  font-size: 18px !important;
+}
+
+.filtros-executivos .filtros-grid {
+  grid-template-columns: .9fr .9fr 1.3fr .9fr .9fr .9fr !important;
+  gap: 10px !important;
+}
+
+.filtros-executivos .input-date,
+.filtros-executivos .select-mkt {
+  height: 38px !important;
+  border-radius: 11px !important;
+}
+
+.calculadora-margem-box {
+  transition: all .2s ease;
+}
+
+.calculadora-recolhida {
+  display: none !important;
+}
+
+.calculadora-aberta {
+  display: block !important;
+}
+
+.bloco-executivo-financeiro {
+  grid-template-columns: repeat(6, minmax(140px, 1fr)) !important;
+  gap: 10px !important;
+  margin-bottom: 10px !important;
+  order: 1;
+}
+
+.bloco-executivo-financeiro .mini-card {
+  min-height: 82px !important;
+  padding: 14px 16px !important;
+  border-radius: 18px !important;
+  background: linear-gradient(180deg, #ffffff 0%, #fff8f7 100%) !important;
+}
+
+.bloco-executivo-financeiro .mini-card h3 {
+  font-size: 22px !important;
+}
+
+.bloco-executivo-financeiro .mini-card:nth-child(1),
+.bloco-executivo-financeiro .mini-card:nth-child(5),
+.bloco-executivo-financeiro .mini-card:nth-child(6) {
+  background: #ecfdf3 !important;
+  border-color: #b7e4c7 !important;
+}
+
+.bloco-cancelamento-executivo {
+  grid-template-columns: repeat(6, minmax(130px, 1fr)) !important;
+  gap: 8px !important;
+  margin-bottom: 12px !important;
+}
+
+.bloco-cancelamento-executivo .mini-card {
+  min-height: 68px !important;
+  opacity: .92;
+}
+
+.bloco-operacional-vendas {
+  grid-template-columns: repeat(6, minmax(130px, 1fr)) !important;
+  gap: 8px !important;
+  margin-bottom: 10px !important;
+}
+
+.bloco-operacional-vendas .mini-card {
+  min-height: 70px !important;
+  padding: 11px 13px !important;
+  background: #fff !important;
+}
+
+.bloco-operacional-vendas .mini-card h3,
+.bloco-cancelamento-executivo .mini-card h3 {
+  font-size: 20px !important;
+}
+
+.bloco-operacional-vendas .mini-card p,
+.bloco-cancelamento-executivo .mini-card p,
+.bloco-executivo-financeiro .mini-card p {
+  font-size: 9px !important;
+  margin-bottom: 5px !important;
+}
+
+.tabs-bar-pos-kpi {
+  margin-top: 8px !important;
+}
+
+.table-panel {
+  margin-top: 8px;
+}
+
+.table-wrap {
+  max-height: 720px !important;
+}
+
+/* Tabela mais executiva */
+.table-wrap table {
+  font-size: 12px;
+}
+
+.table-wrap td,
+.table-wrap th {
+  padding: 9px 10px;
+}
+
+/* Ações de linha não devem poluir */
+.calc-info {
+  max-width: 170px !important;
+}
+
+/* Responsivo */
+@media(max-width:1500px) {
+  .filtros-executivos .filtros-grid {
+    grid-template-columns: repeat(3, 1fr) !important;
+  }
+
+  .bloco-executivo-financeiro,
+  .bloco-operacional-vendas,
+  .bloco-cancelamento-executivo {
+    grid-template-columns: repeat(3, minmax(130px, 1fr)) !important;
+  }
+}
+
+@media(max-width:900px) {
+  .filtros-executivos .filtros-grid,
+  .bloco-executivo-financeiro,
+  .bloco-operacional-vendas,
+  .bloco-cancelamento-executivo {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+
+/* =========================================================
+   PATCH EXECUTIVO V2 - ORGANIZAÇÃO DA TELA VENDAS
+   ========================================================= */
+
+.calculadora-visivel {
+  display: block !important;
+  margin-top: 0 !important;
+  margin-bottom: 16px !important;
+}
+
+.calculadora-recolhida {
+  display: block !important;
+}
+
+#boxCalculadoraMargem {
+  order: 0;
+}
+
+.vendas-section-title {
+  margin: 14px 0 8px;
+  padding: 0 2px;
+}
+
+.vendas-section-title h3 {
+  margin: 2px 0 0;
+  font-size: 16px;
+  color: #2f2b2a;
+}
+
+.vendas-section-title .panel-kicker {
+  margin: 0;
+  color: #c08a84;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  font-weight: 800;
+  font-size: 10px;
+}
+
+.bloco-executivo-financeiro,
+.bloco-cancelamento-executivo,
+.bloco-operacional-vendas {
+  display: grid !important;
+  grid-template-columns: repeat(6, minmax(145px, 1fr)) !important;
+  gap: 10px !important;
+  margin-bottom: 12px !important;
+  width: 100% !important;
+}
+
+.bloco-executivo-financeiro .mini-card,
+.bloco-cancelamento-executivo .mini-card,
+.bloco-operacional-vendas .mini-card {
+  min-height: 88px !important;
+  padding: 14px 16px !important;
+  border-radius: 18px !important;
+}
+
+.bloco-executivo-financeiro .mini-card h3,
+.bloco-cancelamento-executivo .mini-card h3,
+.bloco-operacional-vendas .mini-card h3 {
+  font-size: 22px !important;
+  line-height: 1.05 !important;
+}
+
+.bloco-executivo-financeiro .mini-card p,
+.bloco-cancelamento-executivo .mini-card p,
+.bloco-operacional-vendas .mini-card p {
+  font-size: 9px !important;
+  letter-spacing: .08em !important;
+}
+
+.bloco-executivo-financeiro .mini-card:nth-child(1),
+.bloco-executivo-financeiro .mini-card:nth-child(5),
+.bloco-executivo-financeiro .mini-card:nth-child(6) {
+  background: #ecfdf3 !important;
+  border-color: #b7e4c7 !important;
+}
+
+.bloco-cancelamento-executivo .mini-card {
+  background: #fff7f7 !important;
+}
+
+.bloco-cancelamento-executivo .mini-card:last-child {
+  border-color: #f04438 !important;
+  background: #fff1f3 !important;
+}
+
+.filtros-executivos {
+  margin-bottom: 16px !important;
+}
+
+/* Calculadora compacta, mas visível */
+#boxCalculadoraMargem .calculadora-grid-v2 {
+  grid-template-columns: 1.7fr 1fr repeat(6, minmax(95px, 1fr)) auto !important;
+  gap: 9px !important;
+}
+
+#boxCalculadoraMargem .input-date,
+#boxCalculadoraMargem .select-mkt {
+  height: 38px !important;
+}
+
+#boxCalculadoraMargem .resultado-calculadora {
+  grid-template-columns: repeat(4, minmax(135px, 1fr)) !important;
+}
+
+@media(max-width:1500px) {
+  .bloco-executivo-financeiro,
+  .bloco-cancelamento-executivo,
+  .bloco-operacional-vendas {
+    grid-template-columns: repeat(3, minmax(145px, 1fr)) !important;
+  }
+
+  #boxCalculadoraMargem .calculadora-grid-v2 {
+    grid-template-columns: repeat(4, 1fr) !important;
+  }
+}
+
+@media(max-width:900px) {
+  .bloco-executivo-financeiro,
+  .bloco-cancelamento-executivo,
+  .bloco-operacional-vendas,
+  #boxCalculadoraMargem .calculadora-grid-v2,
+  #boxCalculadoraMargem .resultado-calculadora {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+
+/* =========================================================
+   PATCH EXECUTIVO V3 - ORDEM + CARDS PADRONIZADOS
+   ========================================================= */
+
+/* Ordem visual: Calculadora -> Filtros -> KPIs */
+#boxCalculadoraMargem {
+  margin-bottom: 14px !important;
+}
+
+.filtros-executivos {
+  margin-bottom: 18px !important;
+}
+
+/* Calculadora mais compacta */
+#boxCalculadoraMargem {
+  padding: 15px 18px !important;
+  border-radius: 20px !important;
+}
+
+#boxCalculadoraMargem .calculadora-header {
+  margin-bottom: 10px !important;
+}
+
+#boxCalculadoraMargem .calculadora-grid-v2 {
+  grid-template-columns: 1.7fr 1fr repeat(6, minmax(90px, 1fr)) 72px !important;
+  gap: 8px !important;
+}
+
+#boxCalculadoraMargem .resultado-calculadora {
+  grid-template-columns: repeat(4, minmax(130px, 1fr)) !important;
+}
+
+/* Todos os cards no mesmo tamanho do modelo menor */
+.bloco-executivo-financeiro,
+.bloco-cancelamento-executivo,
+.bloco-operacional-vendas {
+  grid-template-columns: repeat(6, minmax(145px, 1fr)) !important;
+  gap: 10px !important;
+  align-items: stretch !important;
+}
+
+.bloco-executivo-financeiro .mini-card,
+.bloco-cancelamento-executivo .mini-card,
+.bloco-operacional-vendas .mini-card {
+  height: 82px !important;
+  min-height: 82px !important;
+  max-height: 82px !important;
+  padding: 11px 14px !important;
+  border-radius: 16px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+  overflow: hidden !important;
+}
+
+.bloco-executivo-financeiro .mini-card p,
+.bloco-cancelamento-executivo .mini-card p,
+.bloco-operacional-vendas .mini-card p {
+  margin: 0 0 5px !important;
+  height: 22px !important;
+  max-height: 22px !important;
+  overflow: hidden !important;
+  font-size: 9px !important;
+  line-height: 1.15 !important;
+  letter-spacing: .08em !important;
+}
+
+.bloco-executivo-financeiro .mini-card h3,
+.bloco-cancelamento-executivo .mini-card h3,
+.bloco-operacional-vendas .mini-card h3 {
+  margin: 0 !important;
+  font-size: 20px !important;
+  line-height: 1.05 !important;
+  white-space: nowrap !important;
+}
+
+.bloco-executivo-financeiro .mini-card small,
+.bloco-cancelamento-executivo .mini-card small,
+.bloco-operacional-vendas .mini-card small {
+  display: block !important;
+  margin-top: 3px !important;
+  height: 14px !important;
+  max-height: 14px !important;
+  overflow: hidden !important;
+  font-size: 9px !important;
+  line-height: 1.1 !important;
+  white-space: nowrap !important;
+  text-overflow: ellipsis !important;
+}
+
+/* Títulos das seções mais discretos */
+.vendas-section-title {
+  margin: 12px 0 8px !important;
+}
+
+.vendas-section-title h3 {
+  font-size: 15px !important;
+  margin: 2px 0 0 !important;
+}
+
+/* Responsivo */
+@media(max-width:1500px) {
+  #boxCalculadoraMargem .calculadora-grid-v2 {
+    grid-template-columns: repeat(4, 1fr) !important;
+  }
+
+  .bloco-executivo-financeiro,
+  .bloco-cancelamento-executivo,
+  .bloco-operacional-vendas {
+    grid-template-columns: repeat(3, minmax(145px, 1fr)) !important;
+  }
+}
+
+@media(max-width:900px) {
+  #boxCalculadoraMargem .calculadora-grid-v2,
+  #boxCalculadoraMargem .resultado-calculadora,
+  .bloco-executivo-financeiro,
+  .bloco-cancelamento-executivo,
+  .bloco-operacional-vendas {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+
+
+
+  
+    /* CORREÇÃO FINAL SIMPLES - 6 CARDS POR LINHA */
+    #painelVendas .bloco-operacional-vendas,
+    #painelVendas .bloco-executivo-financeiro,
+    #painelVendas .bloco-cancelamento-executivo {
+      display: grid !important;
+      grid-template-columns: repeat(6, minmax(130px, 1fr)) !important;
+      gap: 10px !important;
+      width: 100% !important;
+      margin: 0 0 14px !important;
+      align-items: stretch !important;
+    }
+
+    #painelVendas .bloco-operacional-vendas .mini-card,
+    #painelVendas .bloco-executivo-financeiro .mini-card,
+    #painelVendas .bloco-cancelamento-executivo .mini-card {
+      min-height: 82px !important;
+      height: 82px !important;
+      padding: 12px 14px !important;
+      border-radius: 16px !important;
+      box-sizing: border-box !important;
+      display: flex !important;
+      flex-direction: column !important;
+      justify-content: center !important;
+      overflow: hidden !important;
+      background: linear-gradient(180deg, #ffffff 0%, #fff8f7 100%) !important;
+      border: 1px solid #f1d9d4 !important;
+    }
+
+    #painelVendas .mini-card p {
+      font-size: 9px !important;
+      line-height: 1.15 !important;
+      margin: 0 0 5px !important;
+      letter-spacing: .07em !important;
+      text-transform: uppercase !important;
+    }
+
+    #painelVendas .mini-card h3 {
+      font-size: 20px !important;
+      line-height: 1.05 !important;
+      margin: 0 !important;
+      white-space: nowrap !important;
+    }
+
+    #painelVendas .mini-card small {
+      font-size: 9px !important;
+      line-height: 1.15 !important;
+      margin-top: 4px !important;
+    }
+
+    #painelVendas .mini-card.margem-card-verde {
+      background: #ecfdf3 !important;
+      border-color: #b7e4c7 !important;
+    }
+
+    #painelVendas .mini-card.margem-card-verde h3,
+    #painelVendas .mini-card.margem-card-verde small {
+      color: #027a48 !important;
+    }
+
+    #painelVendas .mini-card.margem-card-alerta {
+      background: #fff8e6 !important;
+      border-color: #fedf89 !important;
+    }
+
+    #painelVendas .mini-card.margem-card-ruim,
+    #painelVendas .mini-card.alerta-cancelamento {
+      background: #fff1f3 !important;
+      border-color: #f04438 !important;
+    }
+
+    @media(max-width:1500px) {
+      #painelVendas .bloco-operacional-vendas,
+      #painelVendas .bloco-executivo-financeiro,
+      #painelVendas .bloco-cancelamento-executivo {
+        grid-template-columns: repeat(3, minmax(130px, 1fr)) !important;
+      }
+    }
+
+    @media(max-width:700px) {
+      #painelVendas .bloco-operacional-vendas,
+      #painelVendas .bloco-executivo-financeiro,
+      #painelVendas .bloco-cancelamento-executivo {
+        grid-template-columns: 1fr !important;
+      }
+
+
+      /* Marketplace */
+.table-wrap th:nth-child(1),
+.table-wrap td:nth-child(1) {
+  width: 70px;
+}
+
+/* Data */
+.table-wrap th:nth-child(2),
+.table-wrap td:nth-child(2) {
+  width: 120px;
+}
+
+/* Pedido */
+.table-wrap th:nth-child(3),
+.table-wrap td:nth-child(3) {
+  width: 160px;
+}
+
+/* SKU */
+.table-wrap th:nth-child(4),
+.table-wrap td:nth-child(4) {
+  width: 150px;
+}
+
+/* Produto (maior) */
+.table-wrap th:nth-child(5),
+.table-wrap td:nth-child(5) {
+  width: 300px;
+}
+
+/* Valores */
+.table-wrap th:nth-child(6),
+.table-wrap td:nth-child(6),
+.table-wrap th:nth-child(7),
+.table-wrap td:nth-child(7),
+.table-wrap th:nth-child(8),
+.table-wrap td:nth-child(8),
+.table-wrap th:nth-child(9),
+.table-wrap td:nth-child(9),
+.table-wrap th:nth-child(10),
+.table-wrap td:nth-child(10) {
+  width: 110px;
+}
+
+/* Margem */
+.table-wrap th:nth-child(11),
+.table-wrap td:nth-child(11) {
+  width: 120px;
+}
+
+    }
+  

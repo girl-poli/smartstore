@@ -10,6 +10,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const btnLimparDatas = document.getElementById('btnLimparDatas');
   const btnAtualizar = document.getElementById('btnAtualizar');
   const btnExportar = document.getElementById('btnExportar');
+  const btnAbrirCalculadora = document.getElementById('btnAbrirCalculadora');
+  const boxCalculadoraMargem = document.getElementById('boxCalculadoraMargem');
 
   const calcProduto = document.getElementById('calcProduto');
   const calcMarketplace = document.getElementById('calcMarketplace');
@@ -44,6 +46,14 @@ document.addEventListener('DOMContentLoaded', () => {
   let statusMapa = [];
   let statusAtivo = 'todos';
   let conciliacaoAtiva = 'todos';
+
+
+  if (btnAbrirCalculadora && boxCalculadoraMargem) {
+    btnAbrirCalculadora.addEventListener('click', () => {
+      boxCalculadoraMargem.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      calcProduto?.focus();
+    });
+  }
 
   function normalizarTexto(valor) {
     return String(valor || '')
@@ -572,7 +582,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     calcularSimulacaoMargem();
 
-    document.querySelector('.calculadora-margem-box')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    const boxCalc = document.querySelector('.calculadora-margem-box');
+    boxCalc?.classList.add('calculadora-aberta');
+    boxCalc?.classList.remove('calculadora-recolhida');
+    if (btnAbrirCalculadora) btnAbrirCalculadora.textContent = 'Ocultar simulador';
+    boxCalc?.scrollIntoView({ behavior: 'smooth', block: 'center' });
   }
 
   function ativarBotoesCalculadora() {
@@ -861,6 +875,16 @@ document.addEventListener('DOMContentLoaded', () => {
     setText('cardTotalRepasse', formatarMoeda(totais.validos.repasse));
     setText('cardMargemGeral', formatarPercentual(totais.margemValidos));
 
+    // Cor da margem válida: >= 20% fica verde.
+    document.querySelectorAll('[id="cardMargemGeral"]').forEach(el => {
+      const card = el.closest('.mini-card');
+      if (!card) return;
+      card.classList.remove('margem-card-verde', 'margem-card-alerta', 'margem-card-ruim');
+      if (totais.margemValidos >= 20) card.classList.add('margem-card-verde');
+      else if (totais.margemValidos >= 10) card.classList.add('margem-card-alerta');
+      else card.classList.add('margem-card-ruim');
+    });
+
     setText('cardCanceladoValor', formatarMoeda(totais.cancelados.valor));
     setText('cardCanceladoCusto', formatarMoeda(totais.cancelados.custo));
     setText('cardCanceladoComissao', formatarMoeda(totais.cancelados.comissao));
@@ -1110,7 +1134,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const c = contarConciliacao();
 
     const chips = [
-      { valor: 'todos', label: `Todos (${c.total})` },
+      { valor: 'todos', label: `Produtos (${c.total})` },
       { valor: 'compras_sim', label: `Custo compras conciliado (${c.custoCompras})` },
       { valor: 'catalogo_usado', label: `Custo usado do catálogo (${c.custoCatalogoUsado})` },
       { valor: 'sem_custo', label: `Sem custo associado (${c.semCustoAssociado})` }
