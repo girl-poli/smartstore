@@ -3,7 +3,6 @@ const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 const { exec } = require('child_process');
-const multer = require('multer');
 
 let XLSX = null;
 try { XLSX = require('xlsx'); } catch { XLSX = null; }
@@ -23,64 +22,6 @@ const OTP_PATH = path.join(DATA_DIR, 'otp-celular.json');
 fs.mkdirSync(IMPORT_DIR, { recursive: true });
 fs.mkdirSync(DATA_DIR, { recursive: true });
 fs.mkdirSync(LOG_DIR, { recursive: true });
-
-// ===== UPLOAD + TRACKING DE ARQUIVOS =====
-const UPLOAD_LOG_PATH = path.join(DATA_DIR, 'upload-log.json');
-
-const ARQUIVOS_ESPERADOS = [
-  { nome: 'catalogo-ml.xlsx', grupo: 'Catálogo', descricao: 'Catálogo Mercado Livre' },
-  { nome: 'catalogo-shopee.xlsx', grupo: 'Catálogo', descricao: 'Catálogo Shopee' },
-  { nome: 'catalogo-tiktok.xlsx', grupo: 'Catálogo', descricao: 'Catálogo TikTok' },
-  { nome: 'vendas-ml.xlsx', grupo: 'Vendas', descricao: 'Vendas Mercado Livre' },
-  { nome: 'vendas-shopee.xlsx', grupo: 'Vendas', descricao: 'Vendas Shopee' },
-  { nome: 'vendas-tiktok.xlsx', grupo: 'Vendas', descricao: 'Vendas TikTok' },
-  { nome: 'relatorio-dropstok-mapeamento.json', grupo: 'Core', descricao: 'Base produto/custo Dropstok' },
-  { nome: 'relatorio-dropstok-vendas.json', grupo: 'Core', descricao: 'Custos/compras Dropstok' },
-  { nome: 'repricing-ml-lista-completa.json', grupo: 'Motor', descricao: 'Repricing Mercado Livre' }
-];
-
-function lerUploadLog() {
-  try { return JSON.parse(fs.readFileSync(UPLOAD_LOG_PATH, 'utf8')); } catch { return {}; }
-}
-
-function salvarUploadLog(log) {
-  fs.writeFileSync(UPLOAD_LOG_PATH, JSON.stringify(log, null, 2), 'utf8');
-}
-
-function registrarUpload(nome, patch) {
-  const log = lerUploadLog();
-  log[nome] = {
-    ...(log[nome] || {}),
-    ...patch,
-    atualizadoEm: new Date().toISOString()
-  };
-  salvarUploadLog(log);
-}
-
-const uploadStorage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, IMPORT_DIR);
-  },
-  filename: function (req, file, cb) {
-    const original = path.basename(file.originalname || '').trim();
-    cb(null, original);
-  }
-});
-
-const upload = multer({
-  storage: uploadStorage,
-  limits: { fileSize: 60 * 1024 * 1024 },
-  fileFilter: function (req, file, cb) {
-    const nome = path.basename(file.originalname || '').trim();
-    const ext = path.extname(nome).toLowerCase();
-
-    if (!['.xlsx', '.xls', '.json', '.csv'].includes(ext)) {
-      return cb(new Error(`Formato inválido para ${nome}. Use XLSX, XLS, JSON ou CSV.`));
-    }
-
-    cb(null, true);
-  }
-});
 
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
@@ -502,9 +443,6 @@ app.post('/api/auth/request-code', rotaSolicitarCodigo);
 app.post('/api/auth/verify-code', rotaValidarCodigo);
 
 
-// Arquivos HTML/JS/CSS do painel precisam ser públicos antes do bloqueio.
-app.use(express.static(ROOT));
-
 // Daqui pra baixo, tudo é protegido.
 app.use(authObrigatorio);
 
@@ -512,130 +450,6 @@ app.get('/', (req, res) => res.redirect('/processamento.html'));
 
 app.use('/data_external', express.static(IMPORT_DIR));
 app.use('/data', express.static(DATA_DIR));
-
-// ===== API UPLOAD COM TRACKING =====
-app.get('/api/upload/status', (req, res) => {
-  const log = lerUploadLog();
-
-  const arquivosEsperados = ARQUIVOS_ESPERADOS.map(item => {
-    const filePath = path.join(IMPORT_DIR, item.nome);
-    const existe = fs.existsSync(filePath);
-    const stat = existe ? fs.statSync(filePath) : null;
-    const registros = existe ? countRecords(filePath) : 0;
-
-    return {
-      ...item,
-      existe,
-      status: existe ? (log[item.nome]?.erro ? 'erro' : 'ok') : 'ausente',
-      tamanhoBytes: stat ? stat.size : 0,
-      registros,
-      atualizadoEm: stat ? stat.mtime.toISOString() : null,
-      ultimoUploadEm: log[item.nome]?.atualizadoEm || null,
-      erro: log[item.nome]?.erro || '',
-      log: log[item.nome]?.log || ''
-    };
-  });
-
-  const extras = fs.readdirSync(IMPORT_DIR)
-    .filter(nome => !nome.startsWith('.'))
-    .filter(nome => !ARQUIVOS_ESPERADOS.some(a => a.nome === nome))
-    .map(nome => {
-      const filePath = path.join(IMPORT_DIR, nome);
-      const stat = fs.statSync(filePath);
-      return {
-        nome,
-        grupo: 'Extra',
-        descricao: 'Arquivo extra enviado',
-        existe: true,
-        status: log[nome]?.erro ? 'erro' : 'ok',
-        tamanhoBytes: stat.size,
-        registros: countRecords(filePath),
-        atualizadoEm: stat.mtime.toISOString(),
-        ultimoUploadEm: log[nome]?.atualizadoEm || null,
-        erro: log[nome]?.erro || '',
-        log: log[nome]?.log || ''
-      };
-    });
-
-  const arquivos = [...arquivosEsperados, ...extras];
-
-  res.json({
-    ok: true,
-    pasta: IMPORT_DIR,
-    resumo: {
-      total: arquivos.length,
-      ok: arquivos.filter(a => a.status === 'ok').length,
-      ausentes: arquivos.filter(a => a.status === 'ausente').length,
-      erros: arquivos.filter(a => a.status === 'erro').length,
-      registros: arquivos.reduce((acc, a) => acc + (Number(a.registros) || 0), 0)
-    },
-    arquivos
-  });
-});
-
-app.post('/api/upload', upload.array('files'), (req, res) => {
-  const recebidos = req.files || [];
-
-  if (!recebidos.length) {
-    return res.status(400).json({ ok: false, erro: 'Nenhum arquivo recebido.' });
-  }
-
-  const resultado = recebidos.map(file => {
-    const nome = path.basename(file.filename);
-    const filePath = path.join(IMPORT_DIR, nome);
-
-    try {
-      const stat = fs.statSync(filePath);
-      const registros = countRecords(filePath);
-
-      registrarUpload(nome, {
-        status: 'ok',
-        erro: '',
-        log: `Upload concluído com sucesso. Registros detectados: ${registros ?? '-'}`
-      });
-
-      return {
-        nome,
-        ok: true,
-        tamanhoBytes: stat.size,
-        registros,
-        atualizadoEm: stat.mtime.toISOString(),
-        log: `Upload concluído com sucesso.`
-      };
-    } catch (erro) {
-      registrarUpload(nome, {
-        status: 'erro',
-        erro: erro.message,
-        log: erro.stack || erro.message
-      });
-
-      return {
-        nome,
-        ok: false,
-        erro: erro.message,
-        log: erro.stack || erro.message
-      };
-    }
-  });
-
-  res.json({
-    ok: resultado.every(r => r.ok),
-    message: resultado.every(r => r.ok) ? 'Upload realizado com sucesso 🚀' : 'Upload concluído com erro em alguns arquivos.',
-    arquivos: resultado
-  });
-});
-
-app.post('/api/upload/reprocessar/:nome', async (req, res) => {
-  const nome = path.basename(req.params.nome || '');
-  const pipeline = PIPELINES.find(p => p.arquivo === nome || p.id === nome);
-
-  if (!pipeline) {
-    return res.status(404).json({ ok: false, erro: 'Nenhum pipeline associado a este arquivo.' });
-  }
-
-  const resultado = await processarPipeline(pipeline.id);
-  res.json(resultado);
-});
 
 app.get('/api/estoque-tiktok', (req, res) => {
   const file = path.join(DATA_DIR, 'estoque-tiktok-cruzado.json');
@@ -878,16 +692,40 @@ app.post('/api/processamento/processar/:pipeline', async (req, res) => {
   }
 });
 
-app.use((erro, req, res, next) => {
-  if (erro) {
-    return res.status(400).json({ ok: false, erro: erro.message || 'Erro ao processar requisição.' });
-  }
-  next();
-});
+// Arquivos HTML/JS/CSS restantes do painel.
+app.use(express.static(ROOT));
 
 app.listen(PORT, () => {
   console.log('🔥 SERVER FINAL ESTAVEL - PIPELINE + MOTORES');
   console.log(`Servidor em http://localhost:${PORT}`);
   console.log(`Login: http://localhost:${PORT}/login.html`);
   console.log(`Pasta de entrada monitorada: ${IMPORT_DIR}`);
+});
+
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
+
+// pasta upload
+const uploadDir = path.join(__dirname, 'data_external');
+
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir);
+}
+
+// config multer
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, uploadDir);
+  },
+  filename: function (req, file, cb) {
+    cb(null, file.originalname);
+  }
+});
+
+const upload = multer({ storage });
+
+// rota upload
+app.post('/api/upload', upload.array('files'), (req, res) => {
+  res.json({ message: "Upload realizado com sucesso 🚀" });
 });
