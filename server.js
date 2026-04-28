@@ -701,3 +701,31 @@ app.listen(PORT, () => {
   console.log(`Login: http://localhost:${PORT}/login.html`);
   console.log(`Pasta de entrada monitorada: ${IMPORT_DIR}`);
 });
+
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
+
+// pasta upload
+const uploadDir = path.join(__dirname, 'data_external');
+
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir);
+}
+
+// config multer
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, uploadDir);
+  },
+  filename: function (req, file, cb) {
+    cb(null, file.originalname);
+  }
+});
+
+const upload = multer({ storage });
+
+// rota upload
+app.post('/api/upload', upload.array('files'), (req, res) => {
+  res.json({ message: "Upload realizado com sucesso 🚀" });
+});
