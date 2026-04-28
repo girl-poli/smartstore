@@ -1853,26 +1853,58 @@ function aplicarFiltroMesAtualPadrao(listaBase = []) {
     if (badge) badge.textContent = 'Últimos 12 meses';
   }
 
-  function calcularTopProdutos(lista = [], limite = 10) {
-    const mapa = new Map();
-    listaFinanceira(lista).forEach(item => {
-      const sku = obterSkuProduto(item);
-      const nome = obterNomeProduto(item);
-      const canal = item.canal_normalizado || normalizarCanal(item);
-      const chave = `${sku}__${nome}`;
-      if (!mapa.has(chave)) mapa.set(chave, { sku, nome, canais: new Set(), quantidade: 0, pedidosChaves: new Set(), faturado: 0, repasse: 0, custo: 0 });
-      const atual = mapa.get(chave);
-      atual.canais.add(canal || 'Desconhecido');
-      atual.quantidade += obterQuantidade(item);
-      atual.faturado += paraNumero(item.preco_venda_normalizado);
-      atual.repasse += paraNumero(item.repasse_normalizado);
-      atual.custo += paraNumero(item.custo_normalizado);
-      const chavePedido = chavePedidoDistintoResumo(item);
-      if (chavePedido) atual.pedidosChaves.add(chavePedido);
-    });
-    return Array.from(mapa.values()).map(item => ({ ...item, pedidos: item.pedidosChaves.size, canaisTexto: Array.from(item.canais).filter(Boolean).join(' / '), receitaLiquida: item.repasse - item.custo, margem: item.faturado > 0 ? ((item.repasse - item.custo) / item.faturado) * 100 : 0 })).sort((a, b) => b.quantidade !== a.quantidade ? b.quantidade - a.quantidade : b.faturado - a.faturado).slice(0, limite);
-  }
+ function calcularTopProdutos(lista = [], limite = 10) {
+  const mapa = new Map();
 
+  listaFinanceira(lista).forEach(item => {
+    const sku = obterSkuProduto(item);
+    const nome = obterNomeProduto(item);
+    const canal = item.canal_normalizado || normalizarCanal(item);
+
+    // ✅ consolida pelo SKU, não pelo nome
+    const chave = sku;
+
+    if (!mapa.has(chave)) {
+      mapa.set(chave, {
+        sku,
+        nome,
+        canais: new Set(),
+        quantidade: 0,
+        pedidosChaves: new Set(),
+        faturado: 0,
+        repasse: 0,
+        custo: 0
+      });
+    }
+
+    const atual = mapa.get(chave);
+
+    // ✅ usa o nome mais completo apenas para exibição
+    if (!atual.nome || String(nome).length > String(atual.nome).length) {
+      atual.nome = nome;
+    }
+
+    atual.canais.add(canal || 'Desconhecido');
+    atual.quantidade += obterQuantidade(item);
+    atual.faturado += paraNumero(item.preco_venda_normalizado);
+    atual.repasse += paraNumero(item.repasse_normalizado);
+    atual.custo += paraNumero(item.custo_normalizado);
+
+    const chavePedido = chavePedidoDistintoResumo(item);
+    if (chavePedido) atual.pedidosChaves.add(chavePedido);
+  });
+
+  return Array.from(mapa.values())
+    .map(item => ({
+      ...item,
+      pedidos: item.pedidosChaves.size,
+      canaisTexto: Array.from(item.canais).filter(Boolean).join(' / '),
+      receitaLiquida: item.repasse - item.custo,
+      margem: item.faturado > 0 ? ((item.repasse - item.custo) / item.faturado) * 100 : 0
+    }))
+    .sort((a, b) => b.quantidade !== a.quantidade ? b.quantidade - a.quantidade : b.faturado - a.faturado)
+    .slice(0, limite);
+}
   function renderizarTopProdutos() {
     const tbody = document.getElementById('topProdutosBody');
     const vazio = document.getElementById('topProdutosVazio');
