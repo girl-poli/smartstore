@@ -1017,9 +1017,6 @@
 
 </head>
 
-<script src="app.js?v=..."></script>
-<script src="scripts/auth-guard.js?v=menu-admin"></script>
-</body>
 <body>
   <div class="app-shell">
     <aside class="sidebar">
@@ -1289,23 +1286,9 @@
     </main>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="app.js?v=1005"></script>
-
-
-  <script>
-    document.addEventListener('DOMContentLoaded', async () => {
-      try {
-        const resp = await fetch('/api/auth/me');
-        const data = await resp.json();
-
-        if (data && data.ok && data.user && data.user.role === 'ADMIN') {
-          const menu = document.getElementById('menuUsuarios');
-          if (menu) menu.style.display = 'block';
-        }
-      } catch {}
-    });
-  </script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="scripts/auth-guard.js?v=menu-admin-2"></script>
+<script src="app.js?v=1006"></script>
 
 </body>
 </html>
