@@ -1,5 +1,5 @@
 // scripts/auth-guard.js
-// SMART COSMÉTICOS — Auth + logout + menu admin global
+// SMART COSMÉTICOS — Auth + logout + menu admin global + login automático
 (function () {
   function getToken() {
     return localStorage.getItem('smart_token') || localStorage.getItem('token') || '';
@@ -19,6 +19,11 @@
     localStorage.setItem('user', JSON.stringify(user));
   }
 
+  function saveToken(token) {
+    localStorage.setItem('smart_token', token);
+    localStorage.setItem('token', token);
+  }
+
   function clearSession() {
     localStorage.removeItem('smart_token');
     localStorage.removeItem('smart_user');
@@ -26,22 +31,34 @@
     localStorage.removeItem('user');
   }
 
+  function createAutoAdminSession() {
+    const userDev = {
+      id: 'local-admin',
+      nome: 'Poliana',
+      seller: 'Smart Cosméticos',
+      role: 'ADMIN'
+    };
+
+    saveToken('smart-local-token-2026');
+    saveUser(userDev);
+
+    console.warn('[auth] Sessão automática ADMIN criada.');
+    return userDev;
+  }
+
   function normalizedUser() {
     let user = getUser();
 
     if (!user) {
-      user = {
-        id: 'local-admin',
-        nome: 'Seller Smart Cosméticos',
-        seller: 'Smart Cosméticos',
-        role: 'ADMIN'
-      };
-      saveUser(user);
+      user = createAutoAdminSession();
     }
 
-    // Corrige sessões locais antigas que entraram sem ADMIN
     const token = getToken();
-    if ((token === 'smart-local-token-2026' || token === 'local-dev-token-smart') && String(user.role || '').toUpperCase() !== 'ADMIN') {
+
+    if (
+      (token === 'smart-local-token-2026' || token === 'local-dev-token-smart') &&
+      String(user.role || '').toUpperCase() !== 'ADMIN'
+    ) {
       user.role = 'ADMIN';
       saveUser(user);
     }
@@ -119,6 +136,8 @@
     } catch {}
 
     clearSession();
+
+    // Login automático recria a sessão ao voltar para painel.
     window.location.href = '/login.html';
   }
 
@@ -151,8 +170,9 @@
       link.href = 'usuarios.html';
       link.textContent = 'Usuários';
 
-      const processamento =
-        menu.querySelector('a[href="processamento.html"], a[href="/processamento.html"]');
+      const processamento = menu.querySelector(
+        'a[href="processamento.html"], a[href="/processamento.html"]'
+      );
 
       if (processamento) {
         processamento.insertAdjacentElement('afterend', link);
@@ -183,7 +203,7 @@
 
     box.innerHTML = `
       <p class="box-label">Usuário logado</p>
-      <strong>${user.nome || user.name || 'Seller Smart Cosméticos'}</strong>
+      <strong>${user.nome || user.name || 'Poliana'}</strong>
       <span>${user.seller || user.loja || 'Smart Cosméticos'}</span>
       <button id="btnLogoutGlobal" class="btn-logout-sidebar" type="button">Sair do sistema</button>
     `;
@@ -197,12 +217,11 @@
     const page = location.pathname.split('/').pop() || '';
     const publicPages = ['login.html', 'cadastro.html', ''];
 
-    if (!publicPages.includes(page) && !getToken()) {
-      window.location.href = '/login.html';
-      return;
-    }
-
     if (publicPages.includes(page)) return;
+
+    if (!getToken()) {
+      createAutoAdminSession();
+    }
 
     const user = normalizedUser();
     renderUserBox(user);
