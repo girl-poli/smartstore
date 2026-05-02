@@ -1,281 +1,130 @@
 // scripts/auth-login.js
-// Login por celular com fallback de endpoints.
-// Fluxo:
-// 1) envia código
-// 2) mostra campo código
-// 3) valida código
-// Salva sessão em smart_token/smart_user e token/user.
+// Login Smart Cosméticos — celular + senha, sem SMS e sem custo.
 document.addEventListener('DOMContentLoaded', () => {
-  const $ = (sel) => document.querySelector(sel);
+  const form = document.getElementById('formLoginSenha') || document.querySelector('form');
+  const celularInput = document.getElementById('celular');
+  const senhaInput = document.getElementById('senha');
+  const btnEntrar = document.getElementById('btnEntrarSenha') || document.querySelector('button[type="submit"]');
+  const authMessage = document.getElementById('authMessage');
+  const tokenBox = document.getElementById('tokenBox');
+  const tokenValue = document.getElementById('tokenValue');
+  const btnCopiarToken = document.getElementById('btnCopiarToken');
 
-  const form =
-    $('#formLogin') ||
-    $('form');
-
-  const celularInput =
-    $('#celular') ||
-    $('#telefone') ||
-    $('#phone') ||
-    $('input[type="tel"]') ||
-    $('input[name="celular"]') ||
-    $('input[name="telefone"]');
-
-  const canalSelect =
-    $('#canal') ||
-    $('#tipoEnvio') ||
-    $('#metodo') ||
-    $('select');
-
-  let codigoInput =
-    $('#codigo') ||
-    $('#code') ||
-    $('input[name="codigo"]') ||
-    $('input[name="code"]');
-
-  const submitBtn =
-    $('#btnEnviarCodigo') ||
-    $('#btnLogin') ||
-    $('button[type="submit"]');
-
-  let etapa = codigoInput ? 'codigo' : 'celular';
-
-  function onlyDigits(value) {
-    return String(value || '').replace(/\D/g, '');
+  function limparCelular(valor) {
+    return String(valor || '').replace(/\D/g, '');
   }
 
-  function showMsg(text, type = 'info') {
-    let el = $('#loginMsg');
-    if (!el) {
-      el = document.createElement('div');
-      el.id = 'loginMsg';
-      el.style.marginTop = '12px';
-      el.style.fontWeight = '800';
-      el.style.fontSize = '13px';
-      form?.appendChild(el);
-    }
-
-    el.textContent = text;
-    el.style.color = type === 'error' ? '#b42318' : '#027a48';
+  function msg(texto, ok = false) {
+    if (!authMessage) return;
+    authMessage.textContent = texto || '';
+    authMessage.classList.toggle('ok', !!ok);
   }
 
-  function saveSession(data) {
-    const token =
-      data.token ||
-      data.accessToken ||
-      data.jwt ||
-      data.smart_token ||
-      data?.data?.token ||
-      '';
-
-    const user =
-      data.user ||
-      data.usuario ||
-      data.me ||
-      data?.data?.user ||
-      data?.data?.usuario ||
-      null;
-
-    if (token) {
-      localStorage.setItem('smart_token', token);
-      localStorage.setItem('token', token);
+  function setLoading(loading) {
+    if (!btnEntrar) return;
+    if (loading) {
+      btnEntrar.dataset.oldText = btnEntrar.textContent;
+      btnEntrar.textContent = 'Entrando...';
+      btnEntrar.disabled = true;
+    } else {
+      btnEntrar.textContent = btnEntrar.dataset.oldText || 'Entrar no painel →';
+      btnEntrar.disabled = false;
     }
-
-    if (user) {
-      localStorage.setItem('smart_user', JSON.stringify(user));
-      localStorage.setItem('user', JSON.stringify(user));
-    }
-
-    return { token, user };
   }
 
-  async function tryEndpoints(endpoints, payload) {
-    let lastError = null;
-
-    for (const url of endpoints) {
-      try {
-        const resp = await fetch(url, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
-        });
-
-        const data = await resp.json().catch(() => ({}));
-
-        if (resp.ok && (data.ok !== false)) {
-          return { url, data };
-        }
-
-        lastError = data.erro || data.error || data.message || `Falha em ${url}`;
-      } catch (err) {
-        lastError = err.message;
-      }
-    }
-
-    throw new Error(lastError || 'Não foi possível concluir o login.');
+  function setCookie(name, value, maxAgeSeconds) {
+    document.cookie = `${name}=${encodeURIComponent(value)}; Path=/; Max-Age=${maxAgeSeconds}; SameSite=Lax`;
   }
 
-  function ensureCodigoField() {
-    if (codigoInput) {
-      codigoInput.closest('.field, .form-group, .input-group')?.style?.removeProperty('display');
-      codigoInput.style.display = '';
-      return codigoInput;
-    }
+  function salvarSessao(token, user) {
+    localStorage.setItem('smart_token', token);
+    localStorage.setItem('token', token);
+    localStorage.setItem('smart_user', JSON.stringify(user || {}));
+    localStorage.setItem('user', JSON.stringify(user || {}));
 
-    const wrap = document.createElement('div');
-    wrap.className = 'input-group';
-    wrap.style.marginTop = '12px';
+    // O servidor lê cookie; o frontend lê localStorage.
+    setCookie('auth_token', token, 60 * 60 * 12);
 
-    wrap.innerHTML = `
-      <label style="display:block;margin-bottom:6px;font-size:10px;letter-spacing:.14em;text-transform:uppercase;font-weight:900;color:#a88a85;">Código</label>
-      <input id="codigo" name="codigo" inputmode="numeric" placeholder="Digite o código recebido" style="width:100%;height:42px;border:1px solid #ecd6d1;border-radius:12px;padding:0 12px;" />
-    `;
-
-    form.insertBefore(wrap, submitBtn || null);
-    codigoInput = wrap.querySelector('#codigo');
-    return codigoInput;
+    if (tokenValue) tokenValue.value = token;
+    if (tokenBox) tokenBox.classList.add('show');
   }
 
-  async function enviarCodigo() {
-    const celular = onlyDigits(celularInput?.value);
+  async function loginComSenha(e) {
+    e.preventDefault();
+
+    const celular = limparCelular(celularInput?.value);
+    const senha = String(senhaInput?.value || '');
 
     if (!celular || celular.length < 10) {
-      showMsg('Digite um celular válido com DDD.', 'error');
+      msg('Informe um celular válido com DDD.');
       return;
     }
 
-    const canal = canalSelect?.value || 'sms';
-
-    if (submitBtn) {
-      submitBtn.disabled = true;
-      submitBtn.textContent = 'Enviando...';
-    }
-
-    const payload = { celular, telefone: celular, phone: celular, canal, metodo: canal };
-
-    const { data } = await tryEndpoints(
-      [
-        '/api/auth/request-code',
-        '/api/auth/send-code',
-        '/api/auth/login/request',
-        '/api/auth/otp/send',
-        '/api/auth/login'
-      ],
-      payload
-    );
-
-    const session = saveSession(data);
-
-    if (session.token) {
-      showMsg('Login realizado com sucesso.');
-      location.href = '/index.html';
+    if (!senha) {
+      msg('Informe sua senha.');
       return;
     }
 
-    const codeFromDev =
-      data.codigo ||
-      data.code ||
-      data.otp ||
-      data.devCode ||
-      data?.data?.codigo ||
-      data?.data?.code ||
-      '';
+    try {
+      msg('');
+      setLoading(true);
 
-    ensureCodigoField();
+      const resp = await fetch('/api/auth/login-senha', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ celular, senha })
+      });
 
-    if (codeFromDev && codigoInput) {
-      codigoInput.value = codeFromDev;
-      showMsg(`Código gerado: ${codeFromDev}`);
-    } else {
-      showMsg('Código enviado. Digite o código recebido.');
-    }
+      const data = await resp.json().catch(() => ({}));
 
-    etapa = 'codigo';
+      if (!resp.ok || data.ok === false) {
+        throw new Error(data.erro || data.message || 'Não foi possível fazer login.');
+      }
 
-    if (submitBtn) {
-      submitBtn.disabled = false;
-      submitBtn.textContent = 'Entrar no painel →';
+      if (!data.token) {
+        throw new Error('Login validado, mas a API não retornou token.');
+      }
+
+      salvarSessao(data.token, data.user);
+      msg('Login realizado com sucesso. Entrando no painel...', true);
+
+      setTimeout(() => {
+        window.location.href = '/processamento.html';
+      }, 350);
+    } catch (erro) {
+      msg(erro.message || 'Erro ao fazer login.');
+    } finally {
+      setLoading(false);
     }
   }
 
-  async function validarCodigo() {
-    const celular = onlyDigits(celularInput?.value);
-    const codigo = onlyDigits(codigoInput?.value);
-
-    if (!codigo) {
-      showMsg('Digite o código de acesso.', 'error');
-      return;
-    }
-
-    if (submitBtn) {
-      submitBtn.disabled = true;
-      submitBtn.textContent = 'Validando...';
-    }
-
-    const payload = {
-      celular,
-      telefone: celular,
-      phone: celular,
-      codigo,
-      code: codigo,
-      otp: codigo
-    };
-
-    const { data } = await tryEndpoints(
-      [
-        '/api/auth/verify-code',
-        '/api/auth/verify',
-        '/api/auth/login/verify',
-        '/api/auth/otp/verify',
-        '/api/auth/login'
-      ],
-      payload
-    );
-
-    const session = saveSession(data);
-
-    if (!session.token) {
-      throw new Error('Código validado, mas a API não retornou token.');
-    }
-
-    showMsg('Login realizado com sucesso.');
-    location.href = '/index.html';
+  if (form) {
+    form.addEventListener('submit', loginComSenha);
   }
 
-  if (!form || !celularInput) {
-    console.warn('[auth-login] Não encontrei form/celular no login.html');
-    return;
-  }
+  btnCopiarToken?.addEventListener('click', async () => {
+    try {
+      await navigator.clipboard.writeText(tokenValue?.value || '');
+      msg('Token copiado.', true);
+    } catch {
+      msg('Não consegui copiar automaticamente.');
+    }
+  });
 
-  // Se já está logado, botão "Ir ao painel" pode funcionar.
-  document.querySelectorAll('a, button').forEach((el) => {
-    const txt = (el.textContent || '').toLowerCase();
-    if (txt.includes('ir ao painel')) {
-      el.addEventListener('click', (e) => {
-        e.preventDefault();
-        location.href = localStorage.getItem('smart_token') || localStorage.getItem('token')
-          ? '/index.html'
-          : '/login.html';
+  document.querySelectorAll('a.auth-link').forEach((a) => {
+    if ((a.textContent || '').toLowerCase().includes('ir ao painel')) {
+      a.addEventListener('click', (e) => {
+        const token = localStorage.getItem('smart_token') || localStorage.getItem('token');
+        if (!token) {
+          e.preventDefault();
+          msg('Faça login com celular e senha para entrar.');
+          return;
+        }
+
+        setCookie('auth_token', token, 60 * 60 * 12);
       });
     }
   });
 
-  form.addEventListener('submit', async (e) => {
-    e.preventDefault();
-
-    try {
-      if (etapa === 'celular') {
-        await enviarCodigo();
-      } else {
-        await validarCodigo();
-      }
-    } catch (err) {
-      showMsg(err.message || 'Erro no login.', 'error');
-      if (submitBtn) {
-        submitBtn.disabled = false;
-        submitBtn.textContent = etapa === 'celular'
-          ? 'Enviar código de acesso →'
-          : 'Entrar no painel →';
-      }
-    }
-  });
+  console.log('[auth-login] login por celular + senha carregado');
 });
