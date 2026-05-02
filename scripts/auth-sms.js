@@ -1,4 +1,3 @@
-
 (function(){
   const $ = (id) => document.getElementById(id);
   const API = '';
@@ -31,11 +30,23 @@
     if(box) box.classList.add('show');
   }
 
+  function setCookie(name, value, maxAgeSeconds){
+    document.cookie = `${name}=${encodeURIComponent(value)}; Path=/; Max-Age=${maxAgeSeconds}; SameSite=Lax`;
+  }
+
+  function limparCookie(name){
+    document.cookie = `${name}=; Path=/; Max-Age=0; SameSite=Lax`;
+  }
+
   function salvarSessao(token, user){
     localStorage.setItem('smart_token', token);
     localStorage.setItem('token', token);
     localStorage.setItem('smart_user', JSON.stringify(user || {}));
     localStorage.setItem('user', JSON.stringify(user || {}));
+
+    // Importante: o servidor NÃO consegue ler localStorage.
+    // Este cookie evita o efeito "pisca e volta para login" quando a página protegida carrega.
+    setCookie('auth_token', token, 60 * 60 * 12);
   }
 
   function sessaoLocal(){
@@ -47,8 +58,11 @@
       seller: 'Smart Cosméticos',
       role: 'ADMIN'
     };
-    salvarSessao('smart-local-token-2026', user);
-    mostrarToken('smart-local-token-2026');
+
+    const token = 'smart-local-token-2026';
+    salvarSessao(token, user);
+    mostrarToken(token);
+    return { token, user };
   }
 
   async function chamarJson(url, payload){
@@ -168,7 +182,7 @@
       mostrarToken(token);
       msg('Acesso autorizado. Entrando no painel...', true);
 
-      setTimeout(()=>{ window.location.href='processamento.html'; }, 500);
+      setTimeout(()=>{ window.location.href='/processamento.html'; }, 500);
     } catch(e) {
       msg(e.message || 'Erro ao validar código.');
     } finally {
@@ -202,12 +216,20 @@
       if((a.textContent || '').toLowerCase().includes('ir ao painel')) {
         a.addEventListener('click', (e) => {
           e.preventDefault();
-          sessaoLocal();
-          window.location.href = 'processamento.html';
+
+          const tokenAtual = localStorage.getItem('smart_token') || localStorage.getItem('token');
+
+          if(!tokenAtual){
+            sessaoLocal();
+          } else {
+            setCookie('auth_token', tokenAtual, 60 * 60 * 12);
+          }
+
+          window.location.href = '/processamento.html';
         });
       }
     });
 
-    console.log('[auth-sms] versão original corrigida carregada');
+    console.log('[auth-sms] versão corrigida com cookie de sessão carregada');
   });
 })();

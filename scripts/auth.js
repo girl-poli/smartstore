@@ -1,9 +1,20 @@
-
 // scripts/auth.js - proteção simples das páginas e utilitário de fetch com token
 (function(){
   const publicPages = ['login.html','cadastro.html'];
   const page = location.pathname.split('/').pop() || 'processamento.html';
   const token = localStorage.getItem('smart_token') || localStorage.getItem('token');
+
+  function setCookie(name, value, maxAgeSeconds){
+    document.cookie = `${name}=${encodeURIComponent(value)}; Path=/; Max-Age=${maxAgeSeconds}; SameSite=Lax`;
+  }
+
+  function clearCookie(name){
+    document.cookie = `${name}=; Path=/; Max-Age=0; SameSite=Lax`;
+  }
+
+  if (token) {
+    setCookie('auth_token', token, 60 * 60 * 12);
+  }
 
   if (!publicPages.includes(page) && !token) {
     location.href = '/login.html';
@@ -21,6 +32,7 @@
       localStorage.removeItem('smart_user');
       localStorage.removeItem('token');
       localStorage.removeItem('user');
+      clearCookie('auth_token');
       location.href = '/login.html';
     },
     fetch: (url, options={}) => {
