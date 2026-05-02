@@ -1,39 +1,6 @@
 const $ = (id) => document.getElementById(id);
 let arquivosStatus = [];
 
-function getToken() {
-  return localStorage.getItem('smart_token') || localStorage.getItem('token') || '';
-}
-
-function apiFetch(url, options = {}) {
-  const headers = new Headers(options.headers || {});
-  const token = getToken();
-
-  // Envia o token para a API. Sem isso o backend retorna: "Não autenticado".
-  if (token) headers.set('Authorization', 'Bearer ' + token);
-
-  return fetch(url, {
-    ...options,
-    headers,
-    credentials: 'include'
-  });
-}
-
-function exigirLoginVisual() {
-  const token = getToken();
-  if (!token) {
-    const status = $('status');
-    if (status) {
-      status.textContent = 'Sessão expirada. Faça login novamente.';
-      status.className = 'status-msg erro';
-    }
-    setTimeout(() => { window.location.href = '/login.html'; }, 600);
-    return false;
-  }
-  return true;
-}
-
-
 function formatBytes(bytes) {
   const n = Number(bytes || 0);
   if (!n) return '-';
@@ -66,12 +33,11 @@ function normalizarResposta(data) {
 }
 
 async function carregarStatus() {
-  if (!exigirLoginVisual()) return;
   const tbody = $('tbodyArquivos');
   tbody.innerHTML = '<tr><td colspan="7">Carregando...</td></tr>';
 
   try {
-    const res = await apiFetch('/api/upload/status', { cache: 'no-store' });
+    const res = await fetch('/api/upload/status', { cache: 'no-store' });
     const data = await res.json();
 
     if (!res.ok || !data.ok) throw new Error(data.erro || 'Erro ao carregar status');
@@ -118,7 +84,6 @@ async function carregarStatus() {
 }
 
 async function upload() {
-  if (!exigirLoginVisual()) return;
   const input = $('fileInput');
   const status = $('status');
 
@@ -135,7 +100,7 @@ async function upload() {
   status.className = 'status-msg';
 
   try {
-    const res = await apiFetch('/api/upload', { method: 'POST', body: formData });
+    const res = await fetch('/api/upload', { method: 'POST', body: formData });
     const data = await res.json();
 
     if (!res.ok || data.ok === false) throw new Error(data.erro || data.message || 'Erro no upload');
@@ -171,12 +136,11 @@ function selecionarArquivo() {
 }
 
 async function reprocessar(idx) {
-  if (!exigirLoginVisual()) return;
   const a = arquivosStatus[idx];
   $('logBox').textContent = `Processando ${a.nome}...`;
 
   try {
-    const res = await apiFetch('/api/upload/reprocessar/' + encodeURIComponent(a.nome), { method: 'POST' });
+    const res = await fetch('/api/upload/reprocessar/' + encodeURIComponent(a.nome), { method: 'POST' });
     const data = await res.json();
     $('logBox').textContent = JSON.stringify(data, null, 2);
     await carregarStatus();
