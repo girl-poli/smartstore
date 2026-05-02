@@ -645,64 +645,77 @@ function enriquecerTikTok(produtosMap) {
 }
 
 
-// =====================
-// INCREMENTAL REAL - MERGE COM DEDUPLICAÇÃO
-// Para produtos, a chave é SKU base. Se já existir, atualiza dados; se não existir, incrementa.
-// =====================
+
+// =====================================================
+// INCREMENTAL REAL - PRODUTOS
+// Nunca apaga a base antiga. Lê produtos.json atual, valida SKU base
+// e só incrementa/atualiza sem duplicar.
+// Chave: skuBase.
+// =====================================================
 function lerJsonOpcional(caminho) {
   if (!fs.existsSync(caminho)) return [];
   try {
-    const data = JSON.parse(fs.readFileSync(caminho, 'utf-8'));
-    return Array.isArray(data) ? data : [];
+    const data = JSON.parse(fs.readFileSync(caminho, "utf-8"));
+    if (Array.isArray(data)) return data;
+    if (Array.isArray(data.produtos)) return data.produtos;
+    if (Array.isArray(data.data)) return data.data;
+    return [];
   } catch {
     return [];
   }
 }
 
-function chaveProdutoIncremental(item) {
-  return extrairSkuBase(item.skuBase || item.sku || item.sky || item.seller_sku || '');
+function chaveIncrementalProduto(item) {
+  return extrairSkuBase(item.skuBase || item.sku || item.sky || item.seller_sku || "");
 }
 
-function mergeIncrementalProdutos(arquivoSaida, produtosNovos) {
-  const existentes = lerJsonOpcional(arquivoSaida);
+function mesclarIncrementalProdutos(produtosNovos) {
+  const antigos = lerJsonOpcional(OUTPUT_PRODUTOS);
   const mapa = new Map();
 
-  for (const item of existentes) {
-    const chave = item._chave_incremental || chaveProdutoIncremental(item);
+  for (const item of antigos) {
+    const chave = chaveIncrementalProduto(item);
     if (!chave) continue;
-    mapa.set(chave, { ...item, _chave_incremental: chave });
+    mapa.set(chave, item);
   }
 
-  let inseridos = 0;
+  let novos = 0;
   let atualizados = 0;
 
   for (const item of produtosNovos) {
-    const chave = chaveProdutoIncremental(item);
+    const chave = chaveIncrementalProduto(item);
     if (!chave) continue;
-    const anterior = mapa.get(chave);
 
-    mapa.set(chave, {
-      ...(anterior || {}),
-      ...item,
-      _chave_incremental: chave,
-      atualizado_incremental_em: new Date().toISOString()
-    });
-
-    if (anterior) atualizados++;
-    else inseridos++;
+    if (mapa.has(chave)) {
+      atualizados++;
+      mapa.set(chave, {
+        ...mapa.get(chave),
+        ...item,
+        atualizado_em_incremental: new Date().toISOString()
+      });
+    } else {
+      novos++;
+      mapa.set(chave, {
+        ...item,
+        criado_em_incremental: new Date().toISOString()
+      });
+    }
   }
 
   const final = Array.from(mapa.values());
 
-  console.log('🔁 Incremental produtos:', {
-    existentes: existentes.length,
-    novos_lidos: produtosNovos.length,
-    inseridos,
-    atualizados,
-    total_final: final.length
-  });
-
-  return { final, existentes: existentes.length, inseridos, atualizados };
+  return {
+    final,
+    auditoria: {
+      modo: "incremental_merge_dedup",
+      antigos: antigos.length,
+      recebidos: produtosNovos.length,
+      novos,
+      atualizados,
+      final: final.length,
+      chave: "skuBase"
+    }
+  };
 }
 
 function main() {
@@ -714,21 +727,15 @@ function main() {
   const shopee = enriquecerShopee(produtosMap);
   const tiktok = enriquecerTikTok(produtosMap);
 
-  const produtosNovos = Array.from(produtosMap.values());
-  const mergeProdutos = mergeIncrementalProdutos(OUTPUT_PRODUTOS, produtosNovos);
+  const produtosProcessados = Array.from(produtosMap.values());
+  const mergeProdutos = mesclarIncrementalProdutos(produtosProcessados);
   const produtos = mergeProdutos.final;
 
   const resumo = {
     base: {
       totalLinhasArquivo: totalLinhas,
       totalSkusBase: produtos.length,
-      incremental: {
-        existentes_antes: mergeProdutos.existentes,
-        lidos_no_arquivo_atual: produtosNovos.length,
-        inseridos: mergeProdutos.inseridos,
-        atualizados_ignorando_duplicidade: mergeProdutos.atualizados,
-        total_final: produtos.length
-      }
+      incremental: mergeProdutos.auditoria
     },
     ml: {
       totalArquivo: ml.totalArquivo,
@@ -777,6 +784,7 @@ function main() {
 
   console.log("=== RESUMO FINAL ===");
   console.log("Base:", resumo.base.totalSkusBase);
+  console.log("Incremental:", JSON.stringify(mergeProdutos.auditoria));
 
   console.log(
     "ML arquivo:",

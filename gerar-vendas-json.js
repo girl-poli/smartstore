@@ -1312,71 +1312,104 @@ function gerarResumoGeral(vendas, ml, shopee, tiktok, comprasInfo) {
 }
 
 
-// =====================
-// INCREMENTAL REAL - MERGE COM DEDUPLICAÇÃO
-// Regra: nunca sobrescrever o histórico. Lê o JSON atual,
-// valida se a venda já existe e só incrementa/atualiza o registro.
-// =====================
-function chaveVendaIncremental(venda) {
+
+// =====================================================
+// INCREMENTAL REAL - VENDAS
+// Nunca apaga a base antiga. Lê o JSON atual, valida se o registro já existe
+// e só incrementa/atualiza sem duplicar.
+// Chave: canal + pedido + sku + item/variação.
+// =====================================================
+function chaveIncrementalVenda(venda) {
   const canal = normalizarChave(venda.canal || venda.marketplace || venda.plataforma || '');
   const pedido = normalizarChave(
-    venda.pedido || venda.id_pedido || venda.numero_pedido || venda.order_id ||
-    venda.id_order || venda.id_venda || venda.codigo_pedido || venda.ml_pedido_principal || ''
+    venda.pedido ||
+    venda.id_pedido ||
+    venda.numero_pedido ||
+    venda.order_id ||
+    venda.id_order ||
+    venda.ml_pedido_principal ||
+    ''
   );
+
+  const sku = normalizarChave(
+    venda.sku ||
+    venda.sku_base ||
+    venda.seller_sku ||
+    venda.sellerSku ||
+    venda.codigo_sku ||
+    ''
+  );
+
   const item = normalizarChave(
-    venda.pedido_item_ml || venda.pacote || venda.package_id || venda.id_item ||
-    venda.item_id || venda.sku || venda.seller_sku || venda.sku_base || ''
+    venda.pedido_item_ml ||
+    venda.pacote ||
+    venda.variacao ||
+    venda.produto ||
+    venda.nome_produto ||
+    ''
   );
-  const sku = normalizarChave(venda.sku || venda.seller_sku || venda.sku_base || '');
-  const data = normalizarChave(venda.data_pedido || venda.data || venda.data_financeira || '');
 
-  // Pedido é a chave principal. SKU/item evita colisão em pedidos com múltiplos produtos.
-  if (pedido) return [canal, pedido, item || sku || 'SEM_ITEM'].join('|');
-  return [canal, sku || 'SEM_SKU', data || normalizarChave(venda.produto || '')].join('|');
-}
-
-function mergeIncrementalVendas(arquivoSaida, vendasNovas) {
-  const existentes = extrairListaVendas(lerJson(arquivoSaida, false));
-  const mapa = new Map();
-
-  for (const venda of existentes) {
-    const chave = chaveVendaIncremental(venda);
-    if (!chave) continue;
-    mapa.set(chave, { ...venda, _chave_incremental: chave });
+  // Se não houver pedido, usa fallback mais amplo para não perder linha.
+  if (!pedido) {
+    return [
+      canal,
+      normalizarChave(venda.data || venda.data_pedido || venda.data_financeira || ''),
+      sku,
+      item,
+      normalizarChave(venda.preco_venda || venda.repasse || '')
+    ].join('|');
   }
 
-  let inseridos = 0;
+  return [canal, pedido, sku, item].join('|');
+}
+
+function mesclarIncrementalVendas(vendasNovas) {
+  const antigas = extrairListaVendas(lerJson(OUTPUT, false));
+  const mapa = new Map();
+
+  for (const venda of antigas) {
+    const chave = chaveIncrementalVenda(venda);
+    if (!chave) continue;
+    mapa.set(chave, venda);
+  }
+
+  let novos = 0;
   let atualizados = 0;
 
   for (const venda of vendasNovas) {
-    const chave = chaveVendaIncremental(venda);
+    const chave = chaveIncrementalVenda(venda);
     if (!chave) continue;
 
-    const anterior = mapa.get(chave);
-    const novoRegistro = {
-      ...(anterior || {}),
-      ...venda,
-      _chave_incremental: chave,
-      atualizado_incremental_em: new Date().toISOString()
-    };
-
-    if (anterior) atualizados++;
-    else inseridos++;
-
-    mapa.set(chave, novoRegistro);
+    if (mapa.has(chave)) {
+      atualizados++;
+      mapa.set(chave, {
+        ...mapa.get(chave),
+        ...venda,
+        atualizado_em_incremental: new Date().toISOString()
+      });
+    } else {
+      novos++;
+      mapa.set(chave, {
+        ...venda,
+        criado_em_incremental: new Date().toISOString()
+      });
+    }
   }
 
   const final = Array.from(mapa.values());
 
-  console.log('🔁 Incremental vendas:', {
-    existentes: existentes.length,
-    novas_lidas: vendasNovas.length,
-    inseridos,
-    atualizados,
-    total_final: final.length
-  });
-
-  return { final, existentes: existentes.length, inseridos, atualizados };
+  return {
+    final,
+    auditoria: {
+      modo: 'incremental_merge_dedup',
+      antigos: antigas.length,
+      recebidos: vendasNovas.length,
+      novos,
+      atualizados,
+      final: final.length,
+      chave: 'canal + pedido + sku + item'
+    }
+  };
 }
 
 // =====================
@@ -1396,25 +1429,19 @@ function main() {
 
   const vendasBase = [...ml, ...shopee, ...tiktok];
   const vendasComCustos = aplicarCustosECompras(vendasBase, mapaCustosCatalogo, comprasInfo.mapa);
-  const vendasNovas = aplicarStatus(vendasComCustos);
+  const vendasProcessadas = aplicarStatus(vendasComCustos);
 
-  garantirPasta(OUTPUT);
+  const merge = mesclarIncrementalVendas(vendasProcessadas);
+  const vendas = merge.final;
 
-  const mergeVendas = mergeIncrementalVendas(OUTPUT, vendasNovas);
-  const vendas = mergeVendas.final;
+  const resumo = gerarResumoGeral(vendas, ml, shopee, tiktok, comprasInfo);
+  resumo.incremental = merge.auditoria;
 
-  const resumo = {
-    ...gerarResumoGeral(vendas, ml, shopee, tiktok, comprasInfo),
-    incremental: {
-      existentes_antes: mergeVendas.existentes,
-      lidos_no_arquivo_atual: vendasNovas.length,
-      inseridos: mergeVendas.inseridos,
-      atualizados_ignorando_duplicidade: mergeVendas.atualizados,
-      total_final: vendas.length
-    }
-  };
   const resumoStatus = gerarResumoStatus(vendas);
   const resumoConciliacao = gerarResumoConciliacao(vendas, comprasInfo);
+  resumoConciliacao.incremental = merge.auditoria;
+
+  garantirPasta(OUTPUT);
 
   fs.writeFileSync(OUTPUT, JSON.stringify(vendas, null, 2), 'utf-8');
   fs.writeFileSync(OUTPUT_RESUMO, JSON.stringify(resumo, null, 2), 'utf-8');
@@ -1429,7 +1456,8 @@ function main() {
   console.log('ML:', ml.length);
   console.log('Shopee:', shopee.length);
   console.log('TikTok:', tiktok.length);
-  console.log('Total vendas final incremental:', vendas.length);
+  console.log('Total vendas final:', vendas.length);
+  console.log('Incremental:', JSON.stringify(resumo.incremental));
   console.log('Compras/custos base:', comprasInfo.compras.length);
   console.log('Vendas conciliadas com compras:', resumoConciliacao.vendas_conciliadas_com_compras);
   console.log('Vendas não conciliadas:', resumoConciliacao.vendas_nao_conciliadas_com_compras);

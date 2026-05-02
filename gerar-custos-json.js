@@ -369,60 +369,85 @@ function ordenarResumoStatus(resumo) {
 }
 
 
-// =====================
-// INCREMENTAL REAL - MERGE COM DEDUPLICAÇÃO
-// Regra: nunca sobrescrever o histórico de custo. Valida se já existe.
-// =====================
-function chaveCustoIncremental(item) {
+
+// =====================================================
+// INCREMENTAL REAL - CUSTOS
+// Nunca apaga a base antiga. Lê custo.json atual, valida se já existe
+// e só incrementa/atualiza sem duplicar.
+// Chave: canal + id_pedido_mkt/id_produto + id_venda/pedido + sku.
+// =====================================================
+function chaveIncrementalCusto(item) {
   const canal = normalizarChave(item.canal || item.marketplace || '');
-  const pedidoMkt = normalizarChave(item.id_pedido_mkt || item.id_produto || item.pedido || '');
-  const idVenda = normalizarChave(item.id_venda || item.id_unico || '');
+  const pedidoMkt = normalizarChave(item.id_pedido_mkt || item.id_produto || '');
+  const pedidoRobo = normalizarChave(item.id_venda || item.pedido || '');
   const sku = normalizarChave(item.sku || item.sku_venda || '');
 
-  if (pedidoMkt) return [canal, pedidoMkt, sku || idVenda || 'SEM_SKU'].join('|');
-  return [canal, idVenda || 'SEM_ID', sku || 'SEM_SKU'].join('|');
+  const chave = [canal, pedidoMkt, pedidoRobo, sku].join('|');
+
+  if (chave.replace(/\|/g, '')) return chave;
+
+  return normalizarChave(
+    item.id_unico ||
+    item.texto_card ||
+    JSON.stringify(item).slice(0, 300)
+  );
 }
 
-function mergeIncrementalCustos(arquivoSaida, custosNovos) {
-  const existentes = extrairListaRobo(lerJson(arquivoSaida, false));
+function extrairListaCusto(conteudo) {
+  if (!conteudo) return [];
+  if (Array.isArray(conteudo)) return conteudo;
+  if (Array.isArray(conteudo.custos)) return conteudo.custos;
+  if (Array.isArray(conteudo.data)) return conteudo.data;
+  return [];
+}
+
+function mesclarIncrementalCustos(custosNovos) {
+  const antigos = extrairListaCusto(lerJson(OUTPUT_CUSTO, false));
   const mapa = new Map();
 
-  for (const item of existentes) {
-    const chave = item._chave_incremental || chaveCustoIncremental(item);
+  for (const item of antigos) {
+    const chave = chaveIncrementalCusto(item);
     if (!chave) continue;
-    mapa.set(chave, { ...item, _chave_incremental: chave });
+    mapa.set(chave, item);
   }
 
-  let inseridos = 0;
+  let novos = 0;
   let atualizados = 0;
 
   for (const item of custosNovos) {
-    const chave = chaveCustoIncremental(item);
+    const chave = chaveIncrementalCusto(item);
     if (!chave) continue;
-    const anterior = mapa.get(chave);
 
-    mapa.set(chave, {
-      ...(anterior || {}),
-      ...item,
-      _chave_incremental: chave,
-      atualizado_incremental_em: new Date().toISOString()
-    });
-
-    if (anterior) atualizados++;
-    else inseridos++;
+    if (mapa.has(chave)) {
+      atualizados++;
+      mapa.set(chave, {
+        ...mapa.get(chave),
+        ...item,
+        atualizado_em_incremental: new Date().toISOString()
+      });
+    } else {
+      novos++;
+      mapa.set(chave, {
+        ...item,
+        criado_em_incremental: new Date().toISOString()
+      });
+    }
   }
 
   const final = Array.from(mapa.values());
 
-  console.log('🔁 Incremental custos:', {
-    existentes: existentes.length,
-    novos_lidos: custosNovos.length,
-    inseridos,
-    atualizados,
-    total_final: final.length
-  });
-
-  return { final, existentes: existentes.length, inseridos, atualizados };
+  return {
+    final,
+    auditoria: {
+      modo: 'incremental_merge_dedup',
+      antigos: antigos.length,
+      recebidos: custosNovos.length,
+      novos,
+      atualizados,
+      final: final.length,
+      chave: 'canal + id_pedido_mkt/id_produto + id_venda/pedido + sku'
+    }
+  };
 }
 
 // =====================
@@ -473,7 +498,7 @@ function main() {
     }
   }
 
-  const custos = vendasRobo.map(item => {
+  let custos = vendasRobo.map(item => {
     const custoNumero = toNumber(item.custo);
     const vendaNumero = toNumber(item.preco_venda);
     const temCusto = custoNumero > 0;
@@ -551,12 +576,12 @@ function main() {
     };
   });
 
-  const mergeCustos = mergeIncrementalCustos(OUTPUT_CUSTO, custos);
-  const custosFinais = mergeCustos.final;
+  const mergeCustos = mesclarIncrementalCustos(custos);
+  custos = mergeCustos.final;
 
   const mapaStatus = {};
 
-  for (const item of custosFinais) {
+  for (const item of custos) {
     const chave = [
       item.status_original || '',
       item.status_custo || '',
@@ -591,9 +616,9 @@ function main() {
     return b.quantidade - a.quantidade;
   });
 
-  const resumoPorStatus = ordenarResumoStatus(contarPor(custosFinais, 'status_custo'));
-  const resumoPorCanal = contarPor(custosFinais, 'canal');
-  const resumoPorStatusOriginal = contarPor(custosFinais, 'status_original');
+  const resumoPorStatus = ordenarResumoStatus(contarPor(custos, 'status_custo'));
+  const resumoPorCanal = contarPor(custos, 'canal');
+  const resumoPorStatusOriginal = contarPor(custos, 'status_original');
 
   const debugPedidosCriticos = debugRegras.filter(d => PEDIDOS_DEBUG.has(String(d.id_venda)));
 
@@ -608,7 +633,7 @@ function main() {
     total_registros_vendas_json: vendas.length,
     total_pedidos_indexados_vendas: mapaVendas.size,
     total_pedidos_multiplos_vendas: mapaVendasInfo.duplicados.size,
-    total_registros_custo_json: custosFinais.length,
+    total_registros_custo_json: custos.length,
 
     total_com_custo: totalComCusto,
     total_sem_custo: totalSemCusto,
@@ -626,22 +651,15 @@ function main() {
     total_paginas: brutoRobo.totalPaginas || null,
     ultima_pagina_concluida: brutoRobo.ultimaPaginaConcluida || null,
 
-    incremental: {
-      existentes_antes: mergeCustos.existentes,
-      lidos_no_arquivo_atual: custos.length,
-      inseridos: mergeCustos.inseridos,
-      atualizados_ignorando_duplicidade: mergeCustos.atualizados,
-      total_final: custosFinais.length
-    },
-
     resumo_por_status_custo: resumoPorStatus,
     resumo_por_canal: resumoPorCanal,
-    resumo_por_status_original: resumoPorStatusOriginal
+    resumo_por_status_original: resumoPorStatusOriginal,
+    incremental: mergeCustos.auditoria
   };
 
   garantirPasta(OUTPUT_CUSTO);
 
-  fs.writeFileSync(OUTPUT_CUSTO, JSON.stringify(custosFinais, null, 2), 'utf-8');
+  fs.writeFileSync(OUTPUT_CUSTO, JSON.stringify(custos, null, 2), 'utf-8');
   fs.writeFileSync(OUTPUT_STATUS, JSON.stringify(listaStatus, null, 2), 'utf-8');
   fs.writeFileSync(OUTPUT_RESUMO, JSON.stringify(resumo, null, 2), 'utf-8');
   fs.writeFileSync(OUTPUT_DEBUG, JSON.stringify(debugRegras, null, 2), 'utf-8');
@@ -657,7 +675,8 @@ function main() {
   console.log(`Total esperado tela robô: ${totalEsperadoTela}`);
   console.log(`Total registros robô: ${vendasRobo.length}`);
   console.log(`Total registros vendas.json: ${vendas.length}`);
-  console.log(`Total no custo.json final incremental: ${custosFinais.length}`);
+  console.log(`Total no custo.json final: ${custos.length}`);
+  console.log('Incremental:', JSON.stringify(mergeCustos.auditoria));
   console.log(`Com custo: ${totalComCusto}`);
   console.log(`Sem custo: ${totalSemCusto}`);
   console.log(`Com cruzamento vendas: ${totalComCruzamentoVendas}`);
