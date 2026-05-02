@@ -16,6 +16,7 @@ const ROOT = __dirname;
 const IMPORT_DIR = path.resolve(ROOT, 'data_external');
 const DATA_DIR = path.join(ROOT, 'data');
 const LOG_DIR = path.join(DATA_DIR, 'logs-processamento');
+const VERSION_DIR = path.join(DATA_DIR, 'versoes-arquivos');
 const META_PATH = path.join(DATA_DIR, 'processamento-meta.json');
 const USERS_PATH = path.join(DATA_DIR, 'users.json');
 const OTP_PATH = path.join(DATA_DIR, 'otp-celular.json');
@@ -23,6 +24,7 @@ const OTP_PATH = path.join(DATA_DIR, 'otp-celular.json');
 fs.mkdirSync(IMPORT_DIR, { recursive: true });
 fs.mkdirSync(DATA_DIR, { recursive: true });
 fs.mkdirSync(LOG_DIR, { recursive: true });
+fs.mkdirSync(VERSION_DIR, { recursive: true });
 
 // ===== UPLOAD + TRACKING DE ARQUIVOS =====
 const UPLOAD_LOG_PATH = path.join(DATA_DIR, 'upload-log.json');
@@ -46,6 +48,55 @@ function lerUploadLog() {
 function salvarUploadLog(log) {
   fs.writeFileSync(UPLOAD_LOG_PATH, JSON.stringify(log, null, 2), 'utf8');
 }
+
+function hashArquivo(filePath) {
+  try {
+    if (!fs.existsSync(filePath)) return '';
+    const hash = crypto.createHash('sha256');
+    const buffer = fs.readFileSync(filePath);
+    hash.update(buffer);
+    return hash.digest('hex');
+  } catch {
+    return '';
+  }
+}
+
+function criarSnapshotArquivo(filePath, nome) {
+  try {
+    if (!fs.existsSync(filePath)) return null;
+
+    const ext = path.extname(nome);
+    const base = path.basename(nome, ext).replace(/[^\w.-]+/g, '_');
+    const stamp = new Date().toISOString().replace(/[:.]/g, '-');
+    const destinoNome = `${base}__${stamp}${ext}`;
+    const destino = path.join(VERSION_DIR, destinoNome);
+
+    fs.copyFileSync(filePath, destino);
+
+    return {
+      nome: destinoNome,
+      caminho: destino,
+      criadoEm: new Date().toISOString()
+    };
+  } catch (erro) {
+    return {
+      erro: erro.message,
+      criadoEm: new Date().toISOString()
+    };
+  }
+}
+
+function encontrarPipelinePorArquivo(nomeArquivo) {
+  if (typeof PIPELINES === 'undefined') return null;
+  return PIPELINES.find(p => p.arquivo === nomeArquivo || p.id === nomeArquivo) || null;
+}
+
+function metaDoArquivo(nomeArquivo, meta) {
+  const pipeline = encontrarPipelinePorArquivo(nomeArquivo);
+  if (!pipeline) return {};
+  return meta[pipeline.id] || {};
+}
+
 
 function registrarUpload(nome, patch) {
   const log = lerUploadLog();
@@ -153,9 +204,8 @@ function criarAdminPadraoSeNaoExistir() {
 
   users.push({
     id: crypto.randomUUID(),
-    nome: 'Poliana',
+    nome: 'Admin',
     email: 'admin@smart.local',
-    celular: '11999999999',
     seller: 'Smart Cosméticos',
     role: 'ADMIN',
     senhaHash: hashSenha('123456'),
@@ -164,7 +214,7 @@ function criarAdminPadraoSeNaoExistir() {
   });
 
   salvarUsuarios(users);
-  console.log('✅ Usuário inicial criado: celular 11999999999 / senha 123456');
+  console.log('✅ Usuário inicial criado: admin@smart.local / 123456');
 }
 
 criarAdminPadraoSeNaoExistir();
@@ -373,78 +423,6 @@ app.post('/api/auth/otp/request', rotaSolicitarCodigo);
 app.post('/api/auth/verify', rotaValidarCodigo);
 app.post('/api/auth/otp/verify', rotaValidarCodigo);
 
-// ===== LOGIN GRATUITO POR CELULAR + SENHA =====
-app.post('/api/auth/login-senha', (req, res) => {
-  try {
-    const celular = normalizarCelular(req.body.celular || req.body.telefone || req.body.phone);
-    const senha = String(req.body.senha || req.body.password || '');
-
-    if (!celular || celular.length < 10) {
-      return res.status(400).json({ ok: false, erro: 'Informe um celular válido com DDD.' });
-    }
-
-    if (!senha) {
-      return res.status(400).json({ ok: false, erro: 'Informe a senha.' });
-    }
-
-    const users = lerUsuarios();
-
-    let user = users.find(u =>
-      normalizarCelular(u.celular || u.phone || '') === celular &&
-      u.ativo !== false
-    );
-
-    // Compatibilidade: se o users.json antigo não tiver celular no admin padrão,
-    // permite primeiro login pelo celular padrão e atualiza o cadastro.
-    if (!user && celular === '11999999999') {
-      user = users.find(u =>
-        String(u.email || '').toLowerCase() === 'admin@smart.local' &&
-        u.ativo !== false
-      );
-
-      if (user && !user.celular) {
-        user.celular = celular;
-        user.nome = user.nome || 'Poliana';
-        user.role = user.role || 'ADMIN';
-        salvarUsuarios(users);
-      }
-    }
-
-    if (!user) {
-      return res.status(404).json({ ok: false, erro: 'Usuário não encontrado.' });
-    }
-
-    if (!user.senhaHash) {
-      return res.status(401).json({ ok: false, erro: 'Usuário sem senha cadastrada.' });
-    }
-
-    if (!senhaConfere(senha, user.senhaHash)) {
-      return res.status(401).json({ ok: false, erro: 'Senha inválida.' });
-    }
-
-    user.ultimoLoginEm = new Date().toISOString();
-    salvarUsuarios(users);
-
-    const token = gerarToken(user);
-    setAuthCookie(res, token);
-
-    return res.json({
-      ok: true,
-      token,
-      user: {
-        id: user.id,
-        nome: user.nome || 'Usuário',
-        seller: user.seller || 'Smart Cosméticos',
-        celular: user.celular || celular,
-        email: user.email || '',
-        role: user.role || 'SELLER'
-      }
-    });
-  } catch (erro) {
-    return res.status(500).json({ ok: false, erro: erro.message });
-  }
-});
-
 app.post('/api/auth/logout', (req, res) => {
   res.setHeader('Set-Cookie', 'auth_token=; Path=/; Max-Age=0; SameSite=Lax');
   res.json({ ok: true });
@@ -602,12 +580,17 @@ app.get('/', (req, res) => res.redirect('/processamento.html'));
 // ===== API UPLOAD COM TRACKING =====
 app.get('/api/upload/status', (req, res) => {
   const log = lerUploadLog();
+  const meta = readMeta();
 
   const arquivosEsperados = ARQUIVOS_ESPERADOS.map(item => {
     const filePath = path.join(IMPORT_DIR, item.nome);
     const existe = fs.existsSync(filePath);
     const stat = existe ? fs.statSync(filePath) : null;
     const registros = existe ? countRecords(filePath) : 0;
+
+    const sha256 = existe ? hashArquivo(filePath) : '';
+    const metaArquivo = metaDoArquivo(item.nome, meta);
+    const jaProcessado = !!(metaArquivo.sha256 && sha256 && metaArquivo.sha256 === sha256);
 
     return {
       ...item,
@@ -617,6 +600,18 @@ app.get('/api/upload/status', (req, res) => {
       registros,
       atualizadoEm: stat ? stat.mtime.toISOString() : null,
       ultimoUploadEm: log[item.nome]?.atualizadoEm || null,
+      ultimoProcessamentoEm: metaArquivo.ultimaExecucao || null,
+      ultimaReferencia: metaArquivo.ultimaReferencia || '',
+      sha256,
+      sha256Processado: metaArquivo.sha256 || '',
+      versaoArquivo: metaArquivo.versaoArquivo || null,
+      incrementalTexto: !existe
+        ? 'Arquivo ausente'
+        : jaProcessado
+          ? 'Sem alteração desde o último processamento'
+          : metaArquivo.sha256
+            ? 'Novo arquivo detectado'
+            : 'Primeira carga',
       erro: log[item.nome]?.erro || '',
       log: log[item.nome]?.log || ''
     };
@@ -628,6 +623,10 @@ app.get('/api/upload/status', (req, res) => {
     .map(nome => {
       const filePath = path.join(IMPORT_DIR, nome);
       const stat = fs.statSync(filePath);
+      const sha256 = hashArquivo(filePath);
+      const metaArquivo = metaDoArquivo(nome, meta);
+      const jaProcessado = !!(metaArquivo.sha256 && sha256 && metaArquivo.sha256 === sha256);
+
       return {
         nome,
         grupo: 'Extra',
@@ -638,6 +637,12 @@ app.get('/api/upload/status', (req, res) => {
         registros: countRecords(filePath),
         atualizadoEm: stat.mtime.toISOString(),
         ultimoUploadEm: log[nome]?.atualizadoEm || null,
+        ultimoProcessamentoEm: metaArquivo.ultimaExecucao || null,
+        ultimaReferencia: metaArquivo.ultimaReferencia || '',
+        sha256,
+        sha256Processado: metaArquivo.sha256 || '',
+        versaoArquivo: metaArquivo.versaoArquivo || null,
+        incrementalTexto: jaProcessado ? 'Sem alteração desde o último processamento' : 'Novo arquivo detectado',
         erro: log[nome]?.erro || '',
         log: log[nome]?.log || ''
       };
@@ -674,19 +679,34 @@ app.post('/api/upload', upload.array('files'), (req, res) => {
       const stat = fs.statSync(filePath);
       const registros = countRecords(filePath);
 
+      const sha256 = hashArquivo(filePath);
+      const meta = readMeta();
+      const metaArquivo = metaDoArquivo(nome, meta);
+      const semAlteracao = !!(metaArquivo.sha256 && metaArquivo.sha256 === sha256);
+
       registrarUpload(nome, {
         status: 'ok',
         erro: '',
-        log: `Upload concluído com sucesso. Registros detectados: ${registros ?? '-'}`
+        sha256,
+        tamanhoBytes: stat.size,
+        registros,
+        semAlteracao,
+        ultimoProcessamentoEm: metaArquivo.ultimaExecucao || null,
+        log: semAlteracao
+          ? `Upload recebido, mas o arquivo é igual ao último processado. Registros detectados: ${registros ?? '-'}`
+          : `Upload concluído com sucesso. Novo arquivo detectado. Registros detectados: ${registros ?? '-'}`
       });
 
       return {
         nome,
         ok: true,
+        semAlteracao,
         tamanhoBytes: stat.size,
         registros,
         atualizadoEm: stat.mtime.toISOString(),
-        log: `Upload concluído com sucesso.`
+        ultimoProcessamentoEm: metaArquivo.ultimaExecucao || null,
+        sha256,
+        log: semAlteracao ? `Arquivo igual ao último processado.` : `Upload concluído com sucesso.`
       };
     } catch (erro) {
       registrarUpload(nome, {
@@ -807,12 +827,13 @@ function montarStatusPipeline(p, meta) {
   const m = meta[p.id] || {};
   const registrosAgora = countRecords(caminho);
   const novaReferencia = stat ? stat.mtime.toISOString() : '';
+  const sha256 = existe ? hashArquivo(caminho) : '';
 
   let incrementalTexto = 'Pronto';
   if (!existe) incrementalTexto = 'Arquivo ausente';
-  else if (!m.ultimaReferencia) incrementalTexto = 'Primeira carga';
-  else if (m.ultimaReferencia !== novaReferencia) incrementalTexto = 'Novo arquivo detectado';
-  else incrementalTexto = 'Sem alteração';
+  else if (!m.sha256) incrementalTexto = 'Primeira carga';
+  else if (m.sha256 !== sha256) incrementalTexto = 'Novo arquivo detectado';
+  else incrementalTexto = 'Sem alteração desde o último processamento';
 
   return {
     ...p,
@@ -822,6 +843,9 @@ function montarStatusPipeline(p, meta) {
     tamanhoBytes: stat ? stat.size : 0,
     registros: registrosAgora ?? m.registros ?? null,
     ultimaReferencia: m.ultimaReferencia || '',
+    sha256,
+    sha256Processado: m.sha256 || '',
+    versaoArquivo: m.versaoArquivo || null,
     ultimaExecucao: m.ultimaExecucao || null,
     ultimoErro: m.ultimoErro || '',
     incrementalTexto
@@ -889,9 +913,23 @@ async function processarPipeline(id) {
   }
 
   const stat = fs.statSync(caminho);
+  const sha256 = hashArquivo(caminho);
   const scriptPath = path.join(ROOT, pipeline.script);
 
-  appendLog(id, `Início | arquivo=${pipeline.arquivo} | caminho=${caminho} | ultimaReferencia=${anterior.ultimaReferencia || '-'}`);
+  if (anterior.sha256 && anterior.sha256 === sha256 && !process.env.FORCE_REPROCESS) {
+    appendLog(id, `SEM ALTERAÇÃO | arquivo=${pipeline.arquivo} | processamento pulado | sha256=${sha256}`);
+    return {
+      ok: true,
+      skipped: true,
+      pipeline: id,
+      mensagem: 'Arquivo sem alteração desde o último processamento. Nada foi reprocessado.',
+      log: readLog(id)
+    };
+  }
+
+  const snapshot = criarSnapshotArquivo(caminho, pipeline.arquivo);
+
+  appendLog(id, `Início | arquivo=${pipeline.arquivo} | caminho=${caminho} | ultimaReferencia=${anterior.ultimaReferencia || '-'} | sha256=${sha256}`);
 
   let resultado;
   if (fs.existsSync(scriptPath)) {
@@ -900,7 +938,10 @@ async function processarPipeline(id) {
       PIPELINE_FILE: caminho,
       DATA_EXTERNAL_DIR: IMPORT_DIR,
       ULTIMA_DATA_REFERENCIA: anterior.ultimaReferencia || '',
-      MODO_INCREMENTAL: 'true'
+      ULTIMO_SHA256_PROCESSADO: anterior.sha256 || '',
+      SHA256_ATUAL: sha256,
+      MODO_INCREMENTAL: 'true',
+      ARQUIVO_JA_PROCESSADO_ANTES: anterior.sha256 ? 'true' : 'false'
     });
   } else {
     resultado = {
@@ -921,6 +962,8 @@ async function processarPipeline(id) {
     modificadoEm: stat.mtime.toISOString(),
     tamanhoBytes: stat.size,
     registros,
+    sha256,
+    versaoArquivo: snapshot,
     ultimoErro: resultado.ok ? '' : String(resultado.stderr || resultado.error?.message || 'Erro')
   };
 

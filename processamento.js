@@ -248,6 +248,8 @@ function cardPipeline(item) {
         <div><small>Registros</small><strong>${fmtQtd(item.registros)}</strong></div>
         <div><small>Incremental</small><strong>${item.incrementalTexto || 'Pronto'}</strong></div>
         <div><small>Última referência</small><strong>${item.ultimaReferencia ? fmtData(item.ultimaReferencia) : '-'}</strong></div>
+        <div><small>SHA atual</small><strong>${item.sha256 ? item.sha256.slice(0, 12) + '...' : '-'}</strong></div>
+        <div><small>SHA processado</small><strong>${item.sha256Processado ? item.sha256Processado.slice(0, 12) + '...' : '-'}</strong></div>
         <div><small>Última execução</small><strong>${fmtData(item.ultimaExecucao)}</strong></div>
       </div>
 
@@ -261,7 +263,7 @@ function cardPipeline(item) {
 
 async function carregarStatus() {
   try {
-    const resp = await fetch('/api/processamento/status?v=' + Date.now());
+    const resp = await (window.smartAuth?.fetch || fetch)('/api/processamento/status?v=' + Date.now());
     if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
 
     const data = await resp.json();
@@ -301,7 +303,7 @@ async function processarPipeline(pipeline, btn) {
   }
 
   try {
-    const resp = await fetch('/api/processamento/processar/' + pipeline, { method: 'POST' });
+    const resp = await (window.smartAuth?.fetch || fetch)('/api/processamento/processar/' + pipeline, { method: 'POST' });
     const data = await resp.json();
     $('logProcessamento').textContent = data.log || JSON.stringify(data, null, 2);
     await carregarStatus();
@@ -323,7 +325,7 @@ function ativarBotoes() {
   document.querySelectorAll('.btn-log-pipeline').forEach(btn => {
     btn.onclick = async () => {
       try {
-        const resp = await fetch('/api/processamento/log/' + btn.dataset.pipeline + '?v=' + Date.now());
+        const resp = await (window.smartAuth?.fetch || fetch)('/api/processamento/log/' + btn.dataset.pipeline + '?v=' + Date.now());
         const data = await resp.json();
         $('logProcessamento').textContent = data.log || 'Sem log para este pipeline.';
       } catch (e) {

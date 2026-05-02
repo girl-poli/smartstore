@@ -37,7 +37,7 @@ async function carregarStatus() {
   tbody.innerHTML = '<tr><td colspan="7">Carregando...</td></tr>';
 
   try {
-    const res = await fetch('/api/upload/status', { cache: 'no-store' });
+    const res = await (window.smartAuth?.fetch || fetch)('/api/upload/status', { cache: 'no-store' });
     const data = await res.json();
 
     if (!res.ok || !data.ok) throw new Error(data.erro || 'Erro ao carregar status');
@@ -69,7 +69,11 @@ async function carregarStatus() {
           <td>${badge(status)}</td>
           <td>${a.registros ?? '-'}</td>
           <td>${formatBytes(a.tamanhoBytes)}</td>
-          <td>${formatDate(a.atualizadoEm || a.ultimoUploadEm)}</td>
+          <td>
+            ${formatDate(a.atualizadoEm || a.ultimoUploadEm)}
+            <small>${a.incrementalTexto || ''}</small>
+            <small>Últ. proc.: ${formatDate(a.ultimoProcessamentoEm)}</small>
+          </td>
           <td class="actions">
             <button onclick="verLog(${idx})" class="btn small ghost">Ver log</button>
             ${status === 'erro' || status === 'ausente'
@@ -100,7 +104,7 @@ async function upload() {
   status.className = 'status-msg';
 
   try {
-    const res = await fetch('/api/upload', { method: 'POST', body: formData });
+    const res = await (window.smartAuth?.fetch || fetch)('/api/upload', { method: 'POST', body: formData });
     const data = await res.json();
 
     if (!res.ok || data.ok === false) throw new Error(data.erro || data.message || 'Erro no upload');
@@ -127,6 +131,11 @@ function verLog(idx) {
     `Atualizado: ${formatDate(a.atualizadoEm || a.ultimoUploadEm)}`,
     '',
     a.erro ? 'ERRO:' : 'LOG:',
+    `Incremental: ${a.incrementalTexto || '-'}`,
+    `Último processamento: ${formatDate(a.ultimoProcessamentoEm)}`,
+    `SHA atual: ${a.sha256 || '-'}`,
+    `SHA processado: ${a.sha256Processado || '-'}`,
+    '',
     a.erro || a.log || 'Sem log registrado.'
   ].join('\n');
 }
@@ -140,7 +149,7 @@ async function reprocessar(idx) {
   $('logBox').textContent = `Processando ${a.nome}...`;
 
   try {
-    const res = await fetch('/api/upload/reprocessar/' + encodeURIComponent(a.nome), { method: 'POST' });
+    const res = await (window.smartAuth?.fetch || fetch)('/api/upload/reprocessar/' + encodeURIComponent(a.nome), { method: 'POST' });
     const data = await res.json();
     $('logBox').textContent = JSON.stringify(data, null, 2);
     await carregarStatus();
