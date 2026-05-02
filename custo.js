@@ -198,6 +198,31 @@ document.addEventListener('DOMContentLoaded', () => {
     );
   }
 
+
+  function formatarDataInputISO(data) {
+    if (!(data instanceof Date) || isNaN(data.getTime())) return '';
+    const ano = data.getFullYear();
+    const mes = String(data.getMonth() + 1).padStart(2, '0');
+    const dia = String(data.getDate()).padStart(2, '0');
+    return `${ano}-${mes}-${dia}`;
+  }
+
+  function aplicarMesAtualPadrao(force = false) {
+    if (!filtroDataInicio || !filtroDataFim) return;
+
+    const inicioAtual = String(filtroDataInicio.value || '').trim();
+    const fimAtual = String(filtroDataFim.value || '').trim();
+
+    if (!force && (inicioAtual || fimAtual)) return;
+
+    const hoje = new Date();
+    const inicio = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
+    const fim = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0);
+
+    filtroDataInicio.value = formatarDataInputISO(inicio);
+    filtroDataFim.value = formatarDataInputISO(fim);
+  }
+
   function dataInputInicio(valor) {
     if (!valor) return null;
 
@@ -663,9 +688,10 @@ document.addEventListener('DOMContentLoaded', () => {
     if (filtroMarketplace) filtroMarketplace.value = 'todos';
     if (filtroPedido) filtroPedido.value = '';
     if (filtroSkuProduto) filtroSkuProduto.value = '';
-    if (filtroDataInicio) filtroDataInicio.value = '';
-    if (filtroDataFim) filtroDataFim.value = '';
     if (filtroTipoData) filtroTipoData.value = 'data_venda';
+
+    // Limpar filtros volta para o mês atual.
+    aplicarMesAtualPadrao(true);
 
     filtroAtivo = {
       tipo: 'todos',
@@ -757,6 +783,9 @@ document.addEventListener('DOMContentLoaded', () => {
       console.log('custo.json carregado:', custos.length);
       console.log('custo-status.json carregado:', mapaStatus.length);
 
+      // Ao carregar a tela Compras, fixa o período no mês atual.
+      aplicarMesAtualPadrao(true);
+
       renderFiltrosStatus();
       renderCustos();
       renderMapaStatus();
@@ -804,6 +833,15 @@ document.addEventListener('DOMContentLoaded', () => {
   filtroTipoData?.addEventListener('change', renderCustos);
   btnLimparFiltros?.addEventListener('click', limparFiltros);
   btnExportar?.addEventListener('click', exportarTabela);
+
+  document.querySelectorAll('[data-open-date]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const input = document.getElementById(btn.dataset.openDate);
+      if (!input) return;
+      if (typeof input.showPicker === 'function') input.showPicker();
+      else input.focus();
+    });
+  });
 
   carregar();
 });

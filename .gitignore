@@ -1,4 +1,18 @@
-node_modules/
+# Dados
+data_external/
 data/
+
+# Excel
+*.xlsx
+
+# Logs
+*.log
+
+# Backups
+*.backup*
+
+# Node
+node_modules/
+
+# Env
 .env
-logs/

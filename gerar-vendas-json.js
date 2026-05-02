@@ -68,6 +68,16 @@ function lerJson(filePath, obrigatorio = true) {
   }
 }
 
+
+function extrairListaVendas(conteudo) {
+  if (!conteudo) return [];
+  if (Array.isArray(conteudo)) return conteudo;
+  if (Array.isArray(conteudo.vendas)) return conteudo.vendas;
+  if (Array.isArray(conteudo.data)) return conteudo.data;
+  if (Array.isArray(conteudo.items)) return conteudo.items;
+  return [];
+}
+
 function normalizarTexto(valor) {
   return String(valor || '')
     .normalize('NFD')
@@ -1364,7 +1374,13 @@ function chaveIncrementalVenda(venda) {
 }
 
 function mesclarIncrementalVendas(vendasNovas) {
-  const antigas = extrairListaVendas(lerJson(OUTPUT, false));
+  let antigas = [];
+  try {
+    antigas = extrairListaVendas(lerJson(OUTPUT, false));
+  } catch (erro) {
+    console.warn('⚠️ Não foi possível ler vendas.json antigo. Será criada uma nova base.', erro.message);
+    antigas = [];
+  }
   const mapa = new Map();
 
   for (const venda of antigas) {

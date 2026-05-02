@@ -332,6 +332,27 @@ async function controlarMenuAdmin() {
   function parseDataVenda(valor) {
     if (!valor) return null;
 
+    if (valor instanceof Date && !isNaN(valor.getTime())) {
+      return valor;
+    }
+
+    // Excel serial date.
+    if (typeof valor === 'number' || /^\d+(\.\d+)?$/.test(String(valor).trim())) {
+      const n = Number(valor);
+      if (Number.isFinite(n) && n > 20000 && n < 90000) {
+        const excelEpoch = new Date(Date.UTC(1899, 11, 30));
+        const date = new Date(excelEpoch.getTime() + n * 86400000);
+        return new Date(
+          date.getUTCFullYear(),
+          date.getUTCMonth(),
+          date.getUTCDate(),
+          date.getUTCHours(),
+          date.getUTCMinutes(),
+          date.getUTCSeconds()
+        );
+      }
+    }
+
     const texto = String(valor).trim();
     if (!texto) return null;
 
@@ -419,11 +440,29 @@ async function controlarMenuAdmin() {
         item?.data_pagamento ||
         item?.data_pagamento_compra ||
         item?.data_custo ||
+        item?.paid_time ||
+        item?.PaidTime ||
         item?.data_pedido ||
+        item?.data_venda ||
+        item?.data_criacao ||
+        item?.created_time ||
+        item?.CreatedTime ||
+        item?.data_importacao ||
         item?.data;
     }
 
-    return item?.data_pedido || item?.data;
+    // Regra robusta:
+    // alguns geradores/marketplaces gravam a data como data_venda ou data_criacao.
+    // Se o filtro usa só data_pedido/data, as vendas de maio ficam invisíveis.
+    return item?.data_pedido ||
+      item?.data_venda ||
+      item?.data_criacao ||
+      item?.created_time ||
+      item?.CreatedTime ||
+      item?.data_importacao ||
+      item?.data_pagamento ||
+      item?.data_financeira ||
+      item?.data;
   }
 
   function obterDataCustoDaVisao(item) {
@@ -827,24 +866,44 @@ function prepararCampoDataResumo(input) {
 }
 
 
-function aplicarFiltroMesAtualPadrao(listaBase = []) {
-  if (!filtroDataInicioResumo || !filtroDataFimResumo) return;
-
-  // 🔴 NOVA REGRA: só aplica se os campos estiverem VAZIOS
-  const inicioAtual = (filtroDataInicioResumo.value || '').trim();
-  const fimAtual = (filtroDataFimResumo.value || '').trim();
-
-  if (inicioAtual.length > 0 || fimAtual.length > 0) {
-    return; // 👉 NÃO sobrescreve se usuário já começou a digitar
-  }
-
+function obterPeriodoMesAtualResumo() {
   const referencia = new Date();
-
   const inicio = new Date(referencia.getFullYear(), referencia.getMonth(), 1);
   const fim = new Date(referencia.getFullYear(), referencia.getMonth() + 1, 0);
 
+  return { inicio, fim };
+}
+
+function sincronizarPickerResumo(input, data) {
+  if (!input || !(data instanceof Date) || isNaN(data.getTime())) return;
+
+  const picker = document.getElementById(`${input.id}Picker`);
+  if (picker) {
+    const ano = data.getFullYear();
+    const mes = String(data.getMonth() + 1).padStart(2, '0');
+    const dia = String(data.getDate()).padStart(2, '0');
+    picker.value = `${ano}-${mes}-${dia}`;
+  }
+}
+
+function aplicarFiltroMesAtualPadrao(force = false) {
+  if (!filtroDataInicioResumo || !filtroDataFimResumo) return;
+
+  const inicioAtual = (filtroDataInicioResumo.value || '').trim();
+  const fimAtual = (filtroDataFimResumo.value || '').trim();
+
+  if (!force && (inicioAtual || fimAtual)) return;
+
+  const { inicio, fim } = obterPeriodoMesAtualResumo();
+
   filtroDataInicioResumo.value = formatarInputData(inicio);
   filtroDataFimResumo.value = formatarInputData(fim);
+
+  filtroDataInicioResumo.classList.remove('input-data-invalida');
+  filtroDataFimResumo.classList.remove('input-data-invalida');
+
+  sincronizarPickerResumo(filtroDataInicioResumo, inicio);
+  sincronizarPickerResumo(filtroDataFimResumo, fim);
 }
   function calcularMargemPorData(lista) {
     const mapa = new Map();
@@ -2164,17 +2223,8 @@ function aplicarFiltroMesAtualPadrao(listaBase = []) {
     try {
       let lista = obterListaFiltrada();
 
-      if (!lista.length && vendas.length && (filtroDataInicioResumo?.value || filtroDataFimResumo?.value)) {
-        logAuditoria('Filtro de data não retornou vendas. Limpando datas automaticamente para evitar tela zerada.', {
-          data_inicio: filtroDataInicioResumo?.value || '',
-          data_fim: filtroDataFimResumo?.value || '',
-          total_vendas_base: vendas.length
-        });
-
-        if (filtroDataInicioResumo) filtroDataInicioResumo.value = '';
-        if (filtroDataFimResumo) filtroDataFimResumo.value = '';
-        lista = obterListaFiltrada();
-      }
+      // Não limpa datas automaticamente.
+      // O resumo deve permanecer no período selecionado; por padrão, mês atual.
 
       const resumo = calcularResumo(lista);
 
@@ -2238,7 +2288,7 @@ function aplicarFiltroMesAtualPadrao(listaBase = []) {
       vendas = prepararVendas(jsonVendas);
       custos = prepararCustos(jsonCustos);
 
-      aplicarFiltroMesAtualPadrao(vendas);
+      aplicarFiltroMesAtualPadrao(true);
       aplicarTudoNaTela();
     } catch (error) {
       console.error('Erro ao carregar resumo executivo:', error);
@@ -2288,7 +2338,7 @@ function aplicarFiltroMesAtualPadrao(listaBase = []) {
 
       if (!vendas.length) return;
 
-      aplicarFiltroMesAtualPadrao(vendas);
+      aplicarFiltroMesAtualPadrao(true);
       aplicarTudoNaTela();
     });
   }

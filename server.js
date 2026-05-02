@@ -206,6 +206,7 @@ function criarAdminPadraoSeNaoExistir() {
     id: crypto.randomUUID(),
     nome: 'Admin',
     email: 'admin@smart.local',
+    celular: '11999999999',
     seller: 'Smart Cosméticos',
     role: 'ADMIN',
     senhaHash: hashSenha('123456'),
@@ -214,7 +215,7 @@ function criarAdminPadraoSeNaoExistir() {
   });
 
   salvarUsuarios(users);
-  console.log('✅ Usuário inicial criado: admin@smart.local / 123456');
+  console.log('✅ Usuário inicial criado: celular 11999999999 / senha 123456');
 }
 
 criarAdminPadraoSeNaoExistir();
@@ -422,6 +423,83 @@ app.post('/api/auth/request', rotaSolicitarCodigo);
 app.post('/api/auth/otp/request', rotaSolicitarCodigo);
 app.post('/api/auth/verify', rotaValidarCodigo);
 app.post('/api/auth/otp/verify', rotaValidarCodigo);
+
+// ===== LOGIN GRATUITO POR CELULAR + SENHA =====
+// Usado pelo scripts/auth-login.js.
+// Importante: esta rota precisa ficar ANTES do app.use(authObrigatorio).
+app.post('/api/auth/login-senha', (req, res) => {
+  try {
+    const celular = normalizarCelular(req.body.celular || req.body.telefone || req.body.phone);
+    const senha = String(req.body.senha || req.body.password || '');
+
+    if (!celular || celular.length < 10) {
+      return res.status(400).json({ ok: false, erro: 'Informe um celular válido com DDD.' });
+    }
+
+    if (!senha) {
+      return res.status(400).json({ ok: false, erro: 'Informe a senha.' });
+    }
+
+    const users = lerUsuarios();
+
+    let user = users.find(u =>
+      normalizarCelular(u.celular || u.phone || '') === celular &&
+      u.ativo !== false
+    );
+
+    // Compatibilidade com users.json antigo:
+    // se o admin padrão foi criado sem celular, permite o primeiro login com senha 123456
+    // e grava o celular informado no cadastro.
+    if (!user) {
+      const adminSemCelular = users.find(u =>
+        String(u.email || '').toLowerCase() === 'admin@smart.local' &&
+        u.ativo !== false
+      );
+
+      if (adminSemCelular && senhaConfere(senha, adminSemCelular.senhaHash)) {
+        adminSemCelular.celular = celular;
+        adminSemCelular.nome = adminSemCelular.nome || 'Admin';
+        adminSemCelular.seller = adminSemCelular.seller || 'Smart Cosméticos';
+        adminSemCelular.role = adminSemCelular.role || 'ADMIN';
+        user = adminSemCelular;
+      }
+    }
+
+    if (!user) {
+      return res.status(404).json({ ok: false, erro: 'Usuário não encontrado para este celular.' });
+    }
+
+    if (!user.senhaHash) {
+      return res.status(401).json({ ok: false, erro: 'Usuário sem senha cadastrada.' });
+    }
+
+    if (!senhaConfere(senha, user.senhaHash)) {
+      return res.status(401).json({ ok: false, erro: 'Senha inválida.' });
+    }
+
+    user.ultimoLoginEm = new Date().toISOString();
+    if (!user.celular) user.celular = celular;
+    salvarUsuarios(users);
+
+    const token = gerarToken(user);
+    setAuthCookie(res, token);
+
+    return res.json({
+      ok: true,
+      token,
+      user: {
+        id: user.id,
+        nome: user.nome || 'Usuário',
+        seller: user.seller || 'Smart Cosméticos',
+        celular: user.celular || celular,
+        email: user.email || '',
+        role: user.role || 'SELLER'
+      }
+    });
+  } catch (erro) {
+    return res.status(500).json({ ok: false, erro: erro.message });
+  }
+});
 
 app.post('/api/auth/logout', (req, res) => {
   res.setHeader('Set-Cookie', 'auth_token=; Path=/; Max-Age=0; SameSite=Lax');
@@ -892,6 +970,12 @@ function executarComando(command, env = {}) {
 }
 
 async function processarPipeline(id) {
+  // PIPELINE_BLINDADO_NAO_PULAR:
+  // Nunca pular execução por SHA quando o usuário clica em processar.
+  // O incremental/deduplicação fica nos geradores.
+  // PIPELINE_BLINDADO_NAO_PULAR:
+  // Nunca pular execução por SHA quando o usuário clica em processar.
+  // O incremental/deduplicação fica nos geradores.
   // SERVER_NAO_PULA_PROCESSAMENTO: quando o usuário clica em Processar, sempre executa o gerador.
   // O incremental/dedup fica nos scripts gerar-*.js.
   const pipeline = PIPELINES.find(p => p.id === id);

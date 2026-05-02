@@ -213,6 +213,16 @@ document.addEventListener('DOMContentLoaded', () => {
   function formatarData(valor) {
     if (!valor) return '-';
 
+    if (valor instanceof Date && !isNaN(valor.getTime())) {
+      const dia = String(valor.getDate()).padStart(2, '0');
+      const mes = String(valor.getMonth() + 1).padStart(2, '0');
+      const ano = valor.getFullYear();
+      const hora = String(valor.getHours()).padStart(2, '0');
+      const minuto = String(valor.getMinutes()).padStart(2, '0');
+      const segundo = String(valor.getSeconds()).padStart(2, '0');
+      return `${dia}/${mes}/${ano} ${hora}:${minuto}:${segundo}`;
+    }
+
     let v = String(valor).trim();
     if (!v || v === '-' || v === '--') return '-';
 
@@ -234,11 +244,25 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
 
+    // YYYY-MM-DD sem hora
+    let m = v.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if (m) {
+      const [, ano, mes, dia] = m;
+      return `${dia}/${mes}/${ano} 00:00:00`;
+    }
+
     // YYYY-MM-DD HH:mm:ss
-    let m = v.match(/^(\d{4})-(\d{2})-(\d{2})[ T](\d{1,2}):(\d{2})(?::(\d{2}))?/);
+    m = v.match(/^(\d{4})-(\d{2})-(\d{2})[ T](\d{1,2}):(\d{2})(?::(\d{2}))?/);
     if (m) {
       const [, ano, mes, dia, hora, minuto, segundo = '00'] = m;
       return `${dia}/${mes}/${ano} ${String(hora).padStart(2, '0')}:${minuto}:${segundo}`;
+    }
+
+    // DD/MM/YYYY sem hora
+    m = v.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+    if (m) {
+      let [, dia, mes, ano] = m;
+      return `${dia.padStart(2, '0')}/${mes.padStart(2, '0')}/${ano} 00:00:00`;
     }
 
     // MM/DD/YYYY hh:mm:ss AM/PM ou DD/MM/YYYY HH:mm:ss
@@ -298,18 +322,27 @@ document.addEventListener('DOMContentLoaded', () => {
     const f = formatarData(valor);
     if (!f || f === '-') return null;
 
-    const m = f.match(/^(\d{2})\/(\d{2})\/(\d{4})\s+(\d{2}):(\d{2}):(\d{2})$/);
-    if (!m) return null;
+    let m = f.match(/^(\d{2})\/(\d{2})\/(\d{4})\s+(\d{2}):(\d{2}):(\d{2})$/);
 
-    const [, dia, mes, ano, hora, minuto, segundo] = m;
-    return new Date(
-      Number(ano),
-      Number(mes) - 1,
-      Number(dia),
-      Number(hora),
-      Number(minuto),
-      Number(segundo)
-    );
+    if (m) {
+      const [, dia, mes, ano, hora, minuto, segundo] = m;
+      return new Date(
+        Number(ano),
+        Number(mes) - 1,
+        Number(dia),
+        Number(hora),
+        Number(minuto),
+        Number(segundo)
+      );
+    }
+
+    m = f.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+    if (m) {
+      const [, dia, mes, ano] = m;
+      return new Date(Number(ano), Number(mes) - 1, Number(dia), 0, 0, 0);
+    }
+
+    return null;
   }
 
 
@@ -319,13 +352,29 @@ document.addEventListener('DOMContentLoaded', () => {
     if (visao === 'financeira') {
       return venda.data_financeira ||
         venda.data_liquidacao ||
+        venda.data_pagamento ||
         venda.data_pagamento_compra ||
         venda.data_custo ||
+        venda.paid_time ||
+        venda.PaidTime ||
         venda.data_pedido ||
+        venda.data_venda ||
+        venda.data_criacao ||
+        venda.created_time ||
+        venda.CreatedTime ||
+        venda.data_importacao ||
         venda.data;
     }
 
-    return venda.data_pedido || venda.data;
+    return venda.data_pedido ||
+      venda.data_venda ||
+      venda.data_criacao ||
+      venda.created_time ||
+      venda.CreatedTime ||
+      venda.data_importacao ||
+      venda.data_pagamento ||
+      venda.data_financeira ||
+      venda.data;
   }
 
 
@@ -398,6 +447,30 @@ document.addEventListener('DOMContentLoaded', () => {
     return 'margem-negativa';
   }
 
+
+  function formatarDataInputISO(data) {
+    if (!(data instanceof Date) || isNaN(data.getTime())) return '';
+    const ano = data.getFullYear();
+    const mes = String(data.getMonth() + 1).padStart(2, '0');
+    const dia = String(data.getDate()).padStart(2, '0');
+    return `${ano}-${mes}-${dia}`;
+  }
+
+  function aplicarMesAtualPadrao(force = false) {
+    if (!filtroDataInicio || !filtroDataFim) return;
+
+    const inicioAtual = String(filtroDataInicio.value || '').trim();
+    const fimAtual = String(filtroDataFim.value || '').trim();
+
+    if (!force && (inicioAtual || fimAtual)) return;
+
+    const hoje = new Date();
+    const inicio = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
+    const fim = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0);
+
+    filtroDataInicio.value = formatarDataInputISO(inicio);
+    filtroDataFim.value = formatarDataInputISO(fim);
+  }
 
   function dataInputInicio(valor) {
     if (!valor) return null;
@@ -1186,10 +1259,10 @@ function atualizarTudoFiltros() {
   }
 
   function limparFiltros() {
-    if (filtroDataInicio) filtroDataInicio.value = '';
-    if (filtroDataFim) filtroDataFim.value = '';
     if (filtroPedido) filtroPedido.value = '';
     if (filtroMarketplace) filtroMarketplace.value = 'todos';
+
+    aplicarMesAtualPadrao(true);
 
     statusAtivo = 'todos';
     conciliacaoAtiva = 'todos';
@@ -1311,6 +1384,8 @@ function atualizarTudoFiltros() {
       console.log('vendas-status.json carregado:', statusMapa.length);
       console.log('catalogo-custos.json carregado:', Array.isArray(catalogoCustos) ? catalogoCustos.length : 0);
       preencherDatalistSku();
+
+      aplicarMesAtualPadrao(true);
 
       renderStatusFilters();
       renderConciliacaoFilters();

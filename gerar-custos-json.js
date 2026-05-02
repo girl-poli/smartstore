@@ -21,6 +21,7 @@ const OUTPUT_CUSTO = './data/custo.json';
 const OUTPUT_STATUS = './data/custo-status.json';
 const OUTPUT_RESUMO = './data/custo-resumo.json';
 const OUTPUT_DEBUG = './data/custo-debug-regras.json';
+const OUTPUT_CATALOGO_CUSTOS = './data/catalogo-custos.json';
 
 const PEDIDOS_DEBUG = new Set([
   '47727',
@@ -402,7 +403,13 @@ function extrairListaCusto(conteudo) {
 }
 
 function mesclarIncrementalCustos(custosNovos) {
-  const antigos = extrairListaCusto(lerJson(OUTPUT_CUSTO, false));
+  let antigos = [];
+  try {
+    antigos = extrairListaCusto(lerJson(OUTPUT_CUSTO, false));
+  } catch (erro) {
+    console.warn('⚠️ Não foi possível ler custo.json antigo. Será criada uma nova base.', erro.message);
+    antigos = [];
+  }
   const mapa = new Map();
 
   for (const item of antigos) {
@@ -448,6 +455,120 @@ function mesclarIncrementalCustos(custosNovos) {
       chave: 'canal + id_pedido_mkt/id_produto + id_venda/pedido + sku'
     }
   };
+}
+
+
+
+// =====================================================
+// CATÁLOGO DE CUSTOS PARA DASHBOARD
+// Gera data/catalogo-custos.json, usado por Resumo/Vendas/Produtos.
+// Sem esse arquivo, o pipeline-guard acusa erro e algumas telas ficam sem custo.
+// =====================================================
+function skuBaseCusto(valor) {
+  return String(valor || '')
+    .trim()
+    .toUpperCase()
+    .replace(/\s+/g, '')
+    .replace(/_VAR_[A-Z0-9]+$/i, '')
+    .replace(/-VAR-[A-Z0-9]+$/i, '')
+    .replace(/_[A-Z0-9]+$/i, '')
+    .replace(/-[A-Z0-9]+$/i, '');
+}
+
+function escolherMelhorCustoCatalogo(atual, candidato) {
+  if (!atual) return candidato;
+
+  const custoAtual = toNumber(atual.custo_catalogo_unitario || atual.custo || atual.custo_final);
+  const custoNovo = toNumber(candidato.custo_catalogo_unitario || candidato.custo || candidato.custo_final);
+
+  // Preferir custo de compra/robô quando existir.
+  if (custoNovo > 0 && custoAtual <= 0) return candidato;
+
+  // Preferir registro conciliado com venda.
+  if (candidato.tem_cruzamento_vendas && !atual.tem_cruzamento_vendas) return candidato;
+
+  // Preferir registro mais recente se houver data.
+  const dataAtual = String(atual.data_importacao || atual.data_venda || atual.data_criacao || '');
+  const dataNova = String(candidato.data_importacao || candidato.data_venda || candidato.data_criacao || '');
+  if (dataNova && dataAtual && dataNova > dataAtual) return candidato;
+
+  return atual;
+}
+
+function gerarCatalogoCustos(custos = [], vendas = []) {
+  const mapa = new Map();
+
+  // 1) Base principal: custos/compras conciliados.
+  for (const item of custos) {
+    const sku = item.sku || item.sku_venda || '';
+    const skuBase = skuBaseCusto(sku);
+    if (!skuBase) continue;
+
+    const custo = toNumber(item.custo);
+    const candidato = {
+      sku,
+      sku_base: skuBase,
+      skuBase,
+      produto: item.produto || item.produto_venda || item.produto_robo || '',
+      nome_base: item.produto || item.produto_venda || item.produto_robo || '',
+      custo,
+      custo_final: custo,
+      custo_catalogo: custo,
+      custo_catalogo_unitario: custo,
+      origem_custo: item.tem_cruzamento_vendas ? 'compras_conciliadas' : 'compras_robo',
+      fonte_custo: item.tem_cruzamento_vendas ? 'Compra conciliada' : 'Robô Dropstok',
+      canal: item.canal || '',
+      pedido: item.pedido || item.id_venda || '',
+      id_pedido_mkt: item.id_pedido_mkt || item.id_produto || '',
+      data_venda: item.data_venda || '',
+      data_importacao: item.data_importacao || item.data_criacao || '',
+      data_criacao: item.data_criacao || '',
+      tem_cruzamento_vendas: Boolean(item.tem_cruzamento_vendas)
+    };
+
+    mapa.set(skuBase, escolherMelhorCustoCatalogo(mapa.get(skuBase), candidato));
+  }
+
+  // 2) Fallback: vendas que possuem custo final/catalogo.
+  for (const venda of vendas) {
+    const sku = venda.sku || venda.sku_base || venda.seller_sku || '';
+    const skuBase = skuBaseCusto(sku);
+    if (!skuBase) continue;
+
+    const custo = toNumber(
+      venda.custo_final ??
+      venda.custo_catalogo_unitario ??
+      venda.custo_catalogo ??
+      venda.custo
+    );
+
+    if (custo <= 0 && mapa.has(skuBase)) continue;
+
+    const candidato = {
+      sku,
+      sku_base: skuBase,
+      skuBase,
+      produto: venda.produto || venda.nome_produto || venda.nome_base || '',
+      nome_base: venda.produto || venda.nome_produto || venda.nome_base || '',
+      custo,
+      custo_final: custo,
+      custo_catalogo: custo,
+      custo_catalogo_unitario: custo,
+      origem_custo: 'vendas_fallback',
+      fonte_custo: 'Base de vendas',
+      canal: venda.canal || venda.marketplace || '',
+      pedido: venda.pedido || venda.id_pedido || venda.order_id || '',
+      id_pedido_mkt: venda.pedido || venda.id_pedido || venda.order_id || '',
+      data_venda: venda.data_pedido || venda.data_venda || venda.data || '',
+      data_importacao: venda.data_importacao || '',
+      data_criacao: venda.data_criacao || '',
+      tem_cruzamento_vendas: false
+    };
+
+    mapa.set(skuBase, escolherMelhorCustoCatalogo(mapa.get(skuBase), candidato));
+  }
+
+  return Array.from(mapa.values()).sort((a, b) => String(a.sku_base).localeCompare(String(b.sku_base)));
 }
 
 // =====================
@@ -659,10 +780,13 @@ function main() {
 
   garantirPasta(OUTPUT_CUSTO);
 
+  const catalogoCustos = gerarCatalogoCustos(custos, vendas);
+
   fs.writeFileSync(OUTPUT_CUSTO, JSON.stringify(custos, null, 2), 'utf-8');
   fs.writeFileSync(OUTPUT_STATUS, JSON.stringify(listaStatus, null, 2), 'utf-8');
   fs.writeFileSync(OUTPUT_RESUMO, JSON.stringify(resumo, null, 2), 'utf-8');
   fs.writeFileSync(OUTPUT_DEBUG, JSON.stringify(debugRegras, null, 2), 'utf-8');
+  fs.writeFileSync(OUTPUT_CATALOGO_CUSTOS, JSON.stringify(catalogoCustos, null, 2), 'utf-8');
 
   console.log('====================================');
   console.log('✅ ARQUIVOS GERADOS');
@@ -671,11 +795,13 @@ function main() {
   console.log(`✅ ${OUTPUT_STATUS}`);
   console.log(`✅ ${OUTPUT_RESUMO}`);
   console.log(`✅ ${OUTPUT_DEBUG}`);
+  console.log(`✅ ${OUTPUT_CATALOGO_CUSTOS}`);
   console.log('------------------------------------');
   console.log(`Total esperado tela robô: ${totalEsperadoTela}`);
   console.log(`Total registros robô: ${vendasRobo.length}`);
   console.log(`Total registros vendas.json: ${vendas.length}`);
   console.log(`Total no custo.json final: ${custos.length}`);
+  console.log(`Total no catalogo-custos.json: ${catalogoCustos.length}`);
   console.log('Incremental:', JSON.stringify(mergeCustos.auditoria));
   console.log(`Com custo: ${totalComCusto}`);
   console.log(`Sem custo: ${totalSemCusto}`);
