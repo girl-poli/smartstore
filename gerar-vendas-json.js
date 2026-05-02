@@ -1311,6 +1311,74 @@ function gerarResumoGeral(vendas, ml, shopee, tiktok, comprasInfo) {
   };
 }
 
+
+// =====================
+// INCREMENTAL REAL - MERGE COM DEDUPLICAÇÃO
+// Regra: nunca sobrescrever o histórico. Lê o JSON atual,
+// valida se a venda já existe e só incrementa/atualiza o registro.
+// =====================
+function chaveVendaIncremental(venda) {
+  const canal = normalizarChave(venda.canal || venda.marketplace || venda.plataforma || '');
+  const pedido = normalizarChave(
+    venda.pedido || venda.id_pedido || venda.numero_pedido || venda.order_id ||
+    venda.id_order || venda.id_venda || venda.codigo_pedido || venda.ml_pedido_principal || ''
+  );
+  const item = normalizarChave(
+    venda.pedido_item_ml || venda.pacote || venda.package_id || venda.id_item ||
+    venda.item_id || venda.sku || venda.seller_sku || venda.sku_base || ''
+  );
+  const sku = normalizarChave(venda.sku || venda.seller_sku || venda.sku_base || '');
+  const data = normalizarChave(venda.data_pedido || venda.data || venda.data_financeira || '');
+
+  // Pedido é a chave principal. SKU/item evita colisão em pedidos com múltiplos produtos.
+  if (pedido) return [canal, pedido, item || sku || 'SEM_ITEM'].join('|');
+  return [canal, sku || 'SEM_SKU', data || normalizarChave(venda.produto || '')].join('|');
+}
+
+function mergeIncrementalVendas(arquivoSaida, vendasNovas) {
+  const existentes = extrairListaVendas(lerJson(arquivoSaida, false));
+  const mapa = new Map();
+
+  for (const venda of existentes) {
+    const chave = chaveVendaIncremental(venda);
+    if (!chave) continue;
+    mapa.set(chave, { ...venda, _chave_incremental: chave });
+  }
+
+  let inseridos = 0;
+  let atualizados = 0;
+
+  for (const venda of vendasNovas) {
+    const chave = chaveVendaIncremental(venda);
+    if (!chave) continue;
+
+    const anterior = mapa.get(chave);
+    const novoRegistro = {
+      ...(anterior || {}),
+      ...venda,
+      _chave_incremental: chave,
+      atualizado_incremental_em: new Date().toISOString()
+    };
+
+    if (anterior) atualizados++;
+    else inseridos++;
+
+    mapa.set(chave, novoRegistro);
+  }
+
+  const final = Array.from(mapa.values());
+
+  console.log('🔁 Incremental vendas:', {
+    existentes: existentes.length,
+    novas_lidas: vendasNovas.length,
+    inseridos,
+    atualizados,
+    total_final: final.length
+  });
+
+  return { final, existentes: existentes.length, inseridos, atualizados };
+}
+
 // =====================
 // MAIN
 // =====================
@@ -1328,13 +1396,25 @@ function main() {
 
   const vendasBase = [...ml, ...shopee, ...tiktok];
   const vendasComCustos = aplicarCustosECompras(vendasBase, mapaCustosCatalogo, comprasInfo.mapa);
-  const vendas = aplicarStatus(vendasComCustos);
-
-  const resumo = gerarResumoGeral(vendas, ml, shopee, tiktok, comprasInfo);
-  const resumoStatus = gerarResumoStatus(vendas);
-  const resumoConciliacao = gerarResumoConciliacao(vendas, comprasInfo);
+  const vendasNovas = aplicarStatus(vendasComCustos);
 
   garantirPasta(OUTPUT);
+
+  const mergeVendas = mergeIncrementalVendas(OUTPUT, vendasNovas);
+  const vendas = mergeVendas.final;
+
+  const resumo = {
+    ...gerarResumoGeral(vendas, ml, shopee, tiktok, comprasInfo),
+    incremental: {
+      existentes_antes: mergeVendas.existentes,
+      lidos_no_arquivo_atual: vendasNovas.length,
+      inseridos: mergeVendas.inseridos,
+      atualizados_ignorando_duplicidade: mergeVendas.atualizados,
+      total_final: vendas.length
+    }
+  };
+  const resumoStatus = gerarResumoStatus(vendas);
+  const resumoConciliacao = gerarResumoConciliacao(vendas, comprasInfo);
 
   fs.writeFileSync(OUTPUT, JSON.stringify(vendas, null, 2), 'utf-8');
   fs.writeFileSync(OUTPUT_RESUMO, JSON.stringify(resumo, null, 2), 'utf-8');
@@ -1349,7 +1429,7 @@ function main() {
   console.log('ML:', ml.length);
   console.log('Shopee:', shopee.length);
   console.log('TikTok:', tiktok.length);
-  console.log('Total vendas:', vendas.length);
+  console.log('Total vendas final incremental:', vendas.length);
   console.log('Compras/custos base:', comprasInfo.compras.length);
   console.log('Vendas conciliadas com compras:', resumoConciliacao.vendas_conciliadas_com_compras);
   console.log('Vendas não conciliadas:', resumoConciliacao.vendas_nao_conciliadas_com_compras);

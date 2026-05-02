@@ -644,6 +644,67 @@ function enriquecerTikTok(produtosMap) {
   };
 }
 
+
+// =====================
+// INCREMENTAL REAL - MERGE COM DEDUPLICAÇÃO
+// Para produtos, a chave é SKU base. Se já existir, atualiza dados; se não existir, incrementa.
+// =====================
+function lerJsonOpcional(caminho) {
+  if (!fs.existsSync(caminho)) return [];
+  try {
+    const data = JSON.parse(fs.readFileSync(caminho, 'utf-8'));
+    return Array.isArray(data) ? data : [];
+  } catch {
+    return [];
+  }
+}
+
+function chaveProdutoIncremental(item) {
+  return extrairSkuBase(item.skuBase || item.sku || item.sky || item.seller_sku || '');
+}
+
+function mergeIncrementalProdutos(arquivoSaida, produtosNovos) {
+  const existentes = lerJsonOpcional(arquivoSaida);
+  const mapa = new Map();
+
+  for (const item of existentes) {
+    const chave = item._chave_incremental || chaveProdutoIncremental(item);
+    if (!chave) continue;
+    mapa.set(chave, { ...item, _chave_incremental: chave });
+  }
+
+  let inseridos = 0;
+  let atualizados = 0;
+
+  for (const item of produtosNovos) {
+    const chave = chaveProdutoIncremental(item);
+    if (!chave) continue;
+    const anterior = mapa.get(chave);
+
+    mapa.set(chave, {
+      ...(anterior || {}),
+      ...item,
+      _chave_incremental: chave,
+      atualizado_incremental_em: new Date().toISOString()
+    });
+
+    if (anterior) atualizados++;
+    else inseridos++;
+  }
+
+  const final = Array.from(mapa.values());
+
+  console.log('🔁 Incremental produtos:', {
+    existentes: existentes.length,
+    novos_lidos: produtosNovos.length,
+    inseridos,
+    atualizados,
+    total_final: final.length
+  });
+
+  return { final, existentes: existentes.length, inseridos, atualizados };
+}
+
 function main() {
   garantirPastaData();
 
@@ -653,12 +714,21 @@ function main() {
   const shopee = enriquecerShopee(produtosMap);
   const tiktok = enriquecerTikTok(produtosMap);
 
-  const produtos = Array.from(produtosMap.values());
+  const produtosNovos = Array.from(produtosMap.values());
+  const mergeProdutos = mergeIncrementalProdutos(OUTPUT_PRODUTOS, produtosNovos);
+  const produtos = mergeProdutos.final;
 
   const resumo = {
     base: {
       totalLinhasArquivo: totalLinhas,
-      totalSkusBase: produtos.length
+      totalSkusBase: produtos.length,
+      incremental: {
+        existentes_antes: mergeProdutos.existentes,
+        lidos_no_arquivo_atual: produtosNovos.length,
+        inseridos: mergeProdutos.inseridos,
+        atualizados_ignorando_duplicidade: mergeProdutos.atualizados,
+        total_final: produtos.length
+      }
     },
     ml: {
       totalArquivo: ml.totalArquivo,
