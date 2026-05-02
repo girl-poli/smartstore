@@ -892,6 +892,8 @@ function executarComando(command, env = {}) {
 }
 
 async function processarPipeline(id) {
+  // SERVER_NAO_PULA_PROCESSAMENTO: quando o usuário clica em Processar, sempre executa o gerador.
+  // O incremental/dedup fica nos scripts gerar-*.js.
   const pipeline = PIPELINES.find(p => p.id === id);
   if (!pipeline) return { ok: false, pipeline: id, erro: 'Pipeline inválido' };
 
@@ -915,19 +917,7 @@ async function processarPipeline(id) {
   const stat = fs.statSync(caminho);
   const sha256 = hashArquivo(caminho);
   const scriptPath = path.join(ROOT, pipeline.script);
-
-  if (anterior.sha256 && anterior.sha256 === sha256 && !process.env.FORCE_REPROCESS) {
-    appendLog(id, `SEM ALTERAÇÃO | arquivo=${pipeline.arquivo} | processamento pulado | sha256=${sha256}`);
-    return {
-      ok: true,
-      skipped: true,
-      pipeline: id,
-      mensagem: 'Arquivo sem alteração desde o último processamento. Nada foi reprocessado.',
-      log: readLog(id)
-    };
-  }
-
-  const snapshot = criarSnapshotArquivo(caminho, pipeline.arquivo);
+const snapshot = criarSnapshotArquivo(caminho, pipeline.arquivo);
 
   appendLog(id, `Início | arquivo=${pipeline.arquivo} | caminho=${caminho} | ultimaReferencia=${anterior.ultimaReferencia || '-'} | sha256=${sha256}`);
 
