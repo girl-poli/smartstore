@@ -12,19 +12,57 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 const ROOT = __dirname;
 
-// ===== PASTAS =====
-const IMPORT_DIR = path.resolve(ROOT, 'data_external');
-const DATA_DIR = path.join(ROOT, 'data');
+// ===== PASTAS / PERSISTÊNCIA =====
+// Local: usa a raiz do projeto.
+// Render produção: defina DATA_ROOT=/var/data e crie um Persistent Disk montado em /var/data.
+// Resultado:
+//   uploads persistentes: /var/data/data_external
+//   JSONs persistentes:  /var/data/data
+const DATA_ROOT = path.resolve(process.env.DATA_ROOT || ROOT);
+const IS_PERSISTENT_STORAGE = DATA_ROOT !== ROOT;
+const IMPORT_DIR = path.join(DATA_ROOT, 'data_external');
+const DATA_DIR = path.join(DATA_ROOT, 'data');
 const LOG_DIR = path.join(DATA_DIR, 'logs-processamento');
 const VERSION_DIR = path.join(DATA_DIR, 'versoes-arquivos');
 const META_PATH = path.join(DATA_DIR, 'processamento-meta.json');
 const USERS_PATH = path.join(DATA_DIR, 'users.json');
 const OTP_PATH = path.join(DATA_DIR, 'otp-celular.json');
 
+fs.mkdirSync(DATA_ROOT, { recursive: true });
 fs.mkdirSync(IMPORT_DIR, { recursive: true });
 fs.mkdirSync(DATA_DIR, { recursive: true });
 fs.mkdirSync(LOG_DIR, { recursive: true });
 fs.mkdirSync(VERSION_DIR, { recursive: true });
+
+function copiarSeVazio(origem, destino) {
+  try {
+    if (!IS_PERSISTENT_STORAGE) return;
+    if (!fs.existsSync(origem)) return;
+
+    const destinoExiste = fs.existsSync(destino);
+    const destinoTemArquivos = destinoExiste && fs.readdirSync(destino).length > 0;
+    if (destinoTemArquivos) return;
+
+    fs.mkdirSync(destino, { recursive: true });
+    for (const item of fs.readdirSync(origem)) {
+      const origemItem = path.join(origem, item);
+      const destinoItem = path.join(destino, item);
+      const stat = fs.statSync(origemItem);
+      if (stat.isDirectory()) {
+        fs.cpSync(origemItem, destinoItem, { recursive: true });
+      } else {
+        fs.copyFileSync(origemItem, destinoItem);
+      }
+    }
+    console.log(`📦 Dados iniciais copiados de ${origem} para ${destino}`);
+  } catch (erro) {
+    console.warn('⚠️ Falha ao copiar dados iniciais para storage persistente:', erro.message);
+  }
+}
+
+// Migração leve: se o disco persistente estiver vazio, copia dados empacotados no projeto.
+copiarSeVazio(path.join(ROOT, 'data_external'), IMPORT_DIR);
+copiarSeVazio(path.join(ROOT, 'data'), DATA_DIR);
 
 // ===== UPLOAD + TRACKING DE ARQUIVOS =====
 const UPLOAD_LOG_PATH = path.join(DATA_DIR, 'upload-log.json');
@@ -425,8 +463,7 @@ app.post('/api/auth/verify', rotaValidarCodigo);
 app.post('/api/auth/otp/verify', rotaValidarCodigo);
 
 // ===== LOGIN GRATUITO POR CELULAR + SENHA =====
-// Usado pelo scripts/auth-login.js.
-// Importante: esta rota precisa ficar ANTES do app.use(authObrigatorio).
+// Usado pelo scripts/auth-login.js. Fica público antes do authObrigatorio.
 app.post('/api/auth/login-senha', (req, res) => {
   try {
     const celular = normalizarCelular(req.body.celular || req.body.telefone || req.body.phone);
@@ -447,9 +484,8 @@ app.post('/api/auth/login-senha', (req, res) => {
       u.ativo !== false
     );
 
-    // Compatibilidade com users.json antigo:
-    // se o admin padrão foi criado sem celular, permite o primeiro login com senha 123456
-    // e grava o celular informado no cadastro.
+    // Compatibilidade com users.json antigo: se o admin foi criado sem celular,
+    // aceita a senha do admin e grava o celular informado.
     if (!user) {
       const adminSemCelular = users.find(u =>
         String(u.email || '').toLowerCase() === 'admin@smart.local' &&
@@ -654,6 +690,32 @@ app.use('/data_external', express.static(IMPORT_DIR));
 app.use(authObrigatorio);
 
 app.get('/', (req, res) => res.redirect('/processamento.html'));
+
+app.get('/api/storage/info', (req, res) => {
+  function infoDir(dir) {
+    try {
+      const exists = fs.existsSync(dir);
+      const files = exists ? fs.readdirSync(dir) : [];
+      return { path: dir, exists, files: files.length, sample: files.slice(0, 20) };
+    } catch (erro) {
+      return { path: dir, exists: false, erro: erro.message };
+    }
+  }
+
+  res.json({
+    ok: true,
+    root: ROOT,
+    dataRoot: DATA_ROOT,
+    persistent: IS_PERSISTENT_STORAGE,
+    importDir: infoDir(IMPORT_DIR),
+    dataDir: infoDir(DATA_DIR),
+    logDir: infoDir(LOG_DIR),
+    env: {
+      NODE_ENV: process.env.NODE_ENV || '',
+      DATA_ROOT: process.env.DATA_ROOT || ''
+    }
+  });
+});
 
 // ===== API UPLOAD COM TRACKING =====
 app.get('/api/upload/status', (req, res) => {
@@ -959,23 +1021,25 @@ app.get('/api/processamento/log/:pipeline', (req, res) => {
   res.json({ log: readLog(req.params.pipeline) });
 });
 
-function executarComando(command, env = {}) {
+function executarComando(command, env = {}, cwd = DATA_ROOT) {
   return new Promise(resolve => {
     exec(command, {
-      cwd: ROOT,
-      env: { ...process.env, ...env },
-      maxBuffer: 1024 * 1024 * 10
+      // Em produção com DATA_ROOT=/var/data, os geradores usam ./data e ./data_external
+      // dentro do disco persistente. Localmente, DATA_ROOT=ROOT e nada muda.
+      cwd,
+      env: {
+        ...process.env,
+        DATA_ROOT,
+        DATA_DIR,
+        DATA_EXTERNAL_DIR: IMPORT_DIR,
+        ...env
+      },
+      maxBuffer: 1024 * 1024 * 20
     }, (error, stdout, stderr) => resolve({ ok: !error, error, stdout, stderr }));
   });
 }
 
 async function processarPipeline(id) {
-  // PIPELINE_BLINDADO_NAO_PULAR:
-  // Nunca pular execução por SHA quando o usuário clica em processar.
-  // O incremental/deduplicação fica nos geradores.
-  // PIPELINE_BLINDADO_NAO_PULAR:
-  // Nunca pular execução por SHA quando o usuário clica em processar.
-  // O incremental/deduplicação fica nos geradores.
   // SERVER_NAO_PULA_PROCESSAMENTO: quando o usuário clica em Processar, sempre executa o gerador.
   // O incremental/dedup fica nos scripts gerar-*.js.
   const pipeline = PIPELINES.find(p => p.id === id);
@@ -1001,16 +1065,18 @@ async function processarPipeline(id) {
   const stat = fs.statSync(caminho);
   const sha256 = hashArquivo(caminho);
   const scriptPath = path.join(ROOT, pipeline.script);
-const snapshot = criarSnapshotArquivo(caminho, pipeline.arquivo);
+  const snapshot = criarSnapshotArquivo(caminho, pipeline.arquivo);
 
   appendLog(id, `Início | arquivo=${pipeline.arquivo} | caminho=${caminho} | ultimaReferencia=${anterior.ultimaReferencia || '-'} | sha256=${sha256}`);
 
   let resultado;
   if (fs.existsSync(scriptPath)) {
-    resultado = await executarComando(`node ${pipeline.script}`, {
+    resultado = await executarComando(`node "${scriptPath}"`, {
       PIPELINE_ID: id,
       PIPELINE_FILE: caminho,
       DATA_EXTERNAL_DIR: IMPORT_DIR,
+      DATA_DIR,
+      DATA_ROOT,
       ULTIMA_DATA_REFERENCIA: anterior.ultimaReferencia || '',
       ULTIMO_SHA256_PROCESSADO: anterior.sha256 || '',
       SHA256_ATUAL: sha256,
@@ -1092,5 +1158,8 @@ app.listen(PORT, () => {
   console.log('🔥 SERVER FINAL ESTAVEL - PIPELINE + MOTORES');
   console.log(`Servidor em http://localhost:${PORT}`);
   console.log(`Login: http://localhost:${PORT}/login.html`);
+  console.log(`DATA_ROOT: ${DATA_ROOT}`);
+  console.log(`Persistente ativo: ${IS_PERSISTENT_STORAGE ? 'SIM' : 'NÃO / LOCAL'}`);
   console.log(`Pasta de entrada monitorada: ${IMPORT_DIR}`);
+  console.log(`Pasta de dados gerados: ${DATA_DIR}`);
 });
