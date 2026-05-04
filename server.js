@@ -258,6 +258,29 @@ function criarAdminPadraoSeNaoExistir() {
 
 criarAdminPadraoSeNaoExistir();
 
+
+function isRotaPublica(req) {
+  const p = String(req.path || req.url || '').split('?')[0];
+
+  if (
+    p === '/' ||
+    p === '/login.html' ||
+    p === '/cadastro.html' ||
+    p === '/favicon.ico' ||
+    p.startsWith('/api/auth/') ||
+    p.startsWith('/assets/') ||
+    p.startsWith('/styles/') ||
+    p.startsWith('/scripts/') ||
+    p.startsWith('/css/') ||
+    p.startsWith('/img/') ||
+    p.startsWith('/images/')
+  ) {
+    return true;
+  }
+
+  return /\.(css|js|png|jpg|jpeg|webp|svg|ico|gif|woff|woff2|ttf|map)$/i.test(p);
+}
+
 function extrairToken(req) {
   const auth = req.headers.authorization || '';
   if (auth.startsWith('Bearer ')) return auth.slice(7);
@@ -687,7 +710,7 @@ app.use('/data', express.static(DATA_DIR));
 app.use('/data_external', express.static(IMPORT_DIR));
 
 // Daqui pra baixo, páginas/APIs internas protegidas.
-app.use(authObrigatorio);
+// STATIC_PUBLICO_ANTES_AUTH\napp.use(express.static(ROOT));\n\napp.use(authObrigatorio);
 
 app.get('/', (req, res) => res.redirect('/processamento.html'));
 

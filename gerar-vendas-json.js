@@ -299,9 +299,15 @@ function tratarML() {
   function criarVendaML(linha, extras = {}) {
     const quantidade = Number(linha[idxQtd] || 1) || 1;
 
+    // ML: o valor real de venda do produto está na coluna Z
+    // "Preço unitário de venda do anúncio (BRL)".
+    // Para pacote/rateio, o valor do item deve vir dessa coluna,
+    // e só comissão/frete/repasse devem ser rateados proporcionalmente.
     const precoUnitario = valor(linha, idxPrecoUnitario);
+    const valorVendaColunaZ = precoUnitario * quantidade;
+
     const receitaDireta = valor(linha, idxReceitaProduto);
-    const receitaProdutos = extras.receitaProdutos ?? (receitaDireta || (precoUnitario * quantidade));
+    const receitaProdutos = extras.receitaProdutos ?? (valorVendaColunaZ || receitaDireta);
 
     const tarifaVenda = Math.abs(extras.tarifaVenda ?? valor(linha, idxTarifaVenda));
     const receitaEnvio = extras.receitaEnvio ?? valor(linha, idxReceitaEnvio);
@@ -338,6 +344,8 @@ function tratarML() {
       ml_pacote_multi_produto: Boolean(extras.mlPacoteMultiProduto),
       ml_pedido_principal: extras.pedidoPrincipal || '',
       ml_preco_unitario_item: precoUnitario,
+      ml_valor_venda_coluna_z: valorVendaColunaZ,
+      ml_valor_venda_item_coluna_z: valorVendaColunaZ,
       ml_participacao_pedido: extras.participacaoPedido ?? '',
       participacao_pedido: extras.participacaoPedido ?? '',
       repasse_total_pedido_shopee: extras.repasseTotalPedido ?? '',
@@ -356,39 +364,44 @@ function tratarML() {
     const tarifasEnvioTotal = Math.abs(valor(linhaPrincipal, idxTarifasEnvio));
     const totalRepasse = valor(linhaPrincipal, idxTotal);
 
-    // Peso correto: preço unitário do item * quantidade.
-    // Exemplo:
-    // Sabonete: 22,47
-    // Lip balm: 8,99
-    // Total: 31,46
+    // Peso do rateio = coluna Z de cada produto filho.
+    // Coluna Z = Preço unitário de venda do anúncio (BRL).
+    // Isso evita pegar o financeiro da linha cinza como valor do produto.
     const pesos = itens.map(item => {
       const qtd = Number(item[idxQtd] || 1) || 1;
-      const precoUnitario = valor(item, idxPrecoUnitario);
+      const precoUnitarioColunaZ = valor(item, idxPrecoUnitario);
       const receitaLinha = valor(item, idxReceitaProduto);
       const acrescimoLinha = valor(item, idxReceitaAcrescimo);
 
-      return (receitaLinha || (precoUnitario * qtd) || acrescimoLinha || qtd || 1);
+      return (precoUnitarioColunaZ * qtd) || receitaLinha || acrescimoLinha || qtd || 1;
     });
 
     const somaPesos = pesos.reduce((acc, n) => acc + n, 0) || itens.length || 1;
 
     return itens.map((linhaItem, index) => {
       const participacao = pesos[index] / somaPesos;
+      const valorVendaItemColunaZ = pesos[index];
 
       return criarVendaML(linhaItem, {
         pedidoPrincipal,
         status: linhaItem[idxStatus] || linhaPrincipal[idxStatus] || '',
-        receitaProdutos: receitaTotal * participacao,
+
+        // Valor de venda do produto: coluna Z do próprio item.
+        receitaProdutos: valorVendaItemColunaZ,
+
+        // Financeiro do pacote: rateado pela participação do item.
         tarifaVenda: tarifaTotal * participacao,
         receitaEnvio: receitaEnvioTotal * participacao,
         tarifasEnvio: tarifasEnvioTotal * participacao,
         total: totalRepasse * participacao,
-        origemRepasse: 'ml_rateio_pacote_multi_produto_por_preco_item',
-        regraRepasse: 'Pacote ML: financeiro da linha principal rateado pelo preço unitário do item',
+
+        origemRepasse: 'ml_rateio_pacote_multi_produto_por_coluna_z',
+        regraRepasse: 'Pacote ML: valor do item pela coluna Z; comissão/frete/repasse rateados pela participação do item no valor total dos filhos',
         mlPacoteMultiProduto: true,
         participacaoPedido: Number((participacao * 100).toFixed(2)),
         repasseTotalPedido: Number(totalRepasse.toFixed(2)),
-        receitaTotalPedido: Number(receitaTotal.toFixed(2))
+        receitaTotalPedido: Number(receitaTotal.toFixed(2)),
+        receitaTotalFilhosColunaZ: Number(somaPesos.toFixed(2))
       });
     });
   }
@@ -790,7 +803,18 @@ function tratarTikTok() {
 function extrairSkuBase(sku) {
   if (!sku) return '';
 
+  // Normaliza variações vindas dos marketplaces.
+  // Exemplos:
+  // DPX8106594238_VAR_ROXO -> DPX8106594238
+  // DPX25-12_VAR_C        -> DPX25-12
+  // DPX3474214656VAR7     -> DPX3474214656
   return String(sku)
+    .trim()
+    .toUpperCase()
+    .replace(/\s+/g, '')
+    .replace(/_VAR_[A-Z0-9]+$/i, '')
+    .replace(/-VAR-[A-Z0-9]+$/i, '')
+    .replace(/VAR[A-Z0-9]+$/i, '')
     .replace(/\s*[-_]?\s*var\s*\d+$/i, '')
     .replace(/\s*[-_]?\s*v\s*\d+$/i, '')
     .replace(/\s*_var_\d+$/i, '')
@@ -932,9 +956,21 @@ function aplicarCustosECompras(vendas, mapaCustosCatalogo, mapaCompras) {
     // Pedido com mais de 1 item/produto:
     //   usa custo unitário do catálogo * quantidade do item.
     //   Isso evita duplicar o custo da compra total para todos os produtos filhos.
-    const custoFinal = pedidoMultiProduto
-      ? (custoCatalogoNumero || custoCompra || 0)
-      : (custoCompra || custoCatalogoNumero || 0);
+    const ehRateioML =
+      venda.ml_pacote_multi_produto ||
+      String(venda.origem_repasse || '').includes('ml_rateio_pacote') ||
+      String(venda.origem_repasse || '').includes('ml_rateio');
+
+    // Regra de custo:
+    // - Se for pacote/rateio ML: SEMPRE usa custo do catálogo do SKU filho.
+    //   Não usar custo da compra do pedido, porque ele é do pedido/pacote e distorce os filhos.
+    // - Pedido multi produto de outros canais: também prioriza catálogo por item.
+    // - Pedido unitário: usa compra conciliada; fallback catálogo.
+    const custoFinal = ehRateioML
+      ? (custoCatalogoNumero || 0)
+      : pedidoMultiProduto
+        ? (custoCatalogoNumero || 0)
+        : (custoCompra || custoCatalogoNumero || 0);
 
     return {
       ...venda,
@@ -949,11 +985,14 @@ function aplicarCustosECompras(vendas, mapaCustosCatalogo, mapaCompras) {
       custo_catalogo_unitario: custoCatalogoUnitario,
       quantidade_custo_calculada: quantidadeVenda,
 
-      origem_custo_venda: pedidoMultiProduto
-        ? (custoCatalogo ? 'catalogo_multi_produto_qtd' : (compra ? 'relatorio_dropstok_vendas_multi_sem_catalogo' : 'sem_custo'))
-        : (compra ? 'relatorio_dropstok_vendas' : (custoCatalogo ? 'catalogo' : 'sem_custo')),
+      origem_custo_venda: ehRateioML
+        ? (custoCatalogo ? 'catalogo_rateio_ml_coluna_z' : 'sem_custo_rateio_ml_sem_catalogo')
+        : pedidoMultiProduto
+          ? (custoCatalogo ? 'catalogo_multi_produto_qtd' : 'sem_custo_multi_produto_sem_catalogo')
+          : (compra ? 'relatorio_dropstok_vendas' : (custoCatalogo ? 'catalogo' : 'sem_custo')),
 
       pedido_multi_produto_custo: pedidoMultiProduto,
+      custo_forcado_catalogo_por_rateio_ml: ehRateioML,
       qtd_itens_mesmo_pedido_venda: qtdItensPedido,
 
       conciliado_custo_compra: compra ? 'SIM' : 'NAO',
